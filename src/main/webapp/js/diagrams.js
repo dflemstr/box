@@ -3,7 +3,7 @@ $(function() {
     for(category in cd) {
         data.push({
            label: category,
-           data: [[i, categoryData[category]]],
+           data: [[i, cd[category]]],
            bars: {
                show: true
            }
