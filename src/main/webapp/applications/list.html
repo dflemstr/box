@@ -26,10 +26,12 @@
                 </div>
                 <hr class="space"/></list:entry></lift:Applications.list><lift:bind-at name="footer">
             <div id="filter-bar">
-                <form method="get" action="/applications/list">
-                    <label for="filter-field">Filter:</label><lift:Applications.filterField/>
-                    <input type="submit" value="Update filter"/>
-                    <a href="/applications/filter">Advanced...</a>
+                <form method="get" action="/applications/list" class="inline">
+                    <p>
+                        <label for="filter-field">Filter:</label><lift:Applications.filterField/>
+                        <input type="submit" value="Update filter"/>
+                        <a href="/applications/filter">Advanced...</a>
+                    </p>
                 </form>
             </div></lift:bind-at>
 </lift:surround>

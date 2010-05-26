@@ -1,6 +1,5 @@
 <lift:surround with="default" at="main">
                 <form method="get" action="/applications/list">
-                    <input type="hidden" class="hide" name="filter" id="filter-field" value=""/>
                     <fieldset>
                         <legend>Filter</legend>
                         <div class="span-9">
@@ -35,6 +34,7 @@
                             </fieldset>
                         </div>
                         <p>
+                            <input type="hidden" class="hide" name="filter" id="filter-field" value=""/>
                             <input type="submit" value="Filter"/>
                         </p>
                     </fieldset>
