@@ -1,0 +1,34 @@
+<lift:surround with="default" at="main">
+                <p>
+                    Please specify all of the information below in order to create a new
+                    user account.
+                </p>
+                <lift:Users.create form="POST">
+                    <fieldset>
+                        <legend>Create user</legend>
+                        <p>
+                            <label for="username-field">Username</label><br/>
+                            <create:username/>
+                        </p>
+                        <p>
+                            <label for="password-field">Password</label><br/>
+                            <create:password/><br/>
+                            <label for="password-field">Repeat</label><br/>
+                            <create:password/>
+                        </p>
+                        <p>
+                            <label for="email-field">E-Mail</label><br/>
+                            <create:email/>
+                        </p>
+                        <p>
+                            <label for="language-field">Language</label><br/>
+                            <create:language/><br/>
+                            <label for="timezone-field">Time zone</label><br/>
+                            <create:timezone/>
+                        </p>
+                        <p>
+                            <create:submit/>
+                        </p>
+                    </fieldset>
+                </lift:Users.create>
+</lift:surround>

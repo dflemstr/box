@@ -1,0 +1,42 @@
+<lift:surround with="default" at="main">
+                <form method="get" action="/applications/list">
+                    <input type="hidden" class="hide" name="filter" id="filter-field" value=""/>
+                    <fieldset>
+                        <legend>Filter</legend>
+                        <div class="span-9">
+                            <label for="keywords-field">Keywords</label><br/>
+                            <input type="text" id="keywords-field" class="changer"/><br/>
+                            <label for="title-field">Title</label><br/>
+                            <input type="text" id="title-field" class="changer"/><br/>
+                            <label for="description-field">Description</label><br/>
+                            <input type="text" id="description-field" class="changer"/>
+                        </div>
+                        <div class="span-9 last">
+                            <label for="category-field">Category</label><br/>
+                            <input type="text" id="category-field" class="changer"/>
+                            <fieldset class="span-9 last">
+                                <legend>Version</legend>
+                                <div class="span-2">
+                                    <label for="major-field">Major</label><br/>
+                                    <input type="text" id="major-field" class="changer number"/>
+                                </div>
+                                <div class="span-2">
+                                    <label for="minor-field">Minor</label><br/>
+                                    <input type="text" id="minor-field" class="changer number"/>
+                                </div>
+                                <div class="span-2">
+                                    <label for="release-field">Release</label><br/>
+                                    <input type="text" id="release-field" class="changer number"/>
+                                </div>
+                                <div class="span-2 last">
+                                    <label for="build-field">Build</label><br/>
+                                    <input type="text" id="build-field" class="changer number"/>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <p>
+                            <input type="submit" value="Filter"/>
+                        </p>
+                    </fieldset>
+                </form>
+</lift:surround>

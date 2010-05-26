@@ -1,0 +1,16 @@
+<lift:surround with="default" at="main">
+                <lift:Users.login form="POST">
+                    <fieldset>
+                        <legend>Log in</legend>
+                        <p>
+                            <label for="username">Username</label><br/>
+                            <login:username/><br/>
+                            <label for="password">Password</label><br/>
+                            <login:password/>
+                        </p>
+                        <p>
+                            <login:submit/>
+                        </p>
+                    </fieldset>
+                </lift:Users.login>
+</lift:surround>

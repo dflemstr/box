@@ -1,0 +1,39 @@
+<lift:surround with="default" at="main">
+    <lift:Users.isLoggedOut>
+                <p>
+                    You are not logged in. Please <lift:Menu.item name="UserLogin">log in</lift:Menu.item> or
+                    <lift:Menu.item name="UserCreate">register</lift:Menu.item> to view your user pages.
+                </p>
+    </lift:Users.isLoggedOut>
+    <lift:Users.isLoggedIn>
+        <head>
+            <script type="text/javascript">
+                var cd = <lift:UserStatistics.categoryDownloads/>;
+                var hd = <lift:UserStatistics.downloadHistory/>;
+            </script>
+            <script src="/js/diagrams.js"></script>
+        </head>
+
+                <div class="span-6">
+                    <h3>Download history</h3>
+                    <div class="span-6 vert-span-4 last" id="history-diagram"></div>
+                    <h3>Downloads by Category</h3>
+                    <div class="span-6 vert-span-4 last" id="category-diagram"></div>
+                </div>
+                <div class="span-13 last">
+                    <h3>Filler</h3>
+                    <p>
+                        I don't know what to put here yet...
+                    </p>
+                    <p>
+                        Maybe an overview over which applications that <em>you</em> have
+                        downloaded also exist in newer reincarnations (aka: versions).
+                    </p>
+                    <p>
+                        Or what about some other kind of overview? Who knows what the
+                        future may bring.
+                    </p>
+                </div>
+    </lift:Users.isLoggedIn>
+</lift:surround>
+

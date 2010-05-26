@@ -1,0 +1,53 @@
+##
+## This is the Props file for the Box web application
+## Please uncomment and change the fields below as you see fit.
+##
+
+##
+## Filesystem setup
+##
+
+## Where uploaded files etc. are stored. If you omit this, the system will use
+## a temporary directory.
+# filesystem.dir=/var/box/
+
+##
+## Database setup
+##
+
+## The driver to use for the database. Default is H2.
+# db.driver=org.h2.Driver
+# db.driver=com.mysql.jdbc.Driver
+# db.driver=org.postgresql.Driver
+# db.driver=oracle.jdbc.driver.OracleDriver
+
+## The connection URL for the database. The default database is an in-RAM H2
+## database.
+# db.url=jdbc:h2:file:boxdatabase
+# db.url=jdbc:h2:mem:box;AUTO_SERVER=TRUE
+# db.url=jdbc:mysql://localhost:3306/databasename
+# db.url=jdbc:postgresql://localhost:5432/databasename
+# db.url=jdbc:oracle:thin:myuser/mypasswd@//localhost:1521/XE
+
+## Only for databases that require authentication:
+# db.user=box_user
+# db.password=123#%#TopSecret#%#321
+
+##
+## Mail setup
+##
+
+## Whether to enable the mail system at all, default false.
+## NOTE: The Mail system is currently unstable and might not work!
+# mail.enable=false
+# mail.enable=true
+
+## The SMTP server to use for outbound e-mail, default is "localhost":
+# mail.smtp.host=smtp.gmail.com
+
+## Do we use a password to access the SMTP server?
+# mail.smtp.auth=true
+
+## If so, specify the credentials:
+# mail.smtp.user=box@gmail.com
+# mail.smtp.password=123#%#TopSecret#%#321
