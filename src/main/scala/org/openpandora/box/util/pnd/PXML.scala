@@ -39,17 +39,19 @@ class Application(xml: NodeSeq) extends DOM(xml) {
   require(categories.length > 0, "The PXML doesn't contain any categories!")
   
   require((xml\"version").length == 1, "There must be one version tag in the PXML file!")
-  val version = xml\"version" map (new Version(_)) apply 0
+  val version = xml\"version" map (new Version(_)) head
 
   require((xml\"osversion").length < 2, "There are too many osversion tags in the PXML file!")
   val osversion = xml\"osversion" map (new Version(_)) headOption
 
   require((xml\"author").length < 2, "There are too many author tags in the PXML file!")
   val author = xml\"author" map (new Author(_)) headOption
+
+  val id = (xml\"@id").text
 }
 
 class LocalizedString(xml: NodeSeq) extends DOM(xml) {
-  val lang = new Locale((xml\"@lang").text)
+  val lang = new Locale((xml\"@lang").text.toLowerCase)
   require((xml\"@lang").length == 1, "A localized string is missing a lang attribute!")
   val text = xml.text.trim
   require(text.length > 0, "A localized string is lacking text in the PXML!")
