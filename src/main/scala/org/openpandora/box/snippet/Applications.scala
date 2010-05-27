@@ -18,6 +18,7 @@ import org.openpandora.box.util.ApplicationFilterParser
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.packages.PackageManager
 import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.Query
 import org.squeryl.dsl.ast.LogicalBoolean
 import org.squeryl.dsl.ast.TypedExpressionNode
 import scala.xml.NodeSeq
@@ -38,10 +39,10 @@ class Applications extends DispatchSnippet with Logger {
 
   private case class VersionRestriction(major: Option[Int], minor: Option[Int], release: Option[Int], build: Option[Int])
   
-  def runFilter(filter: String): Seq[Application] = inTransaction {
+  def runFilter(filter: String): Query[Application] = {
     import ApplicationFilterParser._
     if(filter.isEmpty)
-      from(Database.applications)(app => select(app)).toSeq
+      from(Database.applications)(app => select(app))
     else parseAll(exprs, filter) match {
       case Success(expressions, _) =>
 
@@ -145,14 +146,14 @@ class Applications extends DispatchSnippet with Logger {
             else
               o.desc
           }
-        }.distinct.toSeq
+        }.distinct
       case ns @ NoSuccess(error, _) =>
         S.warning(<p>Invalid filter:</p> ++ <code>{error}</code>)
-        from(Database.applications)(app => select(app)).toSeq
+        from(Database.applications)(app => select(app))
     }
   }
 
-  private lazy val localizedAppMetas = inTransaction {
+  private lazy val localizedAppMetas = {
     val locale = S.locale.toString
     val locales = locale :: (if(locale contains "_") List(locale.split("_").head) else Nil) ::: "en" :: "en_US" :: Nil
     Database.appMetas.where(meta => meta.languageName in locales)
@@ -186,10 +187,10 @@ class Applications extends DispatchSnippet with Logger {
   }
 
   private def makeAppEntry(app: Application, bindName: String, entry: NodeSeq) = {
-    lazy val info = inTransaction(from(localizedAppMetas)(meta => where(meta.applicationId === app.id) select(meta)).single)
-    lazy val pkg = inTransaction(app.pkg.single)
-    lazy val categories = inTransaction(app.categories.toSeq)
-    lazy val comments = inTransaction(app.comments.toSeq)
+    lazy val info = from(localizedAppMetas)(meta => where(meta.applicationId === app.id) select(meta)).single
+    lazy val pkg = app.pkg.single
+    lazy val categories = app.categories.toSeq
+    lazy val comments = app.comments.toSeq
     def applicationLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/applications/" + app.id + "/show"}>{n}</a>)
     def downloadLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
     def image = if(pkg.hasImage)
@@ -223,7 +224,7 @@ class Applications extends DispatchSnippet with Logger {
             case something if something.length > 1024 =>
               S.error("body-field", <p>Comment too long (max accepted length: 1024 characters)</p>)
             case something =>
-              inTransaction(Database.comments.insert(Comment(user, app, new Date, something)))
+              Database.comments.insert(Comment(user, app, new Date, something))
               S.notice(<p>Comment created</p>)
           }
 
@@ -245,13 +246,13 @@ class Applications extends DispatchSnippet with Logger {
            "category" -> makeCategory _)
 
     def makeLanguage(language: NodeSeq): NodeSeq = {
-      val langs = inTransaction(from(Database.appMetas)(meta => where(meta.applicationId === app.id) select(meta.language)).toSeq)
-      if(langs.isEmpty || (langs.length == 1 && langs.head == Locale.ENGLISH))
+      val langs = from(Database.appMetas)(meta => where(meta.applicationId === app.id) select(meta.language))
+      if(langs.isEmpty || (langs.size == 1 && langs.head == Locale.ENGLISH))
         NodeSeq.Empty
       else
         langs flatMap { lang =>
           bind("language", language, "name" -> lang.getDisplayLanguage(S.locale))
-        }
+        } toSeq
     }
 
     def makeLanguages(languages: NodeSeq): NodeSeq =
@@ -260,14 +261,14 @@ class Applications extends DispatchSnippet with Logger {
 
     def makeRating(rating: NodeSeq): NodeSeq = {
       def hasRated(user: User) =
-        inTransaction(from(Database.ratings)(rating => where(rating.userId === user.id and rating.applicationId === app.id) compute(count)) > 0)
+        from(Database.ratings)(rating => where(rating.userId === user.id and rating.applicationId === app.id) compute(count)) > 0
 
       def doAddRating(r: String) = User.currentUser match {
         case Some(user) if !hasRated(user) =>
           try {
             val ratingVal = r.toInt
             require(ratingVal > 0 && ratingVal < 11)
-            inTransaction(Database.ratings.insert(Rating(app, user, ratingVal)))
+            Database.ratings.insert(Rating(app, user, ratingVal))
             S.notice(<p>Rating submitted.</p>)
           } catch {
             case _ =>
@@ -281,7 +282,7 @@ class Applications extends DispatchSnippet with Logger {
 
       val strRange = (1 to 10) map (_.toString)
       def current: (Int, Int) = 
-        inTransaction(from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(avg(rating.value), count)).single.measures) match {
+        from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(avg(rating.value), count)).single.measures match {
           case (None, count) => (5, count.toInt)
           case (Some(avg), count) => (avg.toInt, count.toInt)
         }
@@ -302,7 +303,7 @@ class Applications extends DispatchSnippet with Logger {
     
     def makePerson(who: Long, binding: String)(template: NodeSeq) = {
       val name = User.nameFor(who)
-      val user = inTransaction(Database.users.lookup(who)).get
+      val user = Database.users.lookup(who).get
 
       lazy val gravatar = Helpers.hexEncode(Helpers.md5(user.email.toLowerCase.getBytes("UTF-8")))
 
@@ -327,32 +328,32 @@ class Applications extends DispatchSnippet with Logger {
           val ver = Seq(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild).mkString(".")
           (<a href={S.hostAndPath + "/applications/list?filter=version:" + ver}>{ver}</a>)
         }),
-         "uploader" -> makePerson(inTransaction(pkg.user.single.id), "uploader") _,
+         "uploader" -> makePerson(pkg.user.single.id, "uploader") _,
          "time" -> makeLazyString(df.format(pkg.uploadTime)),
          "author" -> makeAuthor _,
          "categories" -> makeCategories _,
          "languages" -> makeLanguages _,
          "rating" -> makeRating _,
-         "ratingCount" -> makeLazyString(inTransaction(from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(count)).single.measures.toString)),
+         "ratingCount" -> makeLazyString(from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(count)).single.measures.toString),
          "comments" -> makeComments _,
          "commentForm" -> makeCommentForm _,
          "link" -> applicationLink,
          "download" -> downloadLink,
-         "downloadCount" -> makeLazyString(inTransaction(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString)))
+         "downloadCount" -> makeLazyString(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString))
   }
 
   def list(list: NodeSeq): NodeSeq = {
     val filter = (S.attr("filter") or S.param("filter") openOr "").trim
     val apps = runFilter(filter)
 
-    def makeEntry(entry: NodeSeq): NodeSeq = apps flatMap (x => makeAppEntry(x, "entry", entry))
+    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x, "entry", entry))
 
     bind("list", list,
          "entry" -> makeEntry _)
   }
 
   def entry(entry: NodeSeq): NodeSeq = {
-    val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap (id => inTransaction(Database.applications.lookup(id))) openOr {
+    val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap (Database.applications.lookup(_)) openOr {
       S.error(<p>Invalid application id</p>)
       S.redirectTo(S.referer openOr "/")
     }

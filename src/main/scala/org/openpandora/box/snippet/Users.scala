@@ -61,7 +61,7 @@ class Users extends DispatchSnippet with Logger {
   def login(login: NodeSeq): NodeSeq = {
     var password = ""
     def doLogin() = {
-      transaction(from(Database.users)(user => where(user.username === username.is) select(user)).headOption) match {
+      from(Database.users)(user => where(user.username === username.is) select(user)).headOption match {
         case Some(user) if user.validated && (user.checkPassword(password)) =>
           user.login()
           S.notice(<p>{S.?("user.loggedin")}</p>)
@@ -84,7 +84,7 @@ class Users extends DispatchSnippet with Logger {
     S.redirectTo(S.referer openOr "/")
   }
 
-  private def validateUser(body: Boolean, alsoPassword: Boolean) = inTransaction {
+  private def validateUser(body: Boolean, alsoPassword: Boolean) = {
     def mkValidation(test: Boolean, id: String, message: String) = if(test) Seq(id -> message) else Seq.empty
     mkValidation(body && from(Database.users)(user => where(user.username === username.is) compute(count)) > 0, "username", "Username does already exist")
     mkValidation(body && username.is.length > 64, "username", "User name too long (max: 64)") ++
@@ -100,7 +100,7 @@ class Users extends DispatchSnippet with Logger {
       info("Create callback called for registration attempt, username=" + username.is + " email=" + email.is)
       validateUser(true, true) match {
         case Seq() =>
-          val user = inTransaction(Database.users.insert(User(username.is, email.is, passwords.is.head, language.is, timeZone.is, false, !useEmail)))
+          val user = Database.users.insert(User(username.is, email.is, passwords.is.head, language.is, timeZone.is, false, !useEmail))
           if(useEmail) {
             sendValidationEmail(user)
             S.notice(S.?("user.email.validationSent"))
@@ -154,14 +154,11 @@ class Users extends DispatchSnippet with Logger {
         timeZone.set(user.timeZone)
         def doEdit(): Unit = validateUser(true, false) match {
           case Seq() =>
-            transaction{
-              update(Database.users){u =>
-                where(u.id === user.id)
-                set(u.username := username.is,
-                    u.email := email.is,
-                    u.languageName := language.is.toString,
-                    u.timeZoneName := timeZone.is.getID)
-              }
+            update(Database.users){u =>
+              where(u.id === user.id) set(u.username := username.is,
+                                          u.email := email.is,
+                                          u.languageName := language.is.toString,
+                                          u.timeZoneName := timeZone.is.getID)
             }
             User.refresh()
             S.notice(<p>{S.?("user.profile.updated")}</p>)
@@ -191,12 +188,11 @@ class Users extends DispatchSnippet with Logger {
           case Seq() =>
             val passwordSalt = Helpers.randomString(16)
             val passwordHash = Helpers.hash(passwordSalt + passwords.is.head)
-            inTransaction(update(Database.users){u =>
-                where(u.id === user.id)
-                set(u.passwordSalt := passwordSalt,
-                    u.passwordHash := passwordHash,
-                    u.emailUid := Helpers.randomString(16))
-              })
+            update(Database.users){u =>
+              where(u.id === user.id) set(u.passwordSalt := passwordSalt,
+                                          u.passwordHash := passwordHash,
+                                          u.emailUid := Helpers.randomString(16))
+            }
             User.refresh()
             S.notice(<p>{S.?("user.password.changed")}</p>)
 
@@ -222,7 +218,7 @@ class Users extends DispatchSnippet with Logger {
   }
 
   def lostPassword(lostPassword: NodeSeq): NodeSeq = {
-    def doResetPassword(email: String) = inTransaction(from(Database.users)(user => where(user.email === email) select(user))).headOption match {
+    def doResetPassword(email: String) = from(Database.users)(user => where(user.email === email) select(user)).headOption match {
       case Some(user) if user.validated =>
         val resetLink = S.hostAndPath + "/user/reset-password?id=" + user.emailUid
 
@@ -265,11 +261,10 @@ class Users extends DispatchSnippet with Logger {
         case Seq() =>
           val passwordSalt = Helpers.randomString(16)
           val passwordHash = Helpers.hash(passwordSalt + passwords.is.head)
-          inTransaction(update(Database.users){u =>
-              where(u.id === user.id)
-              set(u.passwordSalt := passwordSalt,
-                  u.passwordHash := passwordHash)
-            })
+          update(Database.users){u =>
+            where(u.id === user.id) set(u.passwordSalt := passwordSalt,
+                                        u.passwordHash := passwordHash)
+          }
           User.refresh()
           S.notice(<p>{S.?("user.password.changed")}</p>)
 

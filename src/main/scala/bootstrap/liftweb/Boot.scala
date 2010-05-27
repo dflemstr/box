@@ -53,7 +53,7 @@ class Boot extends Logger {
     val password = Props.get("db.password")
     val userPass = for(u <- user.toOption; p <- password.toOption) yield (u, p)
     info("Connecting to database, driver=" + driver + " url=" + url + " user=" + user + " password=" + password)
-    
+
     //Check whether the driver class exists
     Class.forName(driver)
 
@@ -66,7 +66,7 @@ class Boot extends Logger {
         error("Unsupported database driver: no adapter, url=" + url)
         Predef.error("Unsupported database driver: no adapter, url=" + url)
     }
-    
+
     userPass match {
       case Some((user, pass)) =>
         SessionFactory.concreteFactory = Some(() =>
@@ -79,6 +79,8 @@ class Boot extends Logger {
     }
 
     try transaction{Database.create; info("Database created, url=" + url)} catch {case _ =>}
+    
+    S.addAround(Database.buildLoanWrapper())
   }
 
   private def startDaemons() {

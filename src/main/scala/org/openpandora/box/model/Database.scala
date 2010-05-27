@@ -1,6 +1,8 @@
 package org.openpandora.box.model
 
 import org.squeryl.Schema
+import net.liftweb.util.DynoVar
+import net.liftweb.util.LoanWrapper
 import org.squeryl.PrimitiveTypeMode._
 
 object Database extends Schema {
@@ -25,4 +27,10 @@ object Database extends Schema {
   val usersToPackageDownloads    = oneToManyRelation(users,        packageDownloads).via((u, pd) => u.id === pd.userId)
   val usersToPackages            = oneToManyRelation(users,        packages)        .via((u, p)  => u.id === p .userId)
   val usersToRatings             = oneToManyRelation(users,        ratings)         .via((u, r)  => u.id === r .userId)
+
+  def buildLoanWrapper(): LoanWrapper = new LoanWrapper {
+    def apply[A](f: => A): A = transaction {
+      f
+    }
+  }
 }

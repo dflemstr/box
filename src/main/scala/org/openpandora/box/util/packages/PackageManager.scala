@@ -47,7 +47,7 @@ object PackageManager extends Actor
   }
 
   private class PackageAdder(filename: String, inputStream: InputStream, user: User) extends Actor {
-    def act: Unit = {
+    def act: Unit = transaction {
       import ProcessNotifier._
 
       val name = Helpers.randomString(16)
@@ -90,49 +90,44 @@ object PackageManager extends Actor
         val namePart = filename.split('.').toSeq.dropRight(1).mkString
         val fileName = (namePart.substring(0, Math.min(namePart.length, 60)) + ".pnd")
 
-        val pkg = inTransaction{
-          Database.packages.insert(
-            Package(
-              user = user,
-              fileId = name,
-              fileName = fileName,
-              uploadTime = new java.util.Date,
-              hasImage = maybePngFile.isDefined
-            )
+        val pkg = Database.packages.insert(
+          Package(
+            user = user,
+            fileId = name,
+            fileName = fileName,
+            uploadTime = new java.util.Date,
+            hasImage = maybePngFile.isDefined
           )
-        }
+        )
 
         for(application <- pxml.applications) try {
           val an = application.author.map {a =>
             val name = a.name
             name.substring(0, Math.min(60, name.length))
           }
-          val app = inTransaction {
-            Database.applications.insert(
-              Application(
-                `package` = pkg,
-                versionMajor = application.version.major,
-                versionMinor = application.version.minor,
-                versionRelease = application.version.release,
-                versionBuild = application.version.build,
-                authorName = an
-              )
+          val app = Database.applications.insert(
+            Application(
+              `package` = pkg,
+              pxmlId = application.id,
+              versionMajor = application.version.major,
+              versionMinor = application.version.minor,
+              versionRelease = application.version.release,
+              versionBuild = application.version.build,
+              authorName = an
             )
-          }
+          )
 
           for {
             category <- application.categories
             name = category.name.toLowerCase
             if DotDesktopCategories.values.exists(_.toString.toLowerCase == name)
           } silent {
-            inTransaction {
-              Database.categories.insert(
-                Category(
-                  application = app,
-                  category = DotDesktopCategories.values.find(_.toString.toLowerCase == name).get
-                )
+            Database.categories.insert(
+              Category(
+                application = app,
+                category = DotDesktopCategories.values.find(_.toString.toLowerCase == name).get
               )
-            }
+            )
           }
 
           val titles = application.titles.groupBy(_.lang).toMap
@@ -142,7 +137,7 @@ object PackageManager extends Actor
               if descriptions contains lang
             } yield lang -> (titles(lang).head, descriptions(lang).head)).toMap
 
-          for(lang <- pairs.keySet; locs = pairs(lang)) try inTransaction {
+          for(lang <- pairs.keySet; locs = pairs(lang)) try {
             PackageManager.this.info("Adding an appMeta, application=" + app + " language=" + lang)
             Database.appMetas.insert(
               AppMeta(
@@ -168,6 +163,7 @@ object PackageManager extends Actor
         case err =>
           deleteAll()
           PackageManager.this.info("Unknown error, error="+ err.toString + " stacktrace=" + err.getStackTraceString)
+          throw err
       }
     }
 

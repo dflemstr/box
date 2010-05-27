@@ -7,7 +7,7 @@ import org.squeryl.annotations._
 case class Comment(userId:        Long, //id
                    applicationId: Long, //id
                    time:          Long,
-                   @Column(length = 1024) val
+                   @Column(length = 1024)
                    body:          String) extends LongKeyedEntity {
   def date = new Date(time)
   lazy val application: ManyToOne[Application] = Database.applicationsToComments.right(this)

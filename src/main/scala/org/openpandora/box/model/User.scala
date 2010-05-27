@@ -61,7 +61,7 @@ object User {
 
   private object _currentUserId extends SessionVar[Option[Long]](None)
 
-  private object _currentUser extends RequestVar[Option[User]](currentUserId.flatMap(id => transaction(Database.users.lookup(id))))
+  private object _currentUser extends RequestVar[Option[User]](currentUserId.flatMap(Database.users.lookup(_)))
                                  with CleanRequestVarOnSessionTransition
 
   def currentUserId = _currentUserId.is
@@ -71,5 +71,5 @@ object User {
 
   def loggedIn = currentUserId.isDefined
 
-  def nameFor(id: Long) = inTransaction(Database.users.lookup(id).map(_.username) getOrElse "Unknown")
+  def nameFor(id: Long) = Database.users.lookup(id).map(_.username) getOrElse "Unknown"
 }

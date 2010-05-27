@@ -15,7 +15,7 @@ object FileDispatcher {
                                                                        "Cache-Control" -> ("max-age=" + Int.MaxValue)) ++ maybeDisposition, Nil, 200))
   }
 
-  def servePackage(id: String) = inTransaction{
+  def servePackage(id: String) = {
     from(Database.packages)(pkg => where(pkg.fileId === id) select(pkg)).headOption match {
       case Some(pkg) =>
         val name = pkg.fileName

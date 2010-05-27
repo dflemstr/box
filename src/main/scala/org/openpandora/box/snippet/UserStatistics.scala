@@ -22,11 +22,10 @@ class UserStatistics extends DispatchSnippet
     val userId = User.currentUserId getOrElse 0l
     val thirtyDaysAgo = new Date();
     thirtyDaysAgo.setTime(thirtyDaysAgo.getTime - 2678400000l)
-    val downloadsLastMonth = inTransaction {
+    val downloadsLastMonth =
       from(Database.packageDownloads){download =>
         where(download.userId === userId and download.date > thirtyDaysAgo) groupBy(download.date) compute(count) orderBy(download.date asc)
-      }.toSeq
-    }
+      }
     Text(downloadsLastMonth.map { download =>
         "[" + download.key.getTime.toString + "," + download.measures.toString + "]"
       }.mkString("[", ",", "]"))
@@ -34,13 +33,12 @@ class UserStatistics extends DispatchSnippet
 
   def categoryDownloads(categoryDownloads: NodeSeq): NodeSeq = {
     val userId = User.currentUserId getOrElse 0l
-    val downloadsPerCategory = inTransaction {
+    val downloadsPerCategory =
       from(Database.applications, Database.packageDownloads, Database.categories) {(app, downloads, category) =>
         where(downloads.userId === userId and
               app.packageId === downloads.packageId and
               category.applicationId === app.id) groupBy(category.value) compute(count)
-      }.toSeq
-    }
+      }
 
     Text(downloadsPerCategory.map { download =>
         "'" + DotDesktopCategories(download.key) + "':" + download.measures + ""
