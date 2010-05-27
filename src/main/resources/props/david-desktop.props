@@ -25,7 +25,7 @@ db.driver=com.mysql.jdbc.Driver
 ## database.
 # db.url=jdbc:h2:file:boxdatabase
 # db.url=jdbc:h2:mem:box;AUTO_SERVER=TRUE
-db.url=jdbc:mysql://localhost:3306/box
+db.url=jdbc:mysql://localhost:3306/box?autoReconnect=true
 # db.url=jdbc:postgresql://localhost:5432/databasename
 # db.url=jdbc:oracle:thin:myuser/mypasswd@//localhost:1521/XE
 
