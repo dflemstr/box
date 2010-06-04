@@ -4,10 +4,7 @@
  Blueprint CSS Framework 0.9
  http://blueprintcss.org
 
-   * Copyright (c) 2007-Present. See LICENSE for more info.
-   * See README for instructions on how to use Blueprint.
-   * For credits and origins, see AUTHORS.
-   * This is a compressed file. See the sources in the 'src' directory.
+ Copyright (c) 2007-Present.
 
 ----------------------------------------------------------------------- */
 
@@ -228,3 +225,400 @@ hr.space {background:#fff;color:#fff;visibility:hidden;}
 .clearfix:after, .container:after {content:"\0020";display:block;height:0;clear:both;visibility:hidden;overflow:hidden;}
 .clearfix, .container {display:block;}
 .clear {clear:both;}
+
+/* General */
+.vert-span-1 {height:30px;}
+.vert-span-2 {height:70px;}
+.vert-span-3 {height:110px;}
+.vert-span-4 {height:150px;}
+.vert-span-5 {height:190px;}
+.vert-span-6 {height:230px;}
+.vert-span-7 {height:270px;}
+.vert-span-8 {height:310px;}
+.vert-span-9 {height:350px;}
+.vert-span-10 {height:390px;}
+.vert-span-11 {height:430px;}
+.vert-span-12 {height:470px;}
+.vert-span-13 {height:510px;}
+.vert-span-14 {height:550px;}
+.vert-span-15 {height:590px;}
+.vert-span-16 {height:630px;}
+.vert-span-17 {height:670px;}
+.vert-span-18 {height:710px;}
+.vert-span-19 {height:750px;margin-bottom:0;}
+
+/* Buttons */
+a.button, button, fieldset input[type=submit], .button a {
+  display:block;
+  float:left;
+  margin: 0.7em 0.5em 0.7em 0;
+  padding:5px 10px 5px 7px;   /* Links */
+
+  border:1px solid #dedede;
+  border-top:1px solid #eee;
+  border-left:1px solid #eee;
+
+  background-color:#f5f5f5;
+  font-family:"Lucida Grande", Tahoma, Arial, Verdana, sans-serif;
+  font-size:100%;
+  line-height:130%;
+  text-decoration:none;
+  font-weight:bold;
+  color:#565656;
+  cursor:pointer;
+}
+button {
+  width:auto;
+  overflow:visible;
+  padding:4px 10px 3px 7px;   /* IE6 */
+}
+button[type] {
+  padding:4px 10px 4px 7px;   /* Firefox */
+  line-height:17px;           /* Safari */
+}
+*:first-child+html button[type] {
+  padding:4px 10px 3px 7px;   /* IE7 */
+}
+button img, a.button img{
+  margin:0 3px -3px 0 !important;
+  padding:0;
+  border:none;
+  width:16px;
+  height:16px;
+  float:none;
+}
+
+button:hover, fieldset input[type=submit]:hover, a.button:hover, .button a:hover {
+  background-color:#dff4ff;
+  border:1px solid #c2e1ef;
+  color:#336699;
+}
+a.button:active, .button a:active{
+  background-color:#6299c5;
+  border:1px solid #6299c5;
+  color:#fff;
+}
+
+body .positive {
+  color:#529214;
+}
+a.positive:hover, .positive a:hover, button.positive:hover {
+  background-color:#E6EFC2;
+  border:1px solid #C6D880;
+  color:#529214;
+}
+a.positive:active, .positive a:active {
+  background-color:#529214;
+  border:1px solid #529214;
+  color:#fff;
+}
+
+body .negative {
+  color:#d12f19;
+}
+a.negative:hover, .negative a:hover, .negative button:hover, button.negative:hover {
+  background-color:#fbe3e4;
+  border:1px solid #fbc2c4;
+  color:#d12f19;
+}
+a.negative:active, .negative a:active {
+  background-color:#d12f19;
+  border:1px solid #d12f19;
+  color:#fff;
+}
+
+/* Styling */
+.alt {
+    color: #666;
+    font-family: "Warnock Pro", "Goudy Old Style", "Palatino", "Book Antiqua", Georgia, serif;
+    font-style: italic;
+    font-weight: normal;
+}
+
+.small-image img {
+    vertical-align: middle;
+    margin: 0 0.2em;
+}
+
+/* Forms */
+fieldset input[type=text], fieldset input[type=password], fieldset select {
+    width: 310px;
+}
+
+fieldset input.number {
+    width: 70px;
+}
+
+textarea {
+    width: 98%;
+    height: 4em;
+}
+
+/* Diagrams */
+.legend table {
+    width: auto;
+}
+
+.legend td {
+    padding: 0 0.2em;
+}
+
+/* Theme */
+.shade-0 {
+    background-color: #025D8C;
+}
+
+.shade-1 {
+    background-color: #107FC9;
+}
+
+.shade-2 {
+    background-color: #0A93FC;
+}
+
+.shade-3 {
+    background-color: #73C2FF;
+}
+
+.shade-4 {
+    background-color: #EDF7FF;
+}
+
+/* Layout */
+.row {
+    float: left;
+    margin: 0;
+    position: relative;
+    width: 100%;
+}
+
+#row-0 {
+    color: #EDF7FF;
+    background-color: #025D8C;
+    border-bottom: 0.5em solid #107FC9;
+}
+#row-0 a {
+    color: #EDF7FF;
+}
+#row-0 a:hover, #row-0 a:active {
+    color: #73C2FF;
+}
+
+#row-1 {
+}
+#row-1 a {
+    color: #0A93FC;
+}
+#row-1 a:hover, #row-1 a:active {
+    color: #73C2FF;
+}
+
+#row-2 {
+    bottom: 0;
+    position: fixed;
+    color: #EDF7FF;
+    background-color: #025D8C;
+    border-top: 0.5em solid #107FC9;
+}
+#row-2 a {
+    color: #EDF7FF;
+}
+#row-2 a:hover, #row-2 a:active {
+    color: #73C2FF;
+}
+
+/* Header */
+#logo a {
+    text-decoration: none;
+}
+
+#ajax-container {
+    height: 3em;
+}
+
+/* Menu */
+.topmenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    float: right;
+}
+
+.topmenu-item {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    float: left;
+}
+
+.topmenu-item a {
+    text-decoration: none;
+    font-size: 1.5em;
+}
+
+.submenu {
+    list-style: none;
+    position: absolute;
+    right: -0.5em;
+    top: 3em;
+    margin: 0;
+    padding: 0;
+    float: left;
+    display: none;
+    background-color: #025D8C;
+    border-bottom: 0.5em solid #107FC9;
+    border-left: 0.5em solid #107FC9;
+    border-right: 0.5em solid #107FC9;
+    -webkit-border-bottom-right-radius: 0.5em;
+    -webkit-border-bottom-left-radius: 0.5em;
+    -moz-border-radius-bottomright: 0.5em;
+    -moz-border-radius-bottomleft: 0.5em;
+    border-bottom-left-radius: 0.5em;
+    border-bottom-right-radius: 0.5em;
+    z-index: 2;
+}
+
+.submenu-item {
+    margin: 0;
+    padding: 0;
+    clear: both;
+}
+
+.menu-item a {
+    padding: 0 1em;
+    display: block;
+    white-space: nowrap;
+}
+
+.menu-item a:hover, .menu-item a.active {
+    color: #CEEAF7;
+}
+
+.menu-item .menu-entry {
+    display: block;
+    height: 3em;
+    line-height: 3em;
+    text-decoration: none;
+    float: left;
+}
+
+.menu-dropdown-arrow {
+    width: 20px;
+    height: 3em;
+    float: left;
+    background: url(/images/arrow-down.png) no-repeat left center;
+}
+
+.menu-dropdown-arrow.hover, .menu-dropdown-arrow.open {
+    cursor: pointer;
+    background-position: right center;
+}
+
+/* Application lists */
+.application-title {
+    margin-bottom: 0;
+}
+
+.download-count {
+    line-height: 3;
+}
+
+.rating-count, .download-count {
+    float: right;
+}
+
+.rating-count:before, .download-count:before {
+    content: "(";
+}
+
+.rating-count:after, .download-count:after {
+    content: ")";
+}
+
+/* Stars */
+.ui-stars-star,
+.ui-stars-cancel {
+  float: left;
+  display: block;
+  overflow: hidden;
+  text-indent: -999em;
+  cursor: pointer;
+}
+.ui-stars-star a,
+.ui-stars-cancel a {
+  width: 16px;
+  height: 15px;
+  display: block;
+  background: url(../images/jquery.ui.stars.gif) no-repeat 0 0;
+}
+.ui-stars-star a {
+  background-position: 0 -32px;
+}
+.ui-stars-star-on a {
+  background-position: 0 -48px;
+}
+.ui-stars-star-hover a {
+  background-position: 0 -64px;
+}
+.ui-stars-cancel-hover a {
+  background-position: 0 -16px;
+}
+.ui-stars-star-disabled,
+.ui-stars-star-disabled a,
+.ui-stars-cancel-disabled a {
+  cursor: default !important;
+}
+
+/* Notifications */
+#notifications-wrapper {
+    position: fixed;
+    bottom: 1em;
+    right: 1em;
+    width: 301px;
+    z-index: 9999;
+}
+
+.notification-wrapper {
+    position: relative;
+    margin: 0 0 10px 0;
+    padding: 0;
+}
+
+.notification {
+    display: block;
+    padding: 0;
+    font-size: medium;
+    -webkit-border-radius: 1em;
+    -moz-border-radius: 1em;
+    border-radius: 1em;
+    padding: 0.5em;
+    text-align: left;
+    color: white;
+}
+
+.notification p {
+    padding: 0;
+    margin: 0;
+}
+
+.notification-title {
+    font-size: large;
+    font-weight: bold;
+    padding-bottom: 0.1em;
+    display: block;
+    text-shadow: 1px 1px black;
+}
+
+.notification-image {
+    float: left;
+    margin-right: 0.5em;
+}
+
+.error-notification {
+    background-color: #800;
+}
+
+.warning-notification, .notice-notification {
+    background-color: #393939;
+}
+

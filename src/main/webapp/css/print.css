@@ -27,10 +27,10 @@ blockquote {margin:1.5em;padding:1em;font-style:italic;font-size:.9em;}
 .hide {display:none;}
 a:link, a:visited {background:transparent;font-weight:700;text-decoration:underline;}
 a:link:after, a:visited:after {font-size:90%;}
-#ajax-container {
-    display: hidden;
-}
 
-#navigation {
-    display: hidden;
+#row-0 {
+    display: none;
+}
+#row-2 {
+    display: none;
 }
