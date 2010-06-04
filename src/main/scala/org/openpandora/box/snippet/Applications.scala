@@ -187,7 +187,7 @@ class Applications extends DispatchSnippet with Logger {
   }
 
   private def makeAppEntry(app: Application, bindName: String, entry: NodeSeq) = {
-    lazy val info = from(localizedAppMetas)(meta => where(meta.applicationId === app.id) select(meta)).single
+    lazy val info = from(localizedAppMetas)(meta => where(meta.applicationId === app.id) select(meta)).head
     lazy val pkg = app.pkg.single
     lazy val categories = app.categories.toSeq
     lazy val comments = app.comments.toSeq
