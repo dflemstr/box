@@ -191,9 +191,9 @@ class Applications extends DispatchSnippet with Logger {
     lazy val pkg = app.pkg.single
     lazy val categories = app.categories.toSeq
     lazy val comments = app.comments.toSeq
-    def applicationLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/applications/" + app.id + "/show"}>{n}</a>)
-    def downloadLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
-    def image = if(pkg.hasImage)
+    val applicationLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/applications/" + app.id + "/show"}>{n}</a>)
+    val downloadLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
+    val image = if(pkg.hasImage)
       (<img src={S.hostAndPath + "/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
     else
       NodeSeq.Empty
@@ -322,7 +322,7 @@ class Applications extends DispatchSnippet with Logger {
 
     bind(bindName, entry,
          "image" -> makeLazyNode(image),
-         "title" -> makeLazyString(info.title),
+         "title" -> makeLazyNode(applicationLink(Text(info.title))),
          "description" -> makeLazyString(info.description),
          "version" -> (makeLazyNode {
           val ver = Seq(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild).mkString(".")

@@ -1,6 +1,5 @@
 package org.openpandora.box.snippet
 
-import net.liftweb.http.js.JsCmds
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import net.liftweb.util.Mailer
@@ -20,7 +19,6 @@ import org.openpandora.box.model.Database
 import org.openpandora.box.model.User
 import org.openpandora.box.util.Languages
 import org.openpandora.box.util.TimeZones
-import org.openpandora.box.util.notifications.Poster
 import org.squeryl.PrimitiveTypeMode._
 import scala.xml.NodeSeq
 import scala.xml.Text
@@ -36,8 +34,8 @@ class Users extends DispatchSnippet with Logger {
     case "lostPassword" => lostPassword
     case "resetPassword" => resetPassword
     case "changePassword" => changePassword
-    case "info" => info
-    case "sendMessage" => sendMessage
+    case "name" => name
+    case "picture" => picture
   }
 
   private object username extends RequestVar("")
@@ -280,12 +278,10 @@ class Users extends DispatchSnippet with Logger {
          "newPassword" -> SHtml.password_*("", S.LFuncHolder(passwords.set), "class" -> "password-field"),
          "submit" -> SHtml.submit("Change password", doChangePassword))
   }
+  def name(name: NodeSeq): NodeSeq = User.currentUser map (_.username) map (Text) getOrElse NodeSeq.Empty
 
-  def info(info: NodeSeq) = Text("TODO") ++ info
-
-  def sendMessage(stuff: NodeSeq) =
-    SHtml.ajaxButton("Send message", () => {
-        Poster! Poster.SendMessage(User.currentUser.map(_.id) getOrElse 0l, "notice", <p>Hello World</p>, <p>Hello World</p>)
-        JsCmds.Noop
-      })
+  def picture(picture: NodeSeq): NodeSeq = User.currentUser map { user =>
+    val gravatar = Helpers.hexEncode(Helpers.md5(user.email.toLowerCase.getBytes("UTF-8")))
+    <img src={"http://www.gravatar.com/avatar/" + gravatar + "?s=64&d=identicon"} alt={user.username} class="avatar"/>
+  } getOrElse NodeSeq.Empty
 }
