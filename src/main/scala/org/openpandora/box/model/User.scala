@@ -51,10 +51,6 @@ case class User(@Column(length = 64)
 
 object User {
   def apply(username: String, email: String, password: String, language: Locale, timeZone: TimeZone, admin: Boolean, validated: Boolean): User = {
-    require(username.length <= 64, "User name too long (max: 64)")
-    require(username.length >= 4, "User name too short (min: 4)")
-    require(username matches """[\w_-]+""", """Invalid username (it has to match "[\w_-]+")""")
-    require(password.length >= 4, "Password too short (min: 4)")
     val salt = Helpers.randomString(16)
     User(username, email, salt, Helpers.hash(salt + password), language.toString, timeZone.getID, admin, Helpers.randomString(16),  validated)
   }

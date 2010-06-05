@@ -21,7 +21,6 @@ $(function() {
     });
     $.plot($('#history-diagram'), [
     {
-        label: 'Downloads',
         data: hd,
         lines: {
             show: true,

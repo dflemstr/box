@@ -84,17 +84,19 @@ class Users extends DispatchSnippet with Logger {
 
   private def validateUser(body: Boolean, alsoPassword: Boolean) = {
     def mkValidation(test: Boolean, id: String, message: String) = if(test) Seq(id -> message) else Seq.empty
-    mkValidation(body && from(Database.users)(user => where(user.username === username.is) compute(count)) > 0, "username", "Username does already exist")
-    mkValidation(body && username.is.length > 64, "username", "User name too long (max: 64)") ++
-    mkValidation(body && username.is.length < 4,"username", "User name too short (min: 4)") ++
-    mkValidation(body && !(username.is matches """[\w_-]+"""),"username", """Invalid username (only letters, underscores and dashes allowed)""") ++
-    mkValidation(body && !(email.is matches emailRegex),"email", "Invalid email address.") ++
-    mkValidation(alsoPassword && passwords.toSet.size > 1,"password", "Passwords don't match") ++
-    mkValidation(alsoPassword && passwords.exists(_.length < 4),"password", "Password too short (min: 4)")
+    mkValidation(body && from(Database.users)(user => where(user.username like username.is) compute(count)) > 0, "username", S.?("user.username.exists"))
+    mkValidation(body && from(Database.users)(user => where(user.email like email.is) compute(count)) > 0, "email", S.?("user.email.exists"))
+    mkValidation(body && username.is.length > 64, "username", S.?("user.username.huge").replace("%length%", "64")) ++
+    mkValidation(body && username.is.length < 4,"username", S.?("user.username.tiny").replace("%length%", "4")) ++
+    mkValidation(body && !(username.is matches """[\w_-]+"""),"username", S.?("user.username.invalid")) ++
+    mkValidation(body && !(email.is matches emailRegex),"email", S.?("user.email.invalid")) ++
+    mkValidation(alsoPassword && passwords.toSet.size > 1,"password", S.?("user.password.nomatch")) ++
+    mkValidation(alsoPassword && passwords.exists(_.length < 4),"password", S.?("user.password.tiny").replace("%length%", "4"))
   }
   
   def create(create: NodeSeq): NodeSeq = createFunction.is.map(_()) getOrElse {
     def doCreate(): Unit = {
+      email.set(email.is.toLowerCase)
       info("Create callback called for registration attempt, username=" + username.is + " email=" + email.is)
       validateUser(true, true) match {
         case Seq() =>
@@ -120,7 +122,7 @@ class Users extends DispatchSnippet with Logger {
            "password" -> SHtml.password_*("", S.LFuncHolder(passwords.set), "class" -> "password-field"),
            "language" -> SHtml.selectObj(Languages.localesAndNames(S.locale), Full(language.is), language.set, "id" -> "language-field"),
            "timezone" -> SHtml.selectObj(TimeZones.timeZonesAndCodes, Full(timeZone.is), timeZone.set, "id" -> "timezone-field"),
-           "submit"   -> SHtml.submit("Create user", doCreate _))
+           "submit"   -> SHtml.submit(S.?("user.create"), doCreate _))
     createFunc()
   }
 
@@ -132,14 +134,13 @@ class Users extends DispatchSnippet with Logger {
                          "name" -> user.username,
                          "link" -> ((x: NodeSeq) => <a href={validationLink}>{x}</a>))
         Mailer.sendMail(From("noreply@" + S.hostName),
-                        Subject(S.hostName + " account validation request"),
+                        Subject(S.?("user.validation.subject").replace("%hostname%", S.hostName)),
                         To(user.email),
                         Mailer.xmlToMailBodyType(email))
       case _ =>
-        S.error(Seq(<em>INTERNAL ERROR:</em>, <br/>,
-                    Text("No email template found for 'validate-email'! " +
-                         "Please report this error to the site administrator."), <br/>,
-                    Text("The email was not sent")))
+        S.error(Seq(<em>INTERNAL ERROR:</em>,
+                    <p>No email template found for 'validate-email'! Please report this error to the site administrator.</p>,
+                    <p>The email was not sent</p>))
     }
   }
   
@@ -171,7 +172,7 @@ class Users extends DispatchSnippet with Logger {
                "email"    -> SHtml.text(email.is, email.set, "size" -> "128", "id" -> "email-field"),
                "language" -> SHtml.selectObj(Languages.localesAndNames(S.locale), Full(language.is), language.set, "id" -> "language-field"),
                "timezone" -> SHtml.selectObj(TimeZones.timeZonesAndCodes, Full(timeZone.is), timeZone.set, "id" -> "timezone-field"),
-               "submit"   -> SHtml.submit("Save changes", doEdit _))
+               "submit"   -> SHtml.submit(S.?("save"), doEdit _))
         editFunc()
       case None =>
         S.error(<p>{S.?("user.mustlogin")}</p>)
@@ -201,9 +202,9 @@ class Users extends DispatchSnippet with Logger {
         }
         bind("resetPassword", resetPassword,
              "password" -> SHtml.password_*("", S.LFuncHolder(passwords.set), "class" -> "password-field"),
-             "submit" -> SHtml.submit("Reset password", doSet), "id" -> "submit-field")
+             "submit" -> SHtml.submit(S.?("user.reset"), doSet), "id" -> "submit-field")
       case _ =>
-        S.error(Seq(Text("Invalid password link. "), <a href="/user/lost-password">Get a valid one</a>))
+        S.error(Seq(<p>{S.?("user.reset.invalidlink")}</p>, <a href="/user/lost-password">{S.?("user.reset.getvalidlink")}</a>))
         S.redirectTo(S.referer openOr "/")
     }
 
@@ -211,7 +212,7 @@ class Users extends DispatchSnippet with Logger {
     case Full(id) =>
       passwordReset(resetPassword, id)
     case _ =>
-      S.error(<p>How did you get in there? Don't try to fiddle around!</p>)
+      S.error(<p>{S.?("fiddle")}</p>)
       S.redirectTo(S.referer openOr "/")
   }
 
@@ -226,27 +227,26 @@ class Users extends DispatchSnippet with Logger {
                              "name" -> user.username,
                              "link" -> ((x: NodeSeq) => <a href={resetLink}>{x}</a>))
             Mailer.sendMail(From("noreply@" + S.hostName),
-                            Subject(S.hostName + " password reset request"),
+                            Subject(S.?("user.reset.subject").replace("%hostname%", S.hostName)),
                             To(user.email),
                             Mailer.xmlToMailBodyType(email))
-            S.notice(<p>{"Password reset email sent"}</p>)
+            S.notice(<p>{S.?("user.reset.sent")}</p>)
             S.redirectTo(S.referer openOr "/")
           case _ =>
-            S.error(Seq(<em>INTERNAL ERROR:</em>, <br/>,
-                        Text("No email template found for 'reset-password-email'! " +
-                             "Please report this error to the site administrator."), <br/>,
-                        Text("The email was not sent")))
+            S.error(Seq(<em>INTERNAL ERROR:</em>,
+                        <p>No email template found for 'reset-password-email'! Please report this error to the site administrator.</p>,
+                        <p>The email was not sent</p>))
         }
       case Some(user) if !user.validated =>
         sendValidationEmail(user)
-        S.notice(<p>Resent account confirmation email</p>)
+        S.notice(<p>{S.?("user.validation.resent")}</p>)
         S.redirectTo(S.referer openOr "/")
       case _ =>
-        S.error(<p>Email address couldn't be found</p>)
+        S.error(<p>{S.?("user.reset.notfound")}</p>)
     }
     bind("lostPassword", lostPassword,
          "email" -> SHtml.text("", email.set, "id" -> "email-field"),
-         "submit" -> SHtml.submit("Send password link", () => doResetPassword(email)))
+         "submit" -> SHtml.submit(S.?("user.reset.sendlink"), () => doResetPassword(email)))
   }
 
   def changePassword(changePassword: NodeSeq): NodeSeq = {
@@ -254,7 +254,7 @@ class Users extends DispatchSnippet with Logger {
 
     def doChangePassword() {
       if (!user.checkPassword(oldPassword.is))
-        S.error(<p>Wrong old password</p>)
+        S.error(<p>{S.?("user.change.wrongoldpw")}</p>)
       else validateUser(false, true) match {
         case Seq() =>
           val passwordSalt = Helpers.randomString(16)
@@ -276,7 +276,7 @@ class Users extends DispatchSnippet with Logger {
     bind("changePassword", changePassword,
          "oldPassword" -> SHtml.password("", oldPassword.set, "id" -> "oldpassword-field"),
          "newPassword" -> SHtml.password_*("", S.LFuncHolder(passwords.set), "class" -> "password-field"),
-         "submit" -> SHtml.submit("Change password", doChangePassword))
+         "submit" -> SHtml.submit(S.?("user.password.change"), doChangePassword))
   }
   def name(name: NodeSeq): NodeSeq = User.currentUser map (_.username) map (Text) getOrElse NodeSeq.Empty
 

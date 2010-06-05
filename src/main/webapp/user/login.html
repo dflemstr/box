@@ -1,11 +1,11 @@
 <lift:surround with="default" at="main">
                 <lift:Users.login form="POST">
                     <fieldset>
-                        <legend>Log in</legend>
+                        <legend><lift:loc locid="html.login"/></legend>
                         <p>
-                            <label for="username">Username</label><br/>
+                            <label for="username"><lift:loc locid="html.usernamelabel"/></label><br/>
                             <login:username/><br/>
-                            <label for="password">Password</label><br/>
+                            <label for="password"><lift:loc locid="html.passwordlabel"/></label><br/>
                             <login:password/>
                         </p>
                         <p>

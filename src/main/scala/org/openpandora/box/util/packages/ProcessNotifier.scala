@@ -1,17 +1,25 @@
 package org.openpandora.box.util.packages
 
+import java.util.Locale
+import java.util.ResourceBundle
 import net.liftweb.common.Logger
+import net.liftweb.http.LiftRules
+import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
+import net.liftweb.util.NamedPF
 import org.openpandora.box.model.User
 import org.openpandora.box.util.notifications.Poster
 import scala.actors.Actor
-import scala.xml.NodeSeq
+import scala.xml._
 
 object ProcessNotifier extends Actor
                           with Logger {
   trait Message {
-    val title: NodeSeq
-    val body: NodeSeq
+    val kind: String
+    val replacements: Map[String, String] = Map.empty
+    def localization = "validation." + kind
+    def bodyLocalization = localization + ".body"
+    def titleLocalization = localization + ".title"
   }
 
   trait WarningMessage extends AnyRef
@@ -20,57 +28,69 @@ object ProcessNotifier extends Actor
   trait ErrorMessage   extends Throwable
                           with Message
 
-  private val pxmlStuff = <p>Please read <a href="http://pandorawiki.org/PXML_specification">the PXML specification</a> for more information.</p>
-
   case object PxmlNotFoundError extends ErrorMessage {
-    val title = <p><title:filename/> didn't contain PXML data</p>
-    val body = <p>The package didn't contain any <em>PXML</em> metadata.</p> ++ pxmlStuff
+    val kind = "pxmlnotfounderror"
   }
 
   case object PxmlTruncatedError extends ErrorMessage {
-    val title = <p><title:filename/> is missing a &lt;/PXML&gt; tag</p>
-    val body = <p>The <em>PXML</em> ends without a closing &lt;/PXML&gt; tag, which makes it <em>impossible</em> for us to load it.</p>
+    val kind = "pxmltruncatederror"
   }
 
   case class XmlSyntaxError(error: String) extends ErrorMessage {
-    val title = <p><title:filename/> contains invalid XML data</p>
-    val body = <p>The error was:</p> ++ <code>{error}</code> ++ pxmlStuff
+    val kind = "xmlsyntaxerror"
+    override val replacements = Map("error" -> error)
   }
 
   case class PxmlSyntaxError(error: String) extends ErrorMessage {
-    val title = <p><title:filename/> contains invalid PXML markup</p>
-    val body = <p>The error was:</p> ++ <code>{error}</code> ++ pxmlStuff
+    val kind = "pxmlsyntaxerror"
+    override val replacements = Map("error" -> error)
   }
 
   case object PngInvalidError extends ErrorMessage {
-    val title = <p><title:filename/> has an invalid preview picture</p>
-    val body = <p>There is a block of data with a <em>PNG</em> header after your <em>PXML</em> file. We tried to open it as an image, but weren't able to.</p>
+    val kind = "pnginvaliderror"
   }
 
   case class PxmlSyntaxWarning(error: String) extends WarningMessage {
-    val title = <p><title:filename/> has minor issues</p>
-    val body = <p>The package has issues, but was accepted anyways. The system says:</p> ++ <code>{error}</code>
+    val kind = "pxmlsyntaxwarning"
+    override val replacements = Map("error" -> error)
   }
 
-  case class PackageAdded() extends Message {
-    val title = <p><title:filename/> validated and added</p>
-    val body = <p>You can find the applications it contained among all of the other applications.</p>
+  case object PackageAdded extends Message {
+    val kind = "added"
   }
 
   case class SendResolvedMessage(message: Message, user: User, filename: String)
 
+  private def resourceBundles(locale: Locale) =
+    LiftRules.resourceNames.flatMap {name =>
+      Helpers tryo {
+        List(ResourceBundle.getBundle(name, locale))
+      } openOr {
+        NamedPF.applyBox((name, locale), LiftRules.resourceBundleFactories.toList).map(List(_)) openOr Nil
+      }
+    }
+
+  private def loc(key: String, locale: Locale): String = resourceBundles(locale).flatMap(r => Helpers.tryo(r.getObject(key) match {
+      case s: String => Some(s)
+      case _ => None
+    }).flatten).headOption getOrElse {
+      warn("Couldn't translate key, key=" + key)
+      key
+    }
+
   def act = Actor.loop {
     Actor.react {
-      case m: SendResolvedMessage =>
+      case SendResolvedMessage(message, user, filename) =>
         import Poster._
-        val transformedTitle = bind("title", m.message.title, "filename" -> m.filename)
-        val kind = m.message match {
+        val transformedTitle = loc(message.titleLocalization, user.language).replace("%filename%", filename)
+        val transformedBody = message.replacements.foldLeft(loc(message.bodyLocalization, user.language))((res, n) => res.replace("%" + n._1 + "%", n._2))
+        val kind = message match {
           case err: ErrorMessage => "error"
           case warn: WarningMessage => "warning"
           case _ => "notice"
         }
-        Poster! SendMessage(m.user.id, kind,  transformedTitle, m.message.body)
-        ProcessNotifier.this.info("Sent process message, user=" + m.user.id + " filename=" + m.filename)
+        Poster! SendMessage(user.id, kind, Text(transformedTitle), Unparsed(transformedBody))
+        ProcessNotifier.this.info("Sent process message, user=" + user.id + " filename=" + filename)
       case x => warn("Unhandled message in ProcessNotifier: " + x)
     }
   }

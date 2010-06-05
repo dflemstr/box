@@ -527,12 +527,20 @@ textarea {
     float: right;
 }
 
-.rating-count:before, .download-count:before {
+.rating-count::before, .download-count::before {
     content: "(";
 }
 
-.rating-count:after, .download-count:after {
+.rating-count::after, .download-count::after {
     content: ")";
+}
+
+.category::after, .language::after {
+    content: ",";
+}
+
+.category:last-of-type::after, .language:last-of-type::after {
+    content: "";
 }
 
 /* Stars */

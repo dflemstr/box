@@ -22,12 +22,9 @@ case class Package(userId:     Long,   //id
 object Package {
   def apply(user: User, fileName: String, uploadTime: Date, hasImage: Boolean): Package = {
     import net.liftweb.util.Helpers
-    require(fileName.length <= 64, "File name too long")
     Package(user.id, Helpers.randomString(16), fileName, uploadTime.getTime, hasImage)
   }
   def apply(user: User, fileId: String, fileName: String, uploadTime: Date, hasImage: Boolean): Package = {
-    import net.liftweb.util.Helpers
-    require(fileName.length <= 64, "File name too long")
     Package(user.id, fileId, fileName, uploadTime.getTime, hasImage)
   }
 }

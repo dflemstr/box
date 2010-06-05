@@ -1,15 +1,15 @@
 <lift:surround with="default" at="main">
                 <p>
-                    Welcome to The Box, <em>the</em> place for finding PND files!<lift:Users.isLoggedOut>
+                    <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
                     Please <lift:Menu.item name="UserLogin"/> to gain access to comments, ratings and more!</lift:Users.isLoggedOut>
                 </p><lift:Applications.list filter="orderby:timedesc">
-                <h2>Recent uploads</h2>
+                <h2><lift:loc locid="html.recentuploads"/></h2>
                 <table>
                     <thead>
                         <tr>
-                            <th>Title</th>
-                            <th>Version</th>
-                            <th>Uploaded</th>
+                            <th><lift:loc locid="html.title"/></th>
+                            <th><lift:loc locid="html.version"/></th>
+                            <th><lift:loc locid="html.uploaded"/></th>
                             <th>&nbsp;</th>
                         </tr>
                     </thead>
@@ -18,7 +18,7 @@
                             <td><entry:title/></td>
                             <td><entry:version/></td>
                             <td><entry:time/></td>
-                            <td><entry:link>Details</entry:link></td>
+                            <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
                         </tr></list:entry>
                     </tbody>
                 </table></lift:Applications.list>

@@ -1,20 +1,11 @@
 <lift:surround with="default" at="main">
-                <p>
-                    To add new applications, you have to upload them in PND files.
-                </p>
-                <p>
-                    You just have to upload the PND file; we will take care of filling
-                    in all of the details for you. After uploading the file, we will
-                    extract the metadata you specify in the included <code>PXML.xml</code>
-                    file. Therefore, you should try to adhere to
-                    <a href="http://pandorawiki.org/PXML_specification">the PXML standard</a>
-                    and include as much metadata in your PND as possible.
-                </p>
+                <p><lift:loc locid="html.addapps"/></p>
+                <p><lift:loc locid="html.addinfo"/></p>
                 <lift:Applications.create form="POST" multipart="true">
                     <fieldset>
-                        <legend>Upload PND</legend>
+                        <legend><lift:loc locid="html.uploadpnd"/></legend>
                         <p>
-                            <label for="upload-field">PND file:</label><create:upload/>
+                            <label for="upload-field"><lift:loc locid="html.pndfilelabel"/></label><create:upload/>
                         </p>
                         <p>
                             <create:submit/>

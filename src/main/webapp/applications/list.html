@@ -4,33 +4,33 @@
                     <div class="span-14">
                         <h3 class="application-title span-14 last"><entry:title/></h3>
                         <span class="span-3">
-                            <span class="quiet">Version</span> <entry:version/>
+                            <span class="quiet"><lift:loc locid="html.version"/></span> <entry:version/>
                         </span>
                         <span class="span-5">
-                            <span class="quiet">Uploaded</span> <entry:time/>
+                            <span class="quiet"><lift:loc locid="html.uploaded"/></span> <entry:time/>
                         </span>
                         <span class="span-6 last"><entry:uploader>
-                            <span class="quiet">Uploader</span> <span class="small-image"><uploader:smallavatar/></span><uploader:name/>
+                            <span class="quiet"><lift:loc locid="html.uploader"/></span> <span class="small-image"><uploader:smallavatar/></span><uploader:name/>
                         </entry:uploader></span>
                         <span class="span-14 last"><entry:author>
-                            <span class="quiet">Author</span> <author:name/>
+                            <span class="quiet"><lift:loc locid="html.author"/></span> <author:name/>
                         </entry:author></span>
                         <span class="span-14 last"><entry:categories>
-                            <span class="quiet">Categories</span> <categories:category><em><category:name/></em> </categories:category>
+                            <span class="quiet"><lift:loc locid="html.categories"/></span> <categories:category><em class="category"><category:name/></em> </categories:category>
                         </entry:categories></span>
                     </div>
                     <div class="span-3 last">
                         <div class="span-3 last"><entry:rating/><div class="rating-count"><entry:ratingCount/></div></div>
-                        <div class="span-3 last button"><entry:link>Details</entry:link></div>
+                        <div class="span-3 last button"><entry:link><lift:loc locid="html.details"/></entry:link></div>
                     </div>
                 </div>
                 <hr class="space"/></list:entry></lift:Applications.list><lift:bind-at name="footer">
             <div id="filter-bar">
                 <form method="get" action="/applications/list" class="inline">
                     <p>
-                        <label for="filter-field">Filter:</label><lift:Applications.filterField/>
+                        <label for="filter-field"><lift:loc locid="html.filterlabel"/></label><lift:Applications.filterField/>
                         <input type="submit" value="Update filter"/>
-                        <a href="/applications/filter">Advanced...</a>
+                        <a href="/applications/filter"><lift:loc locid="html.advanced"/>...</a>
                     </p>
                 </form>
             </div></lift:bind-at>

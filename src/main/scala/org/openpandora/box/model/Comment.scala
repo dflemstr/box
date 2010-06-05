@@ -16,7 +16,6 @@ case class Comment(userId:        Long, //id
 
 object Comment {
   def apply(user: User, application: Application, date: Date, body: String): Comment = {
-    require(body.length <= 1024, "Body too long")
     Comment(user.id, application.id, date.getTime, body)
   }
 }

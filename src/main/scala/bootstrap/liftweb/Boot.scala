@@ -21,6 +21,7 @@ import net.liftweb.http.provider.HTTPRequest
 import net.liftweb.sitemap.Loc
 import net.liftweb.sitemap.Menu
 import net.liftweb.sitemap.SiteMap
+import net.liftweb.util.Helpers._
 import net.liftweb.util.Mailer
 import net.liftweb.util.Props
 import org.openpandora.box.dispatch.FileDispatcher
@@ -105,25 +106,25 @@ class Boot extends Logger {
   private def buildSitemap() {
     import net.liftweb.sitemap.Loc._
 
-    val isLoggedIn = If(User.currentUser.isDefined _, "Must be logged in")
-    val isLoggedOut = If(User.currentUser.isEmpty _, "Please log out first")
+    val isLoggedIn = If(User.currentUser.isDefined _, S.?("user.mustlogin"))
+    val isLoggedOut = If(User.currentUser.isEmpty _, S.?("user.mustlogout"))
 
-    val userMenu = Menu(Loc("User", List("user", "view"), "User overview"),
-                        Menu(Loc("UserLogin", List("user", "login"), "Log in", If(User.currentUser.isEmpty _, "Already logged in"))),
-                        Menu(Loc("UserLogout", List("user", "logout"), "Log out", isLoggedIn)),
-                        Menu(Loc("UserCreate", List("user", "create"), "Register", isLoggedOut)),
-                        Menu(Loc("UserLostPassword", List("user", "lost-password"), "Lost password", If(useEmail _, "E-Mail system disabled"), isLoggedOut)),
-                        Menu(Loc("UserResetPassword", List("user", "reset-password"), "Reset password", Hidden, isLoggedOut)),
-                        Menu(Loc("UserEdit", List("user", "edit"), "Account details", isLoggedIn)),
-                        Menu(Loc("UserChangePassword", List("user", "change-password"), "Change password", isLoggedIn)),
-                        Menu(Loc("UserValidate", List("user", "validate"), "Validate user", Hidden, isLoggedOut)))
+    val userMenu = Menu(Loc("User", List("user", "view"), S.?("user.view")),
+                        Menu(Loc("UserLogin", List("user", "login"), S.?("user.login"), If(User.currentUser.isEmpty _, "Already logged in"))),
+                        Menu(Loc("UserLogout", List("user", "logout"), S.?("user.logout"), isLoggedIn)),
+                        Menu(Loc("UserCreate", List("user", "create"), S.?("user.create"), isLoggedOut)),
+                        Menu(Loc("UserLostPassword", List("user", "lost-password"), S.?("user.lost-password"), If(useEmail _, "E-Mail system disabled"), isLoggedOut)),
+                        Menu(Loc("UserResetPassword", List("user", "reset-password"), S.?("user.reset-password"), Hidden, isLoggedOut)),
+                        Menu(Loc("UserEdit", List("user", "edit"), S.?("user.edit"), isLoggedIn)),
+                        Menu(Loc("UserChangePassword", List("user", "change-password"), S.?("user.change-password"), isLoggedIn)),
+                        Menu(Loc("UserValidate", List("user", "validate"), S.?("user.validate"), Hidden, isLoggedOut)))
 
-    val applicationMenu = Menu(Loc("Applications", List("applications", "list"), "Applications"),
-                               Menu(Loc("ShowApplication", List("applications", "show"), "Show application", Hidden)),
-                               Menu(Loc("AddApplications", List("applications", "add"), "Add applications", isLoggedIn)),
-                               Menu(Loc("ConstructAppFilter", List("applications", "filter"), "Construct filter")))
+    val applicationMenu = Menu(Loc("Applications", List("applications", "list"), S.?("applications.list")),
+                               Menu(Loc("ShowApplication", List("applications", "show"), S.?("applications.show"), Hidden)),
+                               Menu(Loc("AddApplications", List("applications", "add"), S.?("applications.add"), isLoggedIn)),
+                               Menu(Loc("ConstructAppFilter", List("applications", "filter"), S.?("applications.filter"))))
 
-    val entries = Menu(Loc("Home", List("index"), "Home")) :: applicationMenu :: userMenu :: Nil
+    val entries = Menu(Loc("Home", List("index"), S.?("index"))) :: applicationMenu :: userMenu :: Nil
     LiftRules.setSiteMap(SiteMap(entries: _*))
   }
 
@@ -187,7 +188,7 @@ class Boot extends Logger {
         JE.Call("displayNotice", JE.Str(kind), JE.Str(title), JE.Str(body.toString), JE.JsNull).cmd
     }
 
-    val messages = S.errors.map(("error", "Error", _)) ++ S.warnings.map(("warning", "Warning", _)) ++ S.notices.map(("notice", "Information", _))
+    val messages = S.errors.map(("error", S.?("error"), _)) ++ S.warnings.map(("warning", S.?("warning"), _)) ++ S.notices.map(("notice", S.?("notice"), _))
 
     val commands = for {
       (kind, title, data) <- messages

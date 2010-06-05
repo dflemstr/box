@@ -1,5 +1,6 @@
 package org.openpandora.box.util
 
+import net.liftweb.common.Logger
 import net.liftweb.http.S
 import org.squeryl.PrimitiveTypeMode._
 import org.openpandora.box.model._
@@ -7,17 +8,21 @@ import org.squeryl.Query
 import org.squeryl.Queryable
 import org.squeryl.dsl.ast.LogicalBoolean
 import org.squeryl.dsl.ast.TypedExpressionNode
+import org.squeryl.dsl.OneToMany
 
-object ApplicationFilterRunner {
+object ApplicationFilterRunner extends Logger {
 
   private case class VersionRestriction(major: Option[Int], minor: Option[Int], release: Option[Int], build: Option[Int])
 
-  def runFilter(appMetaSource: Queryable[AppMeta], filter: String): Query[(Application, AppMeta, Package)] = {
+  def runFilter(filter: String): Query[(Application, Package,
+                                        OneToMany[org.openpandora.box.model.AppMeta],
+                                        OneToMany[org.openpandora.box.model.Category],
+                                        OneToMany[org.openpandora.box.model.Comment])] = {
     import ApplicationFilterParser._
-    def all =
-      from(Database.applications, appMetaSource, Database.packages)((app, meta, pkg) =>
-        where(app.packageId === pkg.id and meta.applicationId === app.id) select(app, meta, pkg) orderBy(pkg.uploadTime))
-    if(filter.isEmpty)
+    def all = from(Database.applications, Database.packages)((app, pkg) =>
+      where(app.packageId === pkg.id) select(app, pkg, app.metas, app.categories, app.comments) orderBy(pkg.uploadTime))
+    
+    val query = if(filter.isEmpty)
       all
     else parseAll(exprs, filter) match {
       case Success(expressions, _) =>
@@ -38,33 +43,34 @@ object ApplicationFilterRunner {
           expr match {
             case FilterVersion(major, minor, release, build) =>
               if(prev.major.isDefined)
-                S.warning(<p>Multiple "major" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "major")}</p>)
               if(prev.minor.isDefined)
-                S.warning(<p>Multiple "minor" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "minor")}</p>)
               if(prev.release.isDefined)
-                S.warning(<p>Multiple "release" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "release")}</p>)
               if(prev.build.isDefined)
-                S.warning(<p>Multiple "build" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "build")}</p>)
               VersionRestriction(Some(major), Some(minor), Some(release), Some(build))
             case FilterVersionMajor(major)     =>
               if(prev.major.isDefined)
-                S.warning(<p>Multiple "major" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "major")}</p>)
               prev.copy(major = Some(major))
             case FilterVersionMinor(minor)     =>
               if(prev.minor.isDefined)
-                S.warning(<p>Multiple "minor" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "minor")}</p>)
               prev.copy(minor = Some(minor))
             case FilterVersionRelease(release) =>
               if(prev.release.isDefined)
-                S.warning(<p>Multiple "release" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "release")}</p>)
               prev.copy(release = Some(release))
             case FilterVersionBuild(build)     =>
               if(prev.build.isDefined)
-                S.warning(<p>Multiple "build" version restrictions specified</p>)
+                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "build")}</p>)
               prev.copy(build = Some(build))
             case _ => prev
           }
         }
+
         val categoryAlternatives    = if(categoryRestrictions.isEmpty)
           Nil
         else
@@ -74,40 +80,45 @@ object ApplicationFilterRunner {
 
         @inline def likeness(what: => String)(to: String) = what like "%" + to + "%"
         @inline def maybeLikeness(what: => Option[String])(to: String) = what like "%" + to + "%"
+        @inline def maybeOmit[A](condition: Boolean, value: A) = if(condition) Seq() else Seq(value)
+
+        val inhibitAppMetas   = titleRestrictions.isEmpty && descriptionRestrictions.isEmpty && !ordering.isInstanceOf[OrderByTitle]
+        val inhibitRatings    = !ordering.isInstanceOf[OrderByRating]
+        val inhibitUsers      = uploaderRestrictions.isEmpty
+        val inhibitCategories = categoryAlternatives.isEmpty
 
         //This is the most epic query ever constructed
         from(Database.applications,
-             appMetaSource,
+             Database.appMetas  .inhibitWhen(inhibitAppMetas),
              Database.packages,
-             Database.ratings,
-             Database.users,
-             Database.categories.inhibitWhen(categoryAlternatives.isEmpty)) {
+             Database.ratings   .inhibitWhen(inhibitRatings),
+             Database.users     .inhibitWhen(inhibitUsers),
+             Database.categories.inhibitWhen(inhibitCategories)) {
           (app, meta, pkg, rating, user, category) =>
           where (
             {
-              Seq(app.id === meta.applicationId,
-                  app.id === rating.applicationId,
-                  app.id === category.get.applicationId,
-                  app.packageId === pkg.id,
-                  user.id === pkg.userId,
-                  category.get.value in categoryAlternatives) ++
-              (titleRestrictions map likeness(meta.title)) ++
-              (descriptionRestrictions map likeness(meta.description)) ++
+              (titleRestrictions map likeness(meta.get.title)) ++
+              (descriptionRestrictions map likeness(meta.get.description)) ++
               keywordRestrictions.map {restr =>
-                likeness(meta.title)(restr) or
-                likeness(meta.description)(restr)
+                likeness(meta.get.title)(restr) or
+                likeness(meta.get.description)(restr)
               } ++
-              (uploaderRestrictions map likeness(user.username)) ++
+              (uploaderRestrictions map likeness(user.get.username)) ++
               (authorRestrictions map maybeLikeness(app.authorName)) ++
               (versionRestriction.major map (app.versionMajor === _)) ++
               (versionRestriction.minor map (app.versionMinor === _)) ++
               (versionRestriction.release map (app.versionRelease === _)) ++
-              (versionRestriction.build map (app.versionBuild === _)) ++ Seq.empty
+              (versionRestriction.build map (app.versionBuild === _)) ++
+              maybeOmit(inhibitAppMetas, app.id === meta.get.applicationId) ++
+              maybeOmit(inhibitRatings, app.id === rating.get.applicationId) ++
+              maybeOmit(inhibitCategories, app.id === category.get.applicationId) ++
+              maybeOmit(inhibitUsers, user.get.id === pkg.userId) ++
+              Seq(app.packageId === pkg.id, category.get.value in categoryAlternatives)
             }.reduceLeft[LogicalBoolean](_ and _)
-          ).select(app, meta, pkg).orderBy {
+          ).select(app, pkg, app.metas, app.categories, app.comments).orderBy {
             val o: TypedExpressionNode[_] = (ordering match {
-                case _: OrderByTitle => meta.title
-                case _: OrderByRating => avg(rating.value)
+                case _: OrderByTitle => meta.get.title
+                case _: OrderByRating => avg(rating.get.value)
                 case _: OrderByTime => pkg.uploadTime
               })
             if(ordering.ascending)
@@ -117,8 +128,9 @@ object ApplicationFilterRunner {
           }
         }.distinct
       case ns @ NoSuccess(error, _) =>
-        S.warning(<p>Invalid filter:</p> ++ <code>{error}</code>)
+        S.warning(<p>{S.?("filters.invalid")}</p> ++ <code>{error}</code>)
         all
     }
+    query
   }
 }

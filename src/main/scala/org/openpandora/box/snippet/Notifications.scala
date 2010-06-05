@@ -17,10 +17,6 @@ class Notifications extends DispatchSnippet {
   def dispatch = {
     case "indicator" => Notifications.showIndicator
     case "script" => script
-    case "test" =>((x: NodeSeq) =>
-        SHtml.ajaxButton("Test notification",
-                         () => JE.Call("displayNotice", JE.Str("notice"), JE.Str("Test"), JE.Str("This is a test message"), JE.JsNull).cmd)
-      )
   }
   def script(template: NodeSeq) = {
     val cmd = LiftRules.noticesToJsCmd()

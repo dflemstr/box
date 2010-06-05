@@ -14,7 +14,7 @@ var displayNotice = function(kind, title, body, assocId) {
         title: title,
         text: body,
         image: '/images/' + kind + '-icon.png',
-        sticky: (kind == 'error') ? true : false,
+        sticky: (kind == 'error'),
         time: 8000,
         class_name: kind + '-notification ui-corner-all'
     });

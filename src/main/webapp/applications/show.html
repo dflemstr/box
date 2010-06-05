@@ -4,47 +4,50 @@
                 <div class="span-14">
                     <h3 class="application-title span-14 last"><entry:title/></h3>
                     <span class="span-3">
-                        <span class="quiet">Version</span> <entry:version/>
+                        <span class="quiet"><lift:loc locid="html.version"/></span> <entry:version/>
                     </span>
                     <span class="span-5">
-                        <span class="quiet">Uploaded</span> <entry:time/>
+                        <span class="quiet"><lift:loc locid="html.uploaded"/></span> <entry:time/>
                     </span>
                     <span class="span-6 last"><entry:uploader>
-                        <span class="quiet">Uploader</span> <span class="small-image"><uploader:smallavatar/></span><uploader:name/>
+                        <span class="quiet"><lift:loc locid="html.uploader"/></span> <span class="small-image"><uploader:smallavatar/></span><uploader:name/>
                     </entry:uploader></span>
                     <span class="span-14 last"><entry:author>
-                        <span class="quiet">Author</span> <author:name/>
+                        <span class="quiet"><lift:loc locid="html.author"/></span> <author:name/>
                     </entry:author></span>
-                    <span class="span-14 last"><entry:categories>
-                        <span class="quiet">Categories</span> <categories:category><em><category:name/></em> </categories:category>
-                    </entry:categories></span>
                     <span class="span-3">
-                        <span class="quiet">Downloads</span> <entry:downloadCount/>
+                        <span class="quiet"><lift:loc locid="html.downloads"/></span> <entry:downloadCount/>
                     </span>
                     <span class="span-11 last">
-                        <span class="quiet">Size</span> <entry:fileSize/>
+                        <span class="quiet"><lift:loc locid="html.size"/></span> <entry:fileSize/>
                     </span>
+                    <span class="span-14 last"><entry:categories>
+                        <span class="quiet"><lift:loc locid="html.categories"/></span> <categories:category><em class="category"><category:name/></em> </categories:category>
+                    </entry:categories></span>
+                    <span class="span-14 last"><entry:languages>
+                        <span class="quiet"><lift:loc locid="html.translations"/></span> <languages:language><em class="language"><language:name/></em> </languages:language>
+                    </entry:languages></span>
                     <span class="span-14 last">
                         <entry:description/>
                     </span>
                 </div>
                 <div class="span-3 last">
                     <div class="span-3 last"><entry:rating/><span class="rating-count"><entry:ratingCount/></span></div>
-                    <div class="span-3 last button"><entry:download>Download</entry:download></div>
+                    <div class="span-3 last button"><entry:download><lift:loc locid="html.download"/></entry:download></div>
                 </div>
                 <hr class="space"/>
-                <entry:comments><h2>Comments</h2>
+                <entry:comments><h2><lift:loc locid="html.comments"/></h2>
                 <div class="span-19 last">
                     <comments:comment>
                     <div class="box">
                         <div class="pull-3"><comment:date/></div>
-                        <comment:author><div class="span-18 last"><span class="small-image"><author:smallavatar/></span><author:name/> wrote:</div></comment:author>
+                        <comment:author><div class="span-18 last"><span class="small-image"><author:smallavatar/></span><author:name/> <lift:loc locid="html.wrote"/>:</div></comment:author>
                         <p class="bottom"><comment:body/></p>
                     </div></comments:comment>
                 </div></entry:comments>
-                <entry:commentForm><div id="respond">
+                <entry:commentForm><h2><lift:loc locid="html.addacomment"/></h2><div id="respond">
                     <p>
-                        <label for="body-field" class="hide">Comment</label>
+                        <label for="body-field" class="hide"><lift:loc locid="html.comment"/></label>
                         <commentForm:body/>
                         <commentForm:submit/>
                     </p>

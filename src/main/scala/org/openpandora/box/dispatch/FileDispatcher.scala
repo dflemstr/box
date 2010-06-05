@@ -1,8 +1,10 @@
 package org.openpandora.box.dispatch
 
 import java.io._
+import java.util.Date
 import net.liftweb.common._
 import net.liftweb.http._
+import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
 import org.openpandora.box.util.filesystem._
 import org.squeryl.PrimitiveTypeMode._
@@ -11,8 +13,12 @@ object FileDispatcher {
   private def serve(file: File, mime: String, name: Option[String] = None) = () => {
     val stream = new BufferedInputStream(new FileInputStream(file))
     val maybeDisposition = name map (x => "Content-Disposition" -> ("attachment; filename=" + x))
-    Full(new StreamingResponse(stream, stream.close, file.length, List("Content-Type" -> mime,
-                                                                       "Cache-Control" -> ("max-age=" + Int.MaxValue)) ++ maybeDisposition, Nil, 200))
+    val timeInAYear = 365.days.later.getTime
+    Full(new StreamingResponse(stream, stream.close, file.length,
+                               List("Content-Type" -> mime,
+                                    "Cache-Control" -> ("max-age=" + 365*24*60*60),
+                                    "Expires" -> toInternetDate(timeInAYear))
+                               ++ maybeDisposition, Nil, 200))
   }
 
   def servePackage(id: String) = {
@@ -29,7 +35,7 @@ object FileDispatcher {
         val file = Filesystem.getFile(id, PNDFile)
         serve(file, PNDFile.mimeType, Some(name))
       case _ =>
-        () => Full(NotFoundResponse("The specified package has been deleted by the user."))
+        () => Full(NotFoundResponse(S.?("package.notfound")))
     }
   }
 
@@ -43,6 +49,6 @@ object FileDispatcher {
       val file = Filesystem.getFile(id, PXMLFile)
       serve(file, PXMLFile.mimeType)
     case Req("file" :: t :: id :: Nil, ext, slash) =>
-      () => Full(NotFoundResponse("Unknown file with id " + id + " and extension " + ext + " in data storage named " + t))
+      () => Full(NotFoundResponse(S.?("file.notfound").replace("%id%", id).replace("%extension%", ext).replace("%datastorage%", t)))
   }
 }

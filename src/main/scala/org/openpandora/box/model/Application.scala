@@ -28,11 +28,6 @@ case class Application(packageId:       Long, //id
 
 object Application {
   def apply(`package`: Package, pxmlId: String, versionMajor: Int, versionMinor: Int, versionRelease: Int, versionBuild: Int, authorName: Option[String]): Application = {
-    authorName.foreach(an => require(an.length <= 64, "Author name too long"))
-    require(versionMajor >= 0,   "Version major value is negative")
-    require(versionMinor >= 0,   "Version minor value is negative")
-    require(versionRelease >= 0, "Version release value is negative")
-    require(versionBuild >= 0,   "Version build value is negative")
     Application(`package`.id, pxmlId: String, versionMajor, versionMinor, versionRelease, versionBuild, authorName)
   }
 }

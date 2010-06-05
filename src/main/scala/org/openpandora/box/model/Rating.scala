@@ -11,7 +11,6 @@ case class Rating(applicationId: Long, //id
 
 object Rating {
   def apply(application: Application, user: User, value: Int): Rating = {
-    require(value > 0 && value <= 10, "Value out of range")
     Rating(application.id, user.id, value)
   }
 }

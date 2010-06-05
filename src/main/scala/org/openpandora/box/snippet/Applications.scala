@@ -16,9 +16,11 @@ import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
 import org.openpandora.box.util.ApplicationFilterRunner
 import org.openpandora.box.util.DotDesktopCategories
+import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.filesystem._
 import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.dsl.OneToMany
 import scala.math._
 import scala.xml.NodeSeq
 import scala.xml.Text
@@ -36,28 +38,22 @@ class Applications extends DispatchSnippet with Logger {
   private object upload extends RequestVar[Option[FileParamHolder]](None)
   private object createCommentFunction extends RequestVar[Option[() => NodeSeq]](None)
 
-  private lazy val localizedAppMetas = {
-    val locale = S.locale.toString
-    val locales = locale :: (if(locale contains "_") List(locale.split("_").head) else Nil)
-    Database.appMetas.where(metaEng => metaEng.languageName === "en_US") //TODO: wait for case support
-  }
-
   def create(create: NodeSeq): NodeSeq = {
     import PackageManager._
     def doCreate() = {
       def success() =
-        S.notice(<p>Your package was successfully uploaded!</p> ++
-                 <p>The server will now process the uploaded file. We will notify you when it's done, stay tuned.</p>)
+        S.notice(<p>{S.?("package.uploaded")}</p> ++
+                 <p>{S.?("package.processing")}</p>)
 
       upload.is match {
         case Some(h) =>
           PackageManager! MakePackageFromStream(h.fileName, h.fileStream, User.currentUser getOrElse {
-              S.error(<p>User was logged out while the package was being uploaded.</p>)
+              S.error(<p>{S.?("package.abortlogout")}</p>)
               S.redirectTo(S.referer openOr "/")
             })
           success()
         case None =>
-          S.error(<p>No file was uploaded!</p>)
+          S.error(<p>{S.?("package.void")}</p>)
       }
     }
 
@@ -66,12 +62,17 @@ class Applications extends DispatchSnippet with Logger {
 
     Helpers.bind("create", create,
                  "upload" -> u % meta,
-                 "submit" -> SHtml.submit("Create", doCreate))
+                 "submit" -> SHtml.submit(S.?("Create"), doCreate))
   }
 
-  private def makeAppEntry(app: Application, info: AppMeta, pkg: Package, bindName: String, entry: NodeSeq) = {
-    lazy val categories = app.categories
-    lazy val comments = app.comments
+  private def makeAppEntry(app: Application, pkg: Package, infos: OneToMany[AppMeta],
+                           categories: OneToMany[Category], comments: OneToMany[Comment],
+                           bindName: String, entry: NodeSeq) = {
+    val locale = S.locale.toString.toLowerCase
+    lazy val concreteInfos = infos.toSeq
+    lazy val info = concreteInfos.find(_.languageName.toLowerCase == locale) orElse
+                    concreteInfos.find(_.languageName.toLowerCase == locale.split("_")(0)) getOrElse
+                    concreteInfos.find(_.languageName.toLowerCase == "en_us").get
     val applicationLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/applications/" + app.id + "/show"}>{n}</a>)
     val downloadLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
     val image = if(pkg.hasImage)
@@ -89,29 +90,28 @@ class Applications extends DispatchSnippet with Logger {
            "body"   -> c.body)
     } toSeq
 
-    def makeComments(comments: NodeSeq): NodeSeq = if(comments.isEmpty)
+    def makeComments(template: NodeSeq): NodeSeq = if(comments.isEmpty)
       NodeSeq.Empty
     else
-      bind("comments", comments,
+      bind("comments", template,
            "comment" -> makeComment _)
-
 
     def makeCommentForm(commentForm: NodeSeq): NodeSeq = createCommentFunction.is.map(_()) getOrElse (User.currentUser match {
         case Some(user) =>
           var text = ""
           def doCreateComment(): Unit = text match {
             case "" =>
-              S.error("body-field", <p>Comment field empty</p>)
+              S.error("body-field", <p>{S.?("comment.empty")}</p>)
             case something if something.length > 1024 =>
-              S.error("body-field", <p>Comment too long (max accepted length: 1024 characters)</p>)
+              S.error("body-field", <p>{S.?("comment.huge").replace("%length%", "1024")}</p>)
             case something =>
               Database.comments.insert(Comment(user, app, new Date, something))
-              S.notice(<p>Comment created</p>)
+              S.notice(<p>{S.?("comment.created")}</p>)
           }
 
           def createFunc() = bind("commentForm", commentForm,
                                   "body" -> SHtml.textarea(text, x => text = x, "id" -> "body-field", "cols" -> "64", "rows" -> "8"),
-                                  "submit" -> SHtml.submit("Create comment", doCreateComment))
+                                  "submit" -> SHtml.submit(S.?("comment.create"), doCreateComment))
           createFunc()
         case None => NodeSeq.Empty
       })
@@ -132,7 +132,7 @@ class Applications extends DispatchSnippet with Logger {
         NodeSeq.Empty
       else
         langs flatMap { lang =>
-          bind("language", language, "name" -> lang.getDisplayLanguage(S.locale))
+          bind("language", language, "name" -> lang.getDisplayName(S.locale))
         } toSeq
     }
 
@@ -150,15 +150,15 @@ class Applications extends DispatchSnippet with Logger {
             val ratingVal = r.toInt
             require(ratingVal > 0 && ratingVal < 11)
             Database.ratings.insert(Rating(app, user, ratingVal))
-            S.notice(<p>Rating submitted.</p>)
+            S.notice(<p>{S.?("rating.created")}</p>)
           } catch {
             case _ =>
-              S.error(<p>Invalid rating.</p>)
+              S.error(<p>{S.?("rating.invalid")}</p>)
           }
         case Some(user) =>
-          S.error(<p>You have already rated this application.</p>)
+          S.error(<p>{S.?("rating.alreadyrated")}</p>)
         case None =>
-          S.error(<p>Must be logged in to rate.</p>)
+          S.error(<p>{S.?("rating.mustlogin")}</p>)
       }
 
       val strRange = (1 to 10) map (_.toString)
@@ -200,10 +200,10 @@ class Applications extends DispatchSnippet with Logger {
 
     val stepThreshold = 0.9
     def makeFileSize(size: Long) = size match {
-      case b if size < stepThreshold * 1024 => b + " B"
-      case kb if size < stepThreshold * 1024*1024 => round(10.0 * kb / 1024.0) / 10.0 + " kB"
-      case mb if size < stepThreshold * 1024*1024*1024 => round(mb * 10.0 / (1024.0 * 1024.0)) / 10.0 + " MB"
-      case gb => round(gb * 10.0 / (1024.0 * 1024.0 * 1024.0)) / 10.0 + " GB"
+      case b if size < stepThreshold * 1024 => S.?("bytes").replace("%n%", b.toString)
+      case kb if size < stepThreshold * 1024*1024 => S.?("kilobytes").replace("%n%", (round(10.0 * kb / 1024.0) / 10.0).toString)
+      case mb if size < stepThreshold * 1024*1024*1024 => S.?("megabytes").replace("%n%", (round(mb * 10.0 / (1024.0 * 1024.0)) / 10.0).toString)
+      case gb => S.?("gigabytes").replace("%n%", (round(gb * 10.0 / (1024.0 * 1024.0 * 1024.0)) / 10.0).toString)
     }
 
     def makeLazyNode(node: => NodeSeq) = (_: NodeSeq) => node
@@ -234,9 +234,9 @@ class Applications extends DispatchSnippet with Logger {
 
   def list(list: NodeSeq): NodeSeq = {
     val filter = (S.attr("filter") or S.param("filter") openOr "").trim
-    val apps = ApplicationFilterRunner.runFilter(localizedAppMetas, filter)
+    val apps = ApplicationFilterRunner.runFilter(filter)
 
-    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, x._3, "entry", entry))
+    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, x._3, x._4, x._5, "entry", entry))
 
     bind("list", list,
          "entry" -> makeEntry _)
@@ -244,13 +244,13 @@ class Applications extends DispatchSnippet with Logger {
 
   def entry(entry: NodeSeq): NodeSeq = {
     val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap {x =>
-      from(Database.applications, Database.appMetas, Database.packages)((app, meta, pkg) =>
-        where(app.id === x and meta.applicationId === x and app.packageId === pkg.id) select(app, meta, pkg)).headOption
+      from(Database.applications, Database.packages)((app, pkg) =>
+        where(app.id === x and app.packageId === pkg.id) select(app, pkg, app.metas, app.categories, app.comments)).headOption
     } getOrElse {
       S.error(<p>Invalid application id</p>)
       S.redirectTo(S.referer openOr "/")
     }
-    makeAppEntry(app._1, app._2, app._3, "entry", entry)
+    makeAppEntry(app._1, app._2, app._3, app._4, app._5, "entry", entry)
   }
 
   def filter(filter: NodeSeq) = S.param("filter") map Text openOr NodeSeq.Empty

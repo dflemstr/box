@@ -83,7 +83,7 @@ object PackageManager extends Actor
         XML.save(pxmlFile.getAbsolutePath, xml, "UTF-8", true)
 
         //Now load the metadata in the PXML
-        val pxml = try new PXML(xml) catch {
+        val pxml = try new PXML(xml, user.language) catch {
           case err: RequirementException => throw PxmlSyntaxError(Option(err.getMessage) getOrElse "")
         }
 
@@ -156,7 +156,7 @@ object PackageManager extends Actor
         } catch { case err => sendMessage(PxmlSyntaxWarning(err.getMessage))}
 
         PackageManager.this.info("A package was successfully added, id=" + pkg.id)
-        sendMessage(PackageAdded())
+        sendMessage(PackageAdded)
       } catch {
         case err: ErrorMessage =>
           deleteAll()
