@@ -32,6 +32,7 @@ import org.squeryl.PrimitiveTypeMode._
 import org.xml.sax.SAXException
 import scala.actors.Actor
 import scala.actors.Actor._
+import scala.math.{min => minNumber}
 import scala.xml.PrettyPrinter
 import scala.xml.XML
 
@@ -88,7 +89,7 @@ object PackageManager extends Actor
 
         //If it loaded successfully, we can add it to the database
         val namePart = filename.split('.').toSeq.dropRight(1).mkString
-        val fileName = (namePart.substring(0, Math.min(namePart.length, 60)) + ".pnd")
+        val fileName = (namePart.substring(0, minNumber(namePart.length, 60)) + ".pnd")
 
         val pkg = Database.packages.insert(
           Package(
@@ -103,7 +104,7 @@ object PackageManager extends Actor
         for(application <- pxml.applications) try {
           val an = application.author.map {a =>
             val name = a.name
-            name.substring(0, Math.min(60, name.length))
+            name.substring(0, minNumber(60, name.length))
           }
           val app = Database.applications.insert(
             Application(
@@ -168,7 +169,7 @@ object PackageManager extends Actor
     }
 
     private def resizeImage(image: BufferedImage, maxWidth: Int, maxHeight: Int) = {
-      val factor = Math.min(maxWidth / image.getWidth.toFloat, maxHeight / image.getHeight.toFloat)
+      val factor = minNumber(maxWidth / image.getWidth.toFloat, maxHeight / image.getHeight.toFloat)
       val width = (image.getWidth * factor).toInt
       val height = (image.getHeight * factor).toInt
       val result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)

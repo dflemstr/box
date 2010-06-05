@@ -29,8 +29,6 @@ object Database extends Schema {
   val usersToRatings             = oneToManyRelation(users,        ratings)         .via((u, r)  => u.id === r .userId)
 
   def buildLoanWrapper(): LoanWrapper = new LoanWrapper {
-    def apply[A](f: => A): A = transaction {
-      f
-    }
+    def apply[A](f: => A): A = transaction(f)
   }
 }

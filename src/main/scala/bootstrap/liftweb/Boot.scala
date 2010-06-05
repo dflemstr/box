@@ -78,7 +78,7 @@ class Boot extends Logger {
         )
     }
 
-    try transaction{Database.create; info("Database created, url=" + url)} catch {case _ =>}
+    try transaction{Database.create; info("Database created, url=" + url)} catch {case _ => info("Database exists already")}
     
     S.addAround(Database.buildLoanWrapper())
   }

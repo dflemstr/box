@@ -7,7 +7,7 @@ import org.squeryl.annotations._
 
 case class AppMeta(applicationId:    Long,   //id
                    @Column(length = 6)
-                   languageName:         String, //lang
+                   languageName:     String, //lang
                    @Column(length = 64)
                    title:            String,
                    @Column(length = 2048)
