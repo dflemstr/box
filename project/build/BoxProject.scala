@@ -9,13 +9,13 @@ class BoxProject(info: ProjectInfo) extends DefaultWebProject(info) {
 
   val liftVersion = "2.0-scala280-SNAPSHOT"
 
-  override def libraryDependencies = Set(
-    "net.liftweb" % "lift-webkit" % liftVersion % "compile->default",
-    "org.squeryl" % "squeryl_2.8.0.Beta1" % "0.9.4beta3" % "compile->default",
-    "org.mortbay.jetty" % "jetty" % "6.1.22" % "test->default",
-    "junit" % "junit" % "4.5" % "test->default",
-    "org.scala-tools.testing" % "specs_2.8.0.Beta1" % "1.6.2" % "test->default",
-    "com.h2database" % "h2" % "1.2.121",
-    "mysql" % "mysql-connector-java" % "5.0.5"
+  override def libraryDependencies = Set (
+    "net.liftweb" % "lift-webkit" % liftVersion % "compile",
+    "org.squeryl" %% "squeryl" % "0.9.4beta4" % "compile",
+    "org.mortbay.jetty" % "jetty" % "6.1.22" % "test",
+    "junit" % "junit" % "4.5" % "test",
+    "org.scala-tools.testing" % "specs_2.8.0.Beta1" % "1.6.2" % "test",
+    "com.h2database" % "h2" % "1.2.121" % "compile",
+    "mysql" % "mysql-connector-java" % "5.0.5" % "compile"
   ) ++ super.libraryDependencies
 }

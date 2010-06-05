@@ -47,15 +47,15 @@ class Applications extends DispatchSnippet with Logger {
       case Success(expressions, _) =>
 
         //Split the filter expressions into separate sequences of strings
-        val titleRestrictions       = expressions partialMap {case FilterTitle(title)       => title}
-        val descriptionRestrictions = expressions partialMap {case FilterDescription(descr) => descr}
-        val keywordRestrictions     = expressions partialMap {case FilterKeyword(keyword)   => keyword}
-        val uploaderRestrictions    = expressions partialMap {case FilterUploader(uploader) => uploader}
-        val authorRestrictions      = expressions partialMap {case FilterAuthor(uploader)   => uploader}
-        val categoryRestrictions    = expressions partialMap {case FilterCategory(category) => category}
+        val titleRestrictions       = expressions collect {case FilterTitle(title)       => title}
+        val descriptionRestrictions = expressions collect {case FilterDescription(descr) => descr}
+        val keywordRestrictions     = expressions collect {case FilterKeyword(keyword)   => keyword}
+        val uploaderRestrictions    = expressions collect {case FilterUploader(uploader) => uploader}
+        val authorRestrictions      = expressions collect {case FilterAuthor(uploader)   => uploader}
+        val categoryRestrictions    = expressions collect {case FilterCategory(category) => category}
 
         //Determine ordering: use the first expression found, or else sort by title
-        val ordering                = expressions.partialMap {case expr: OrderingExpression => expr}.headOption.getOrElse(OrderByTitle(false))
+        val ordering                = expressions.collect {case expr: OrderingExpression => expr}.headOption.getOrElse(OrderByTitle(false))
 
         //Accumulate all version filter expressions
         val versionRestriction      = expressions.foldLeft(VersionRestriction(None, None, None, None)) {(prev, expr) =>
