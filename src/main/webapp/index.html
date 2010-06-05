@@ -1,26 +1,26 @@
 <lift:surround with="default" at="main">
-                <p>
-                    <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
-                    <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
-                </p><lift:Applications.list filter="orderby:timedesc">
-                <h2><lift:loc locid="html.recentuploads"/></h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th><lift:loc locid="html.title"/></th>
-                            <th><lift:loc locid="html.version"/></th>
-                            <th><lift:loc locid="html.uploaded"/></th>
-                            <th>&nbsp;</th>
-                        </tr>
-                    </thead>
-                    <tbody><list:entry>
-                        <tr>
-                            <td><entry:title/></td>
-                            <td><entry:version/></td>
-                            <td><entry:time/></td>
-                            <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
-                        </tr></list:entry>
-                    </tbody>
-                </table></lift:Applications.list>
+            <p>
+                <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
+                <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
+            </p><lift:Applications.list filter="orderby:timedesc">
+            <h2><lift:loc locid="html.recentuploads"/></h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th><lift:loc locid="html.title"/></th>
+                        <th><lift:loc locid="html.version"/></th>
+                        <th><lift:loc locid="html.uploaded"/></th>
+                        <th>&nbsp;</th>
+                    </tr>
+                </thead>
+                <tbody><list:entry>
+                    <tr>
+                        <td><entry:title/></td>
+                        <td><entry:version/></td>
+                        <td><entry:time/></td>
+                        <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
+                    </tr></list:entry>
+                </tbody>
+            </table></lift:Applications.list>
 </lift:surround>
 
