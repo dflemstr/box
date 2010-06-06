@@ -82,8 +82,8 @@ object ProcessNotifier extends Actor
     Actor.react {
       case SendResolvedMessage(message, user, filename) =>
         import Poster._
-        val transformedTitle = loc(message.titleLocalization, user.language).replace("%filename%", filename)
-        val transformedBody = message.replacements.foldLeft(loc(message.bodyLocalization, user.language))((res, n) => res.replace("%" + n._1 + "%", n._2))
+        val transformedTitle = loc(message.titleLocalization, user.language).replace("%filename%", Text(filename).text)
+        val transformedBody = message.replacements.foldLeft(loc(message.bodyLocalization, user.language))((res, n) => res.replace("%" + n._1 + "%", Text(n._2).text))
         val kind = message match {
           case err: ErrorMessage => "error"
           case warn: WarningMessage => "warning"
