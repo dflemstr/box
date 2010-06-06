@@ -78,17 +78,20 @@ class LocalizedString(xml: NodeSeq, locale: Locale) extends DOM(xml, locale) {
 }
 
 class Version(xml: NodeSeq, locale: Locale) extends DOM(xml, locale) {
-  val major = (xml\"@major").text.toInt
-  require(major > -1,   ?("validation.version.invalid").replace("%versionfield%", "major"))
+  private def toInt(label: String) = {
+    val text = (xml \ ("@" + label)).text
+    require(text matches """\d{1,9}""", ?("validation.version.noint").replace("%versionfield%", label))
+    val int = text.toInt
+    require(int > -1,   ?("validation.version.invalid").replace("%versionfield%", label))
+    int
+  }
+  val major = toInt("major")
 
-  val minor = (xml\"@minor").text.toInt
-  require(minor > -1,   ?("validation.version.invalid").replace("%versionfield%", "minor"))
+  val minor = toInt("minor")
   
-  val release = (xml\"@release").text.toInt
-  require(release > -1, ?("validation.version.invalid").replace("%versionfield%", "release"))
+  val release = toInt("release")
 
-  val build = (xml\"@build").text.toInt
-  require(build > -1,   ?("validation.version.invalid").replace("%versionfield%", "build"))
+  val build = toInt("build")
 }
 
 class Author(xml: NodeSeq, locale: Locale) extends DOM(xml, locale) {
