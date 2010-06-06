@@ -1,7 +1,7 @@
 <lift:surround with="default" at="main">
                 <p>
                     <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
-                    Please <lift:Menu.item name="UserLogin"/> to gain access to comments, ratings and more!</lift:Users.isLoggedOut>
+                    <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
                 </p><lift:Applications.list filter="orderby:timedesc">
                 <h2><lift:loc locid="html.recentuploads"/></h2>
                 <table>

@@ -89,7 +89,7 @@ object ProcessNotifier extends Actor
           case warn: WarningMessage => "warning"
           case _ => "notice"
         }
-        Poster! SendMessage(user.id, kind, Text(transformedTitle), Unparsed(transformedBody))
+        Poster! SendMessage(user.id, kind, LiftRules.localizeStringToXml(transformedTitle), LiftRules.localizeStringToXml(transformedBody))
         ProcessNotifier.this.info("Sent process message, user=" + user.id + " filename=" + filename)
       case x => warn("Unhandled message in ProcessNotifier: " + x)
     }

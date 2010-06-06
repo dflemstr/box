@@ -74,7 +74,7 @@ class Users extends DispatchSnippet with Logger {
          "username" -> SHtml.text(username, username.set, "id" -> "username-field"),
          //We use "" because the password should always be cleared:
          "password" -> SHtml.password("", x => password = x, "id" -> "password-field"),
-         "submit" -> SHtml.submit("Log in", doLogin))
+         "submit" -> SHtml.submit(S.?("user.login"), doLogin))
   }
 
   def logout(foo: NodeSeq): NodeSeq = {

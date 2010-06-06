@@ -1,9 +1,6 @@
 <lift:surround with="default" at="main">
     <lift:Users.isLoggedOut>
-                <p>
-                    You are not logged in. Please <lift:Menu.item name="UserLogin">log in</lift:Menu.item> or
-                    <lift:Menu.item name="UserCreate">register</lift:Menu.item> to view your user pages.
-                </p>
+                <p><lift:loc locid="html.loginview"/></p>
     </lift:Users.isLoggedOut>
     <lift:Users.isLoggedIn>
         <head>
