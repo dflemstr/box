@@ -73,10 +73,10 @@ class Applications extends DispatchSnippet with Logger {
     lazy val info = concreteInfos.find(_.languageName.toLowerCase == locale) orElse
                     concreteInfos.find(_.languageName.toLowerCase == locale.split("_")(0)) getOrElse
                     concreteInfos.find(_.languageName.toLowerCase == "en_us").get
-    val applicationLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/applications/" + app.id + "/show"}>{n}</a>)
-    val downloadLink = (n: NodeSeq) => (<a href={S.hostAndPath + "/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
+    val applicationLink = (n: NodeSeq) => (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
+    val downloadLink = (n: NodeSeq) => (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
     val image = if(pkg.hasImage)
-      (<img src={S.hostAndPath + "/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
+      (<img src={"/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
     else
       NodeSeq.Empty
 
@@ -119,7 +119,7 @@ class Applications extends DispatchSnippet with Logger {
     def makeCategory(category: NodeSeq): NodeSeq = categories.flatMap {cat =>
       val name = DotDesktopCategories(cat.value).toString
       bind("category", category,
-           "name" -> <a href={S.hostAndPath + "/applications/list?filter=category:" + name}>{name}</a>)
+           "name" -> <a href={"/applications/list?filter=category:" + name}>{name}</a>)
     } toSeq
 
     def makeCategories(categories: NodeSeq): NodeSeq =
@@ -192,7 +192,7 @@ class Applications extends DispatchSnippet with Logger {
         <img src={"http://www.gravatar.com/avatar/" + gravatar + "?s=" + size + "&d=identicon"} alt={name} class="avatar"/>
 
       bind(binding, template,
-           "name" -> <a href={S.hostAndPath + "/applications/list?filter=uploader:" + name}>{name}</a>,
+           "name" -> <a href={"/applications/list?filter=uploader:" + name}>{name}</a>,
            "largeavatar" -> gravatarImage(70),
            "avatar"      -> gravatarImage(30),
            "smallavatar" -> gravatarImage(16))
@@ -215,7 +215,7 @@ class Applications extends DispatchSnippet with Logger {
          "description" -> makeLazyString(info.description),
          "version" -> (makeLazyNode {
           val ver = Seq(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild).mkString(".")
-          (<a href={S.hostAndPath + "/applications/list?filter=version:" + ver}>{ver}</a>)
+          (<a href={"/applications/list?filter=version:" + ver}>{ver}</a>)
         }),
          "uploader" -> makePerson(pkg.user.single.id, "uploader") _,
          "time" -> makeLazyString(df.format(pkg.uploadTime)),
