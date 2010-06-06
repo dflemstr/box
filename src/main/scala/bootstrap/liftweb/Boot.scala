@@ -150,7 +150,7 @@ class Boot extends Logger {
     LiftRules.handleMimeFile = OnDiskFileParamHolder(_, _, _, _)
 
     LiftRules.localizeStringToXml = {
-      case x if x.startsWith("%%") => scala.xml.XML.loadString("<xml:group>" + x.drop(2) + "</xml:group>")
+      case x if x.startsWith("%%") => scala.xml.XML.loadString("<xml:group>" + x.drop(2) + "</xml:group>").child
       case y => scala.xml.Text(y)
     }
 
