@@ -124,7 +124,7 @@ class Boot extends Logger {
                                Menu(Loc("AddApplications", List("applications", "add"), S.?("applications.add"), isLoggedIn)),
                                Menu(Loc("ConstructAppFilter", List("applications", "filter"), S.?("applications.filter"))))
 
-    val entries = Menu(Loc("Home", List("index"), S.?("index"))) :: applicationMenu :: userMenu :: Nil
+    val entries = Menu(Loc("Home", List("index"), S.?("index"), Hidden)) :: applicationMenu :: userMenu :: Nil
     LiftRules.setSiteMap(SiteMap(entries: _*))
   }
 

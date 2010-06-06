@@ -44,6 +44,7 @@ object PackageManager extends Actor
     react {
       case MakePackageFromStream(filename, stream, user) =>
         new PackageAdder(filename, stream, user).start()
+      case x => info("PackageManager received an unknown message, message=" + x)
     }
   }
 
@@ -234,10 +235,7 @@ object PackageManager extends Actor
         //The whole file fits in the window, act accordingly
         channel.position(0)
         channel.read(buffer)
-        val tmp = indexOf(buffer, 0, channel.size.toInt, pxmlPattern, pxmlFailure)
-        if(tmp < 0)
-          throw ProcessNotifier.PxmlNotFoundError
-        tmp
+        indexOf(buffer, 0, channel.size.toInt, pxmlPattern, pxmlFailure)
       } else {
         var result: Long = -1
         while(result < 0 && i < MaxChunks) {
