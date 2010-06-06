@@ -1,6 +1,6 @@
 import sbt._
 
-class BoxProject(info: ProjectInfo) extends DefaultWebProject(info) {
+class BoxProject(info: ProjectInfo) extends DefaultWebProject(info) with hoffrocket.YuiCompressorPlugin {
    val scalatools_snapshot = "Scala Tools Snapshots" at
   "http://scala-tools.org/repo-snapshots/"
 

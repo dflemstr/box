@@ -3,6 +3,6 @@
 *~
 pom.xml
 target
-lib_managed
+*_managed
 project/boot/
 
