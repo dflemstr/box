@@ -149,6 +149,10 @@ class Boot extends Logger {
 
     LiftRules.handleMimeFile = OnDiskFileParamHolder(_, _, _, _)
 
+    LiftRules.maxMimeFileSize = Props.get("filesystem.maxMimeFileSize") map (_.toLong) openOr 104857600l
+
+    LiftRules.maxMimeSize = LiftRules.maxMimeFileSize + 1024*1024
+
     LiftRules.localizeStringToXml = {
       case x if x.startsWith("%%") => scala.xml.XML.loadString("<xml:group>" + x.drop(2) + "</xml:group>").child
       case y => scala.xml.Text(y)

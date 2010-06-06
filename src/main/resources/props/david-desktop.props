@@ -11,6 +11,9 @@
 ## a temporary directory.
 # filesystem.dir=/var/box/
 
+## Max uploaded file size, default 100MiB
+# filesystem.maxMimeFileSize=104857600
+
 ##
 ## Database setup
 ##
