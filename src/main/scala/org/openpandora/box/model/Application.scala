@@ -3,16 +3,17 @@ package org.openpandora.box.model
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.dsl.OneToMany
 import org.squeryl.annotations._
+import scala.annotation.target.field
 
 
 case class Application(packageId:       Long, //id
-                       @Column(length = 256)
+                       @(Column @field)(length = 256)
                        pxmlId:          String,
                        versionMajor:    Int,
                        versionMinor:    Int,
                        versionRelease:  Int,
                        versionBuild:    Int,
-                       @Column(length = 64)
+                       @(Column @field)(length = 64)
                        authorName:      Option[String]) extends LongKeyedEntity {
   lazy val `package`:  ManyToOne[Package]  = Database.packagesToApplications.right(this)
 

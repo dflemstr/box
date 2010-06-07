@@ -4,14 +4,15 @@ import org.squeryl.dsl.ManyToOne
 import java.util.Locale
 import org.openpandora.box.util.Languages
 import org.squeryl.annotations._
+import scala.annotation.target.field
 
 
 case class AppMeta(applicationId:    Long,   //id
-                   @Column(length = 6)
+                   @(Column @field)(length = 6)
                    languageName:     String, //lang
-                   @Column(length = 64)
+                   @(Column @field)(length = 64)
                    title:            String,
-                   @Column(length = 2048)
+                   @(Column @field)(length = 2048)
                    description:      String) extends LongKeyedEntity {
   lazy val application: ManyToOne[Application] = Database.applicationsToAppMetas.right(this)
   def language = Languages.locales.find(_.toString.toLowerCase == languageName) getOrElse Locale.getDefault

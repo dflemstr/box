@@ -5,11 +5,12 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.dsl.OneToMany
 import org.squeryl.annotations._
+import scala.annotation.target.field
 
 case class Package(userId:     Long,   //id
-                   @Column(length = 16) val
+                   @(Column @field)(length = 16) val
                    fileId:     String, //unique
-                   @Column(length = 64) val
+                   @(Column @field)(length = 64) val
                    fileName:   String,
                    uploadTime: Long,
                    hasImage:   Boolean) extends LongKeyedEntity {
