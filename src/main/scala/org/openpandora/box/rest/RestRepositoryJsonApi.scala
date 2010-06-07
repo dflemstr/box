@@ -92,7 +92,7 @@ object RepositoryUpdater extends Actor {
             "uri" -> uri(host),
             "localizations" -> localizations,
             "categories" -> categories,
-            "image" -> image(host)
+            "icon" -> image(host)
           )
       }
 
