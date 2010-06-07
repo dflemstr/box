@@ -7,12 +7,14 @@ import net.liftweb.http.LiftRules
 import net.liftweb.util.Helpers
 import net.liftweb.util.NamedPF
 import org.openpandora.box.util.Localization._
+import org.openpandora.box.util.Languages
 import scala.xml.NodeSeq
 
 case class RequirementException(msg: String) extends Exception(msg)
 
 class DOM(val raw: NodeSeq, val locale: Locale) extends Logger {
   def require(body: Boolean, message: String) = if(!body) throw new RequirementException(message)
+  def error(message: String) = throw new RequirementException(message)
 
   protected def ?(key: String): String = loc(key, locale)
 }
@@ -58,7 +60,9 @@ class Application(xml: NodeSeq, locale: Locale) extends DOM(xml, locale) {
 }
 
 class LocalizedString(xml: NodeSeq, locale: Locale) extends DOM(xml, locale) {
-  val lang = new Locale((xml\"@lang").text.toLowerCase)
+  private val langName = (xml\"@lang").text
+  private val lowLang = langName.toLowerCase
+  val lang = Languages.locales.find(_.toString.toLowerCase == lowLang) getOrElse error(?("validation.string.lang.invalid").replace("%lang%", langName))
   require((xml\"@lang").length == 1, ?("validation.string.lang.missing"))
   val text = xml.text.trim
   require(text.length > 0, ?("validation.string.empty"))
