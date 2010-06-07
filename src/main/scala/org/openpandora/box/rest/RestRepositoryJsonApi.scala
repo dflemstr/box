@@ -1,6 +1,6 @@
 package org.openpandora.box.rest
 
-import net.liftweb.http.{Req, GetRequest, PostRequest, LiftRules, JsonResponse, PlainTextResponse}
+import net.liftweb.http.{Req, GetRequest, PostRequest, LiftRules, JsonResponse, NotFoundResponse}
 import net.liftweb.common.{Full, Box, Empty, Logger}
 import net.liftweb.http.js.JE
 import net.liftweb.http.js.JE.{JsObj, JsArray, strToS, JsNull}
@@ -19,7 +19,8 @@ object RestRepositoryJsonApi extends Logger {
 
   def dispatch: LiftRules.DispatchPF = {
     case Req("repository" :: Nil, "json", GetRequest) =>
-      () => data map (jsFunc => JsonResponse(hostnameCache.getOrElseUpdate(S.hostAndPath, jsFunc(S.hostAndPath))))
+      () => Full(data.dmap[LiftResponse](NotFoundResponse("The repository file is still being generated..."))
+                 (jsFunc => JsonResponse(hostnameCache.getOrElseUpdate(S.hostAndPath, jsFunc(S.hostAndPath)))))
   }
 }
 
