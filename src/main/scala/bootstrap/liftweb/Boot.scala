@@ -26,6 +26,7 @@ import net.liftweb.util.Mailer
 import net.liftweb.util.Props
 import org.openpandora.box.dispatch.FileDispatcher
 import org.openpandora.box.rest.RestRepositoryJsonApi
+import org.openpandora.box.rest.RepositoryUpdater
 import org.openpandora.box.model._
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.packages.ProcessNotifier
@@ -89,6 +90,7 @@ class Boot extends Logger {
     PackageManager.start()
     ProcessNotifier.start()
     Poster.start()
+    RepositoryUpdater.start()
   }
 
   private lazy val useEmail = Props.get("mail.enable").map(_.toBoolean) openOr false

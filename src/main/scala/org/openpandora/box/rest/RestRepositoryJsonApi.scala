@@ -1,29 +1,56 @@
 package org.openpandora.box.rest
 
 import net.liftweb.http.{Req, GetRequest, PostRequest, LiftRules, JsonResponse, PlainTextResponse}
-import net.liftweb.common.{Full, Box}
+import net.liftweb.common.{Full, Box, Empty, Logger}
 import net.liftweb.http.js.JE
 import net.liftweb.http.js.JE.{JsObj, JsArray, strToS, boolToJsExp}
 import net.liftweb.http.js.JsExp
+import net.liftweb.http.LiftResponse
 import net.liftweb.http.S
 import org.openpandora.box.model._
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Localization._
 import org.squeryl.PrimitiveTypeMode._
+import scala.actors.Actor
 
-object RestRepositoryJsonApi {
+object RestRepositoryJsonApi extends Logger {
+  private[rest] var data: Box[JsExp] = Empty
+
   def dispatch: LiftRules.DispatchPF = {
     case Req("repository" :: Nil, "json", GetRequest) =>
-      () => Full(repomd)
+      () => data map (JsonResponse(_))
   }
-  private def repomd = JsonResponse(
-    JsObj(
-      "repository" -> JsObj(
-        "name" -> loc("application"),
-        "version" -> JE.numToJsExp(1.0)
-      ),
-      "applications" -> makeAppEntries
-    )
+}
+
+object RepositoryUpdater extends Actor {
+  object RefreshRepository
+
+  private object Pinger extends Actor {
+    def act = while(true) {
+      RepositoryUpdater.this! RefreshRepository
+      Thread.sleep(60000)
+    }
+  }
+
+  override def start() = {
+    this! RefreshRepository
+    Pinger.start()
+    super.start()
+  }
+
+  def act = Actor.loop {
+    Actor.react {
+      case RefreshRepository =>
+        RestRepositoryJsonApi.data = Full(repomd)
+    }
+  }
+
+  private def repomd = JsObj(
+    "repository" -> JsObj(
+      "name" -> loc("application"),
+      "version" -> JE.numToJsExp(1.0)
+    ),
+    "applications" -> makeAppEntries
   )
 
   private case class LocalizationEntry(lang: String, title: String, description: String)
@@ -31,7 +58,7 @@ object RestRepositoryJsonApi {
   private case class ApplicationEntry(id: String, version: VersionEntry, author: Option[String], vendor: Option[String], uri: String,
                                       localizations: Seq[LocalizationEntry], categories: Seq[String], image: Option[String])
 
-  def makeAppEntries: JsArray = {
+  private def makeAppEntries: JsArray = inTransaction {
     val data =
       from(Database.applications, Database.users, Database.packages) { (app, user, pkg) =>
         where(app.packageId === pkg.id and user.id === pkg.userId) select(app, user, pkg)
