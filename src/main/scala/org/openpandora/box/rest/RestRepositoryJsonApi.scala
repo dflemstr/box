@@ -3,7 +3,7 @@ package org.openpandora.box.rest
 import net.liftweb.http.{Req, GetRequest, PostRequest, LiftRules, JsonResponse, PlainTextResponse}
 import net.liftweb.common.{Full, Box, Empty, Logger}
 import net.liftweb.http.js.JE
-import net.liftweb.http.js.JE.{JsObj, JsArray, strToS, boolToJsExp}
+import net.liftweb.http.js.JE.{JsObj, JsArray, strToS, JsNull}
 import net.liftweb.http.js.JsExp
 import net.liftweb.http.LiftResponse
 import net.liftweb.http.S
@@ -14,16 +14,17 @@ import org.squeryl.PrimitiveTypeMode._
 import scala.actors.Actor
 
 object RestRepositoryJsonApi extends Logger {
-  private[rest] var data: Box[JsExp] = Empty
+  private[rest] var data: Box[String => JsExp] = Empty
+  private[rest] val hostnameCache: collection.mutable.Map[String, JsExp] = collection.mutable.Map.empty
 
   def dispatch: LiftRules.DispatchPF = {
     case Req("repository" :: Nil, "json", GetRequest) =>
-      () => data map (JsonResponse(_))
+      () => data map (jsFunc => JsonResponse(hostnameCache.getOrElseUpdate(S.hostAndPath, jsFunc(S.hostAndPath))))
   }
 }
 
 object RepositoryUpdater extends Actor {
-  object RefreshRepository
+  case object RefreshRepository
 
   private object Pinger extends Actor {
     def act = while(true) {
@@ -33,7 +34,6 @@ object RepositoryUpdater extends Actor {
   }
 
   override def start() = {
-    this! RefreshRepository
     Pinger.start()
     super.start()
   }
@@ -42,58 +42,59 @@ object RepositoryUpdater extends Actor {
     Actor.react {
       case RefreshRepository =>
         RestRepositoryJsonApi.data = Full(repomd)
+        RestRepositoryJsonApi.hostnameCache.clear()
     }
   }
 
-  private def repomd = JsObj(
-    "repository" -> JsObj(
+  private def repomd = {
+    val repository = JsObj(
       "name" -> loc("application"),
       "version" -> JE.numToJsExp(1.0)
-    ),
-    "applications" -> makeAppEntries
-  )
+    )
+    val applications = makeAppEntries
+    (host: String) => JsObj(
+      "repository" -> repository,
+      "applications" -> applications(host)
+    )
+  }
 
-  private case class LocalizationEntry(lang: String, title: String, description: String)
-  private case class VersionEntry(major: Int, minor: Int, release: Int, build: Int)
-  private case class ApplicationEntry(id: String, version: VersionEntry, author: Option[String], vendor: Option[String], uri: String,
-                                      localizations: Seq[LocalizationEntry], categories: Seq[String], image: Option[String])
-
-  private def makeAppEntries: JsArray = inTransaction {
-    val data =
+  private def makeAppEntries: (String => JsArray) = inTransaction {
+    val appFuncs =
       from(Database.applications, Database.users, Database.packages) { (app, user, pkg) =>
         where(app.packageId === pkg.id and user.id === pkg.userId) select(app, user, pkg)
-      }
-
-    val apps = data.map {
-      case (app, user, pkg) =>
-        ApplicationEntry(app.pxmlId, VersionEntry(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild),
-                         app.authorName, Some(user.username), S.hostAndPath + "/files/packages/" + pkg.fileId + ".pnd",
-                         app.metas.toSeq.map(y => LocalizationEntry(y.languageName, y.title, y.description)),
-                         app.categories.toSeq.map(y => DotDesktopCategories(y.value).toString),
-                         if(pkg.hasImage) Some(S.hostAndPath + "/files/images/" + pkg.fileId + ".png") else None)
-    }.toSeq
-
-    JsArray(
-      (for(app <- apps) yield JsObj(
-          "id" -> app.id,
-          "version" -> JsObj(
-            "major"   -> JE.numToJsExp(app.version.major),
-            "minor"   -> JE.numToJsExp(app.version.minor),
-            "release" -> JE.numToJsExp(app.version.release),
-            "build"   -> JE.numToJsExp(app.version.build)
-          ),
-          "author" -> app.author.orNull[String],
-          "vendor" -> app.vendor.orNull[String],
-          "uri" -> app.uri,
-          "localizations" -> JsObj(
-            (for(loc <- app.localizations) yield loc.lang -> JsObj(
+      }.toSeq.map {
+        case (app, user, pkg) =>
+          val id      = JE.strToS(app.pxmlId)
+          val version = JsObj(
+            "major"   -> JE.numToJsExp(app.versionMajor),
+            "minor"   -> JE.numToJsExp(app.versionMinor),
+            "release" -> JE.numToJsExp(app.versionRelease),
+            "build"   -> JE.numToJsExp(app.versionBuild)
+          )
+          val author  = app.authorName.map(JE.strToS) getOrElse JsNull
+          val vendor  = JE.strToS(user.username)
+          val uri = (host: String) => (host + "/files/packages/" + pkg.fileId + ".pnd")
+          val localizations = JsObj(
+            (for(loc <- app.metas.toSeq) yield loc.languageName -> JsObj(
                 "title" -> loc.title,
                 "description" -> loc.description
               )): _*
-          ),
-          "categories" -> JsArray(app.categories.map(x => x: JsExp): _*),
-          "image" -> app.image.orNull[String]
-        )): _*
-    )
+          )
+          val categories = JsArray(app.categories.toSeq.map(y => DotDesktopCategories(y.value).toString: JsExp): _*)
+          val image = (host: String) => (if(pkg.hasImage) JE.strToS(host + "/files/images/" + pkg.fileId + ".png") else JsNull)
+
+          (host: String) => JsObj(
+            "id" -> id,
+            "version" -> version,
+            "author" -> author,
+            "vendor" -> vendor,
+            "uri" -> uri(host),
+            "localizations" -> localizations,
+            "categories" -> categories,
+            "image" -> image(host)
+          )
+      }
+
+    (host: String) => JsArray(appFuncs.map(_(host)): _*)
   }
 }
