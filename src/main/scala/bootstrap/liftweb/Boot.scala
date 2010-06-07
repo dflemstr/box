@@ -25,6 +25,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Mailer
 import net.liftweb.util.Props
 import org.openpandora.box.dispatch.FileDispatcher
+import org.openpandora.box.rest.RestRepositoryJsonApi
 import org.openpandora.box.model._
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.packages.ProcessNotifier
@@ -169,7 +170,8 @@ class Boot extends Logger {
         RewriteResponse(List("applications", "show"), Map("id" -> id))
     }
 
-    LiftRules.dispatch.append(FileDispatcher.dispatch)
+    LiftRules.dispatch.prepend(FileDispatcher.dispatch)
+    LiftRules.dispatch.prepend(RestRepositoryJsonApi.dispatch)
 
     LiftRules.explicitlyParsedSuffixes += "pnd"
 
