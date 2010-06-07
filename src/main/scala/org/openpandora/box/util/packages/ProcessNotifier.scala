@@ -8,6 +8,7 @@ import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import net.liftweb.util.NamedPF
 import org.openpandora.box.model.User
+import org.openpandora.box.util.Localization._
 import org.openpandora.box.util.notifications.Poster
 import scala.actors.Actor
 import scala.xml._
@@ -60,23 +61,6 @@ object ProcessNotifier extends Actor
   }
 
   case class SendResolvedMessage(message: Message, user: User, filename: String)
-
-  private def resourceBundles(locale: Locale) =
-    LiftRules.resourceNames.flatMap {name =>
-      Helpers tryo {
-        List(ResourceBundle.getBundle(name, locale))
-      } openOr {
-        NamedPF.applyBox((name, locale), LiftRules.resourceBundleFactories.toList).map(List(_)) openOr Nil
-      }
-    }
-
-  private def loc(key: String, locale: Locale): String = resourceBundles(locale).flatMap(r => Helpers.tryo(r.getObject(key) match {
-      case s: String => Some(s)
-      case _ => None
-    }).flatten).headOption getOrElse {
-      warn("Couldn't translate key, key=" + key)
-      key
-    }
 
   def act = Actor.loop {
     Actor.react {

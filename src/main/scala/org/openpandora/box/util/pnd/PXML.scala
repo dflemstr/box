@@ -6,28 +6,15 @@ import net.liftweb.common.Logger
 import net.liftweb.http.LiftRules
 import net.liftweb.util.Helpers
 import net.liftweb.util.NamedPF
+import org.openpandora.box.util.Localization._
 import scala.xml.NodeSeq
 
 case class RequirementException(msg: String) extends Exception(msg)
 
 class DOM(val raw: NodeSeq, val locale: Locale) extends Logger {
   def require(body: Boolean, message: String) = if(!body) throw new RequirementException(message)
-  private val resourceBundles =
-    LiftRules.resourceNames.flatMap {name =>
-      Helpers tryo {
-        List(ResourceBundle.getBundle(name, locale))
-      } openOr {
-        NamedPF.applyBox((name, locale), LiftRules.resourceBundleFactories.toList).map(List(_)) openOr Nil
-      }
-    }
 
-  protected def ?(key: String): String = resourceBundles.flatMap(r => Helpers.tryo(r.getObject(key) match {
-      case s: String => Some(s)
-      case _ => None
-    }).flatten).headOption getOrElse {
-      warn("Couldn't translate key, key=" + key)
-      key
-    }
+  protected def ?(key: String): String = loc(key, locale)
 }
 
 /**
