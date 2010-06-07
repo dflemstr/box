@@ -74,7 +74,7 @@ object RepositoryUpdater extends Actor {
           )
           val author  = app.authorName.map(JE.strToS) getOrElse JsNull
           val vendor  = JE.strToS(user.username)
-          val uri = (host: String) => (host + "/files/packages/" + pkg.fileId + ".pnd")
+          val uri = (host: String) => (host + "/file/package/" + pkg.fileId + ".pnd")
           val localizations = JsObj(
             (for(loc <- app.metas.toSeq) yield loc.languageName -> JsObj(
                 "title" -> loc.title,
@@ -82,7 +82,7 @@ object RepositoryUpdater extends Actor {
               )): _*
           )
           val categories = JsArray(app.categories.toSeq.map(y => DotDesktopCategories(y.value).toString: JsExp): _*)
-          val image = (host: String) => (if(pkg.hasImage) JE.strToS(host + "/files/images/" + pkg.fileId + ".png") else JsNull)
+          val image = (host: String) => (if(pkg.hasImage) JE.strToS(host + "/file/image/" + pkg.fileId + ".png") else JsNull)
 
           (host: String) => JsObj(
             "id" -> id,
