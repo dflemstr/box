@@ -17,7 +17,8 @@ object FileDispatcher {
     Full(new StreamingResponse(stream, stream.close, file.length,
                                List("Content-Type" -> mime,
                                     "Cache-Control" -> ("max-age=" + 365*24*60*60),
-                                    "Expires" -> toInternetDate(timeInAYear))
+                                    "Expires" -> toInternetDate(timeInAYear),
+                                    "Pragma" -> "")
                                ++ maybeDisposition, Nil, 200))
   }
 
