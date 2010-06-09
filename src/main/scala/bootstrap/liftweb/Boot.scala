@@ -173,7 +173,8 @@ class Boot extends Logger {
     }
 
     LiftRules.statelessDispatchTable.prepend(FileDispatcher.dispatch)
-    LiftRules.statelessDispatchTable.prepend(RestRepositoryJsonApi.dispatch)
+
+    LiftRules.dispatch.prepend(RestRepositoryJsonApi.dispatch)
 
     LiftRules.explicitlyParsedSuffixes += "pnd"
 
