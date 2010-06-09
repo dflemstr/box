@@ -172,8 +172,8 @@ class Boot extends Logger {
         RewriteResponse(List("applications", "show"), Map("id" -> id))
     }
 
-    LiftRules.dispatch.prepend(FileDispatcher.dispatch)
-    LiftRules.dispatch.prepend(RestRepositoryJsonApi.dispatch)
+    LiftRules.statelessDispatchTable.prepend(FileDispatcher.dispatch)
+    LiftRules.statelessDispatchTable.prepend(RestRepositoryJsonApi.dispatch)
 
     LiftRules.explicitlyParsedSuffixes += "pnd"
 
