@@ -227,25 +227,25 @@ hr.space {background:#fff;color:#fff;visibility:hidden;}
 .clear {clear:both;}
 
 /* General */
-.vert-span-1 {height:30px;}
-.vert-span-2 {height:70px;}
-.vert-span-3 {height:110px;}
-.vert-span-4 {height:150px;}
-.vert-span-5 {height:190px;}
-.vert-span-6 {height:230px;}
-.vert-span-7 {height:270px;}
-.vert-span-8 {height:310px;}
-.vert-span-9 {height:350px;}
-.vert-span-10 {height:390px;}
-.vert-span-11 {height:430px;}
-.vert-span-12 {height:470px;}
-.vert-span-13 {height:510px;}
-.vert-span-14 {height:550px;}
-.vert-span-15 {height:590px;}
-.vert-span-16 {height:630px;}
-.vert-span-17 {height:670px;}
-.vert-span-18 {height:710px;}
-.vert-span-19 {height:750px;margin-bottom:0;}
+.climb-1 {height:30px;}
+.climb-2 {height:70px;}
+.climb-3 {height:110px;}
+.climb-4 {height:150px;}
+.climb-5 {height:190px;}
+.climb-6 {height:230px;}
+.climb-7 {height:270px;}
+.climb-8 {height:310px;}
+.climb-9 {height:350px;}
+.climb-10 {height:390px;}
+.climb-11 {height:430px;}
+.climb-12 {height:470px;}
+.climb-13 {height:510px;}
+.climb-14 {height:550px;}
+.climb-15 {height:590px;}
+.climb-16 {height:630px;}
+.climb-17 {height:670px;}
+.climb-18 {height:710px;}
+.climb-19 {height:750px;margin-bottom:0;}
 
 /* Buttons */
 a.button, button, fieldset input[type=submit], .button a {
