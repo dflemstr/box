@@ -28,7 +28,7 @@ class FileDispatcherImpl(fs: Filesystem = Filesystem.default) extends FileDispat
                                ++ maybeDisposition, Nil, 200))
   }
 
-  def servePackage(id: String)(implicit fs: Filesystem) = {
+  def servePackage(id: String)(implicit fs: Filesystem) = transaction {
     from(Database.packages)(pkg => where(pkg.fileId === id) select(pkg)).headOption match {
       case Some(pkg) =>
         val name = pkg.fileName
