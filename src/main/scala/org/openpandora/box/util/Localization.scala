@@ -7,8 +7,18 @@ import net.liftweb.http.LiftRules
 import net.liftweb.util.Helpers
 import net.liftweb.util.NamedPF
 
-object Localization extends Logger {
-  private def resourceBundles(locale: Locale) =
+object Localization {
+  val default: Localization = new LocalizationImpl
+}
+
+trait Localization {
+  def loc(key: String, locale: Locale): String
+  def loc(key: String): String
+}
+
+private[util] class LocalizationImpl extends Localization
+                                        with Logger {
+  def resourceBundles(locale: Locale) =
     LiftRules.resourceNames.flatMap {name =>
       Helpers tryo {
         List(ResourceBundle.getBundle(name, locale))
@@ -17,7 +27,7 @@ object Localization extends Logger {
       }
     }
 
-  private def resourceBundles =
+  def resourceBundles =
     LiftRules.resourceNames.flatMap {name =>
       Helpers tryo {
         List(ResourceBundle.getBundle(name))

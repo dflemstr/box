@@ -8,13 +8,14 @@ import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import net.liftweb.util.NamedPF
 import org.openpandora.box.model.User
-import org.openpandora.box.util.Localization._
+import org.openpandora.box.util.Localization
 import org.openpandora.box.util.notifications.Poster
 import scala.actors.Actor
 import scala.xml._
 
-object ProcessNotifier extends Actor
-                          with Logger {
+object ProcessNotifier {
+  val default: ProcessNotifier = new ProcessNotifierImpl
+
   trait Message {
     val kind: String
     val replacements: Map[String, String] = Map.empty
@@ -59,6 +60,22 @@ object ProcessNotifier extends Actor
   case object PackageAdded extends Message {
     val kind = "added"
   }
+}
+
+trait ProcessNotifier {
+  def sendResolvedMessage(message: ProcessNotifier.Message, user: User, filename: String)
+}
+
+private[packages] class ProcessNotifierImpl(localization: Localization = Localization.default,
+                                            poster: Poster = Poster.default) extends ProcessNotifier
+                                                                                with Actor
+                                                                                with Logger {
+  import localization._
+  import ProcessNotifier._
+  start()
+
+  def sendResolvedMessage(message: Message, user: User, filename: String) =
+    this! SendResolvedMessage(message, user, filename)
 
   case class SendResolvedMessage(message: Message, user: User, filename: String)
 
@@ -73,8 +90,8 @@ object ProcessNotifier extends Actor
           case warn: WarningMessage => "warning"
           case _ => "notice"
         }
-        Poster! SendMessage(user.id, kind, LiftRules.localizeStringToXml(transformedTitle), LiftRules.localizeStringToXml(transformedBody))
-        ProcessNotifier.this.info("Sent process message, user=" + user.id + " filename=" + filename)
+        poster.sendMessage(user.id, kind, LiftRules.localizeStringToXml(transformedTitle), LiftRules.localizeStringToXml(transformedBody))
+        ProcessNotifierImpl.this.info("Sent process message, user=" + user.id + " filename=" + filename)
       case x => warn("Unhandled message in ProcessNotifier: " + x)
     }
   }

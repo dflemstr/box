@@ -10,17 +10,24 @@ import org.squeryl.dsl.ast.LogicalBoolean
 import org.squeryl.dsl.ast.TypedExpressionNode
 import org.squeryl.dsl.OneToMany
 
-object ApplicationFilterRunner extends Logger {
+object ApplicationFilterRunner {
+  val default: ApplicationFilterRunner = new ApplicationFilterRunnerImpl
+}
 
-  private case class VersionRestriction(major: Option[Int], minor: Option[Int], release: Option[Int], build: Option[Int])
+trait ApplicationFilterRunner {
+  def runFilter(filter: String)(implicit p: ApplicationFilterParser): Query[(Application, Package)]
+}
 
-  def runFilter(filter: String): Query[(Application, Package,
-                                        OneToMany[org.openpandora.box.model.AppMeta],
-                                        OneToMany[org.openpandora.box.model.Category],
-                                        OneToMany[org.openpandora.box.model.Comment])] = {
+private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
+                                                   with Logger {
+
+  case class VersionRestriction(major: Option[Int], minor: Option[Int], release: Option[Int], build: Option[Int])
+
+  def runFilter(filter: String)(implicit p: ApplicationFilterParser): Query[(Application, Package)] = {
+    import p._
     import ApplicationFilterParser._
     def all = from(Database.applications, Database.packages)((app, pkg) =>
-      where(app.packageId === pkg.id) select(app, pkg, app.metas, app.categories, app.comments) orderBy(pkg.uploadTime))
+      where(app.packageId === pkg.id) select(app, pkg) orderBy(pkg.uploadTime))
     
     val query = if(filter.isEmpty)
       all
@@ -115,7 +122,7 @@ object ApplicationFilterRunner extends Logger {
               maybeOmit(inhibitUsers, user.get.id === pkg.userId) ++
               Seq(app.packageId === pkg.id, category.get.value in categoryAlternatives)
             }.reduceLeft[LogicalBoolean](_ and _)
-          ).select(app, pkg, app.metas, app.categories, app.comments).orderBy {
+          ).select(app, pkg).orderBy {
             val o: TypedExpressionNode[_] = (ordering match {
                 case _: OrderByTitle => meta.get.title
                 case _: OrderByRating => avg(rating.get.value)

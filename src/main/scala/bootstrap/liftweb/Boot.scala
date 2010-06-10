@@ -25,9 +25,9 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Mailer
 import net.liftweb.util.Props
 import org.openpandora.box.dispatch.FileDispatcher
-import org.openpandora.box.rest.RestRepositoryJsonApi
-import org.openpandora.box.rest.RepositoryUpdater
+import org.openpandora.box.rest.RestRepositoryApi
 import org.openpandora.box.model._
+import org.openpandora.box.util.filesystem.Filesystem
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.packages.ProcessNotifier
 import org.openpandora.box.util.notifications.Poster
@@ -41,7 +41,6 @@ class Boot extends Logger {
     createDatabase()
     setupEmail()
     buildSitemap()
-    startDaemons()
   }
 
   private def createDatabase() {
@@ -84,13 +83,6 @@ class Boot extends Logger {
     try transaction{Database.create; info("Database created, url=" + url)} catch {case _ => info("Database exists already")}
     
     S.addAround(Database.buildLoanWrapper())
-  }
-
-  private def startDaemons() {
-    PackageManager.start()
-    ProcessNotifier.start()
-    Poster.start()
-    RepositoryUpdater.start()
   }
 
   private lazy val useEmail = Props.get("mail.enable").map(_.toBoolean) openOr false
@@ -172,9 +164,9 @@ class Boot extends Logger {
         RewriteResponse(List("applications", "show"), Map("id" -> id))
     }
 
-    LiftRules.statelessDispatchTable.prepend(FileDispatcher.dispatch)
+    LiftRules.statelessDispatchTable.prepend(FileDispatcher.default.dispatch)
 
-    LiftRules.dispatch.prepend(RestRepositoryJsonApi.dispatch)
+    LiftRules.dispatch.prepend(RestRepositoryApi.default.dispatch)
 
     LiftRules.explicitlyParsedSuffixes += "pnd"
 

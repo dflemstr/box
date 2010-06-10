@@ -4,10 +4,18 @@ import java.io.File
 import net.liftweb.util.Props
 
 object Filesystem {
+  val default: Filesystem = new FilesystemImpl
+}
+
+trait Filesystem {
+  def getFile(id: String, kind: FileType): File
+}
+
+private[filesystem] class FilesystemImpl extends Filesystem {
   val directory = Props.get("filesystem.dir") map (x => new File(x)) getOrElse
     new File(System.getProperty("java.io.tmpdir"), "box")
 
-  def getFile(name: String, kind: FileType) = {
+  def getFile(id: String, kind: FileType) = {
     if(!directory.exists)
       directory.mkdir()
 
@@ -15,7 +23,7 @@ object Filesystem {
     if(!subdir.exists)
       subdir.mkdir()
     
-    new File(subdir, name + "." + kind.extension)
+    new File(subdir, id + "." + kind.extension)
   }
 }
 

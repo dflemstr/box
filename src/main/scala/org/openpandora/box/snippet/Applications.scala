@@ -15,6 +15,7 @@ import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
 import org.openpandora.box.util.ApplicationFilterRunner
+import org.openpandora.box.util.ApplicationFilterParser
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
@@ -47,7 +48,7 @@ class Applications extends DispatchSnippet with Logger {
 
       upload.is match {
         case Some(h) =>
-          PackageManager! MakePackageFromStream(h.fileName, h.fileStream, User.currentUser getOrElse {
+          PackageManager.default.makePackageFromStream(h.fileName, h.fileStream, User.currentUser getOrElse {
               S.error(<p>{S.?("package.abortlogout")}</p>)
               S.redirectTo(S.referer openOr "/")
             })
@@ -65,14 +66,16 @@ class Applications extends DispatchSnippet with Logger {
                  "submit" -> SHtml.submit(S.?("Create"), doCreate))
   }
 
-  private def makeAppEntry(app: Application, pkg: Package, infos: OneToMany[AppMeta],
-                           categories: OneToMany[Category], comments: OneToMany[Comment],
+  private def makeAppEntry(app: Application, pkg: Package,
                            bindName: String, entry: NodeSeq) = {
     val locale = S.locale.toString.toLowerCase
+    lazy val infos = app.metas
+    lazy val categories = app.categories
+    lazy val comments = app.comments
     lazy val concreteInfos = infos.toSeq
     lazy val info = concreteInfos.find(_.languageName.toLowerCase == locale) orElse
-                    concreteInfos.find(_.languageName.toLowerCase == locale.split("_")(0)) getOrElse
-                    concreteInfos.find(_.languageName.toLowerCase == "en_us").get
+    concreteInfos.find(_.languageName.toLowerCase == locale.split("_")(0)) getOrElse
+    concreteInfos.find(_.languageName.toLowerCase == "en_us").get
     val applicationLink = (n: NodeSeq) => (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
     val downloadLink = (n: NodeSeq) => (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
     val image = if(pkg.hasImage)
@@ -228,15 +231,15 @@ class Applications extends DispatchSnippet with Logger {
          "commentForm" -> makeCommentForm _,
          "link" -> applicationLink,
          "download" -> downloadLink,
-         "fileSize" -> makeFileSize(Filesystem.getFile(pkg.fileId, PNDFile).length),
+         "fileSize" -> makeFileSize(Filesystem.default.getFile(pkg.fileId, PNDFile).length),
          "downloadCount" -> makeLazyString(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString))
   }
 
   def list(list: NodeSeq): NodeSeq = {
     val filter = (S.attr("filter") or S.param("filter") openOr "").trim
-    val apps = ApplicationFilterRunner.runFilter(filter)
+    val apps = ApplicationFilterRunner.default.runFilter(filter)(ApplicationFilterParser.default)
 
-    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, x._3, x._4, x._5, "entry", entry))
+    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, "entry", entry))
 
     bind("list", list,
          "entry" -> makeEntry _)
@@ -245,12 +248,12 @@ class Applications extends DispatchSnippet with Logger {
   def entry(entry: NodeSeq): NodeSeq = {
     val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap {x =>
       from(Database.applications, Database.packages)((app, pkg) =>
-        where(app.id === x and app.packageId === pkg.id) select(app, pkg, app.metas, app.categories, app.comments)).headOption
+        where(app.id === x and app.packageId === pkg.id) select(app, pkg)).headOption
     } getOrElse {
       S.error(<p>Invalid application id</p>)
       S.redirectTo(S.referer openOr "/")
     }
-    makeAppEntry(app._1, app._2, app._3, app._4, app._5, "entry", entry)
+    makeAppEntry(app._1, app._2, "entry", entry)
   }
 
   def filter(filter: NodeSeq) = S.param("filter") map Text openOr NodeSeq.Empty

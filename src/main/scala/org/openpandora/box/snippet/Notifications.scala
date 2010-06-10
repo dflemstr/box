@@ -10,7 +10,7 @@ import scala.xml.NodeSeq
 
 object Notifications {
   private val showIndicator =
-    ((_: NodeSeq) => <lift:comet type="NotificationDispatcher" name={(User.currentUser.map(_.id) getOrElse 0).toString}/>)
+    ((_: NodeSeq) => <lift:comet type="NotificationDispatcherComet" name={(User.currentUser.map(_.id) getOrElse 0).toString}/>)
 }
 
 class Notifications extends DispatchSnippet {

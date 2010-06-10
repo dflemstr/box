@@ -10,6 +10,12 @@ import org.openpandora.box.util.filesystem._
 import org.squeryl.PrimitiveTypeMode._
 
 object FileDispatcher {
+  val default: FileDispatcher = new FileDispatcherImpl
+}
+
+trait FileDispatcher extends Dispatcher
+
+class FileDispatcherImpl(fs: Filesystem = Filesystem.default) extends FileDispatcher {
   private def serve(file: File, mime: String, name: Option[String] = None) = () => {
     val stream = new BufferedInputStream(new FileInputStream(file))
     val maybeDisposition = name map (x => "Content-Disposition" -> ("attachment; filename=" + x))
@@ -22,7 +28,7 @@ object FileDispatcher {
                                ++ maybeDisposition, Nil, 200))
   }
 
-  def servePackage(id: String) = {
+  def servePackage(id: String)(implicit fs: Filesystem) = {
     from(Database.packages)(pkg => where(pkg.fileId === id) select(pkg)).headOption match {
       case Some(pkg) =>
         val name = pkg.fileName
@@ -33,21 +39,21 @@ object FileDispatcher {
             Database.packageDownloads.insert(PackageDownload(`package` = pkg))
         }
 
-        val file = Filesystem.getFile(id, PNDFile)
+        val file = fs.getFile(id, PNDFile)
         serve(file, PNDFile.mimeType, Some(name))
       case _ =>
         () => Full(NotFoundResponse(S.?("package.notfound")))
     }
   }
 
-  val dispatch: PartialFunction[Req, () => Box[LiftResponse]] = {
-    case Req("file" :: PNDFile.folder :: id :: Nil, PNDFile.extension, _) if Filesystem.getFile(id, PNDFile).exists =>
-      servePackage(id)
-    case Req("file" :: PNGImage.folder :: id :: Nil, PNGImage.extension, _) if Filesystem.getFile(id, PNGImage).exists =>
-      val file = Filesystem.getFile(id, PNGImage)
+  def dispatch = {
+    case Req("file" :: PNDFile.folder :: id :: Nil, PNDFile.extension, _) if fs.getFile(id, PNDFile).exists =>
+      servePackage(id)(fs)
+    case Req("file" :: PNGImage.folder :: id :: Nil, PNGImage.extension, _) if fs.getFile(id, PNGImage).exists =>
+      val file = fs.getFile(id, PNGImage)
       serve(file, PNGImage.mimeType)
-    case Req("file" :: PXMLFile.folder :: id :: Nil, PXMLFile.extension, _) if Filesystem.getFile(id, PXMLFile).exists =>
-      val file = Filesystem.getFile(id, PXMLFile)
+    case Req("file" :: PXMLFile.folder :: id :: Nil, PXMLFile.extension, _) if fs.getFile(id, PXMLFile).exists =>
+      val file = fs.getFile(id, PXMLFile)
       serve(file, PXMLFile.mimeType)
     case Req("file" :: t :: id :: Nil, ext, slash) =>
       () => Full(NotFoundResponse(S.?("file.notfound").replace("%id%", id).replace("%extension%", ext).replace("%datastorage%", t)))
