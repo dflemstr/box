@@ -104,20 +104,22 @@ class Boot extends Logger {
     val isLoggedIn = If(User.currentUser.isDefined _, S.?("user.mustlogin"))
     val isLoggedOut = If(User.currentUser.isEmpty _, S.?("user.mustlogout"))
 
-    val userMenu = Menu(Loc("User", List("user", "view"), S.?("user.view")),
-                        Menu(Loc("UserLogin", List("user", "login"), S.?("user.login"), If(User.currentUser.isEmpty _, "Already logged in"))),
-                        Menu(Loc("UserLogout", List("user", "logout"), S.?("user.logout"), isLoggedIn)),
-                        Menu(Loc("UserCreate", List("user", "create"), S.?("user.create"), isLoggedOut)),
-                        Menu(Loc("UserLostPassword", List("user", "lost-password"), S.?("user.lost-password"), If(useEmail _, "E-Mail system disabled"), isLoggedOut)),
-                        Menu(Loc("UserResetPassword", List("user", "reset-password"), S.?("user.reset-password"), Hidden, isLoggedOut)),
-                        Menu(Loc("UserEdit", List("user", "edit"), S.?("user.edit"), isLoggedIn)),
-                        Menu(Loc("UserChangePassword", List("user", "change-password"), S.?("user.change-password"), isLoggedIn)),
-                        Menu(Loc("UserValidate", List("user", "validate"), S.?("user.validate"), Hidden, isLoggedOut)))
+    val userMenu =
+      Menu(Loc("User", List("user", "view"), S.?("user.view")),
+           Menu(Loc("UserLogin", List("user", "login"), S.?("user.login"), If(User.currentUser.isEmpty _, "Already logged in"))),
+           Menu(Loc("UserLogout", List("user", "logout"), S.?("user.logout"), isLoggedIn)),
+           Menu(Loc("UserCreate", List("user", "create"), S.?("user.create"), isLoggedOut)),
+           Menu(Loc("UserLostPassword", List("user", "lost-password"), S.?("user.lost-password"), If(useEmail _, "E-Mail system disabled"), isLoggedOut)),
+           Menu(Loc("UserResetPassword", List("user", "reset-password"), S.?("user.reset-password"), Hidden, isLoggedOut)),
+           Menu(Loc("UserEdit", List("user", "edit"), S.?("user.edit"), isLoggedIn)),
+           Menu(Loc("UserChangePassword", List("user", "change-password"), S.?("user.change-password"), isLoggedIn)),
+           Menu(Loc("UserValidate", List("user", "validate"), S.?("user.validate"), Hidden, isLoggedOut)))
 
-    val applicationMenu = Menu(Loc("Applications", List("applications", "list"), S.?("applications.list")),
-                               Menu(Loc("ShowApplication", List("applications", "show"), S.?("applications.show"), Hidden)),
-                               Menu(Loc("AddApplications", List("applications", "add"), S.?("applications.add"), isLoggedIn)),
-                               Menu(Loc("ConstructAppFilter", List("applications", "filter"), S.?("applications.filter"))))
+    val applicationMenu =
+      Menu(Loc("Applications", List("applications", "list"), S.?("applications.list")),
+           Menu(Loc("ShowApplication", List("applications", "show"), S.?("applications.show"), Hidden)),
+           Menu(Loc("AddApplications", List("applications", "add"), S.?("applications.add"), isLoggedIn)),
+           Menu(Loc("ConstructAppFilter", List("applications", "filter"), S.?("applications.filter"))))
 
     val entries = Menu(Loc("Home", List("index"), S.?("index"), Hidden)) :: applicationMenu :: userMenu :: Nil
     LiftRules.setSiteMap(SiteMap(entries: _*))
