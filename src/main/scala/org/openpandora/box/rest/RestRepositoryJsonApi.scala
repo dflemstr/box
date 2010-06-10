@@ -13,6 +13,7 @@ import org.openpandora.box.dispatch.Dispatcher
 import org.openpandora.box.model._
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Localization
+import org.openpandora.box.util.packages.PackageManager
 import org.squeryl.PrimitiveTypeMode._
 import scala.actors.Actor
 
@@ -28,6 +29,7 @@ private[rest] class RestRepositoryJsonApi(localization: Localization = Localizat
   import localization._
 
   RepositoryUpdater.start()
+  RepositoryUpdater! RepositoryUpdater.RefreshRepository
   
   var data: Box[String => JsExp] = Empty
   val responseCache: collection.mutable.Map[String, LiftResponse] = collection.mutable.Map.empty
@@ -65,7 +67,13 @@ private[rest] class RestRepositoryJsonApi(localization: Localization = Localizat
 
   object RepositoryUpdater extends Actor {
     case object RefreshRepository
+    
+    val update = (pkg: Package) => {
+      this! RefreshRepository
+    }
 
+    PackageManager.default.registerPackageAddedCallback(update)
+    
     def act = Actor.loop {
       Actor.react {
         case RefreshRepository =>
