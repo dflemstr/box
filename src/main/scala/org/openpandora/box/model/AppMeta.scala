@@ -15,7 +15,7 @@ case class AppMeta(applicationId:    Long,   //id
                    @(Column @field)(length = 2048)
                    description:      String) extends LongKeyedEntity {
   lazy val application: ManyToOne[Application] = Database.applicationsToAppMetas.right(this)
-  def language = Languages.locales.find(_.toString.toLowerCase == languageName) getOrElse Locale.getDefault
+  def language = Languages.locales.find(_.toString.toLowerCase == languageName.toLowerCase) getOrElse Locale.getDefault
 }
 
 object AppMeta {

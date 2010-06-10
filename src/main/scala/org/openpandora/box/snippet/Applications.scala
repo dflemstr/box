@@ -131,7 +131,7 @@ class Applications extends DispatchSnippet with Logger {
            "category" -> makeCategory _)
 
     def makeLanguage(language: NodeSeq): NodeSeq = {
-      val langs = from(Database.appMetas)(meta => where(meta.applicationId === app.id) select(meta.language))
+      val langs = concreteInfos.map(_.language)
       if(langs.isEmpty || (langs.size == 1 && langs.head == Locale.ENGLISH))
         NodeSeq.Empty
       else
