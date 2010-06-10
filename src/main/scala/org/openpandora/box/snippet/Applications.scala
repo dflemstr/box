@@ -11,6 +11,7 @@ import net.liftweb.http.RequestVar
 import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JE
+import net.liftweb.http.js.JsCmds
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
@@ -144,38 +145,55 @@ class Applications extends DispatchSnippet with Logger {
            "language" -> makeLanguage _)
 
     def makeRating(rating: NodeSeq): NodeSeq = {
+      val id = Helpers.nextFuncName
+      def redraw() = JsCmds.SetHtml(id, render)
+
       def hasRated(user: User) =
         from(Database.ratings)(rating => where(rating.userId === user.id and rating.applicationId === app.id) compute(count)) > 0
 
-      def doAddRating(r: String) = User.currentUser match {
+      def doAddRating(rating: Int)() = User.currentUser match {
         case Some(user) if !hasRated(user) =>
           try {
-            val ratingVal = r.toInt
-            require(ratingVal > 0 && ratingVal < 11)
-            Database.ratings.insert(Rating(app, user, ratingVal))
+            require(rating > 0 && rating < 11)
+            Database.ratings.insert(Rating(app, user, rating))
             S.notice(<p>{S.?("rating.created")}</p>)
           } catch {
             case _ =>
               S.error(<p>{S.?("rating.invalid")}</p>)
           }
+          redraw()
         case Some(user) =>
           S.error(<p>{S.?("rating.alreadyrated")}</p>)
+          JsCmds.Noop
         case None =>
           S.error(<p>{S.?("rating.mustlogin")}</p>)
+          JsCmds.Noop
       }
 
-      val strRange = (1 to 10) map (_.toString)
-      def current: (Int, Int) = 
+      def current =
         from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(avg(rating.value), count)).single.measures match {
           case (None, count) => (5, count.toInt)
           case (Some(avg), count) => (avg.toInt, count.toInt)
         }
-      val id = Helpers.nextFuncName
-      <div id={id}>{SHtml.ajaxSelect(strRange zip strRange, Full(current._1.toString), x => {
-              doAddRating(x)
-              val (rating, count) = current
-              JE.Call("ratingAdded", JE.Str(id), JE.Num(rating), JE.Num(count)).cmd
-            }, "class" -> "rating" :: (if(User.currentUser.isEmpty || hasRated(User.currentUser.get)) List("disabled" -> "disabled") else Nil): _*)}</div>
+
+
+      def makeDisplay(average: Int, enabled: Boolean)(display: NodeSeq): NodeSeq =
+        for {
+          i <- 1 to 10
+          kind = if(i <= average) "enabled" else "disabled"
+          evenOrOddTemplate = Helpers.chooseTemplate("display", kind, rating)
+          template = Helpers.chooseTemplate(kind, if(i % 2 == 1) "even" else "odd", evenOrOddTemplate) //Reverse even/odd, because firstEntry==1
+          node <- if(enabled) SHtml.a(doAddRating(i) _, template) else template
+        } yield node
+
+      def render = {
+        val (average, count) = current
+        bind("rating", rating,
+             "display" -> makeDisplay(average, User.currentUser.map(u => !hasRated(u)) getOrElse false) _,
+             "count" -> Text(count.toString))
+      }
+
+      <div id={id}>{render}</div>
     }
     
     def makeAuthor(author: NodeSeq) = app.authorName match {
@@ -226,7 +244,6 @@ class Applications extends DispatchSnippet with Logger {
          "categories" -> makeCategories _,
          "languages" -> makeLanguages _,
          "rating" -> makeRating _,
-         "ratingCount" -> makeLazyString(from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(count)).single.measures.toString),
          "comments" -> makeComments _,
          "commentForm" -> makeCommentForm _,
          "link" -> applicationLink,

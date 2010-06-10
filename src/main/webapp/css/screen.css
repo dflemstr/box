@@ -515,6 +515,35 @@ textarea {
 }
 
 /* Application lists */
+.star {
+    padding-left: 8px;
+    overflow: hidden;
+    background: url(../images/stars.png) no-repeat;
+}
+.star-disabled.star-even {
+    background-position: 0 0;
+}
+
+.star-disabled.star-odd {
+    background-position: -8px 0;
+}
+
+.star-enabled.star-even {
+    background-position: 0 -16px;
+}
+
+.star-enabled.star-odd {
+    background-position: -8px -16px;
+}
+
+.star-hover.star-even {
+    background-position: 0 -32px;
+}
+
+.star-hover.star-odd {
+    background-position: -8px -32px;
+}
+
 .application-title {
     margin-bottom: 0;
 }
@@ -523,7 +552,7 @@ textarea {
     line-height: 3;
 }
 
-.rating-count, .download-count {
+.download-count {
     float: right;
 }
 
@@ -541,40 +570,6 @@ textarea {
 
 .category:last-of-type::after, .language:last-of-type::after {
     content: "";
-}
-
-/* Stars */
-.ui-stars-star,
-.ui-stars-cancel {
-  float: left;
-  display: block;
-  overflow: hidden;
-  text-indent: -999em;
-  cursor: pointer;
-}
-.ui-stars-star a,
-.ui-stars-cancel a {
-  width: 16px;
-  height: 15px;
-  display: block;
-  background: url(../images/jquery.ui.stars.gif) no-repeat 0 0;
-}
-.ui-stars-star a {
-  background-position: 0 -32px;
-}
-.ui-stars-star-on a {
-  background-position: 0 -48px;
-}
-.ui-stars-star-hover a {
-  background-position: 0 -64px;
-}
-.ui-stars-cancel-hover a {
-  background-position: 0 -16px;
-}
-.ui-stars-star-disabled,
-.ui-stars-star-disabled a,
-.ui-stars-cancel-disabled a {
-  cursor: default !important;
 }
 
 /* Notifications */
