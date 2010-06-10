@@ -49,9 +49,9 @@ class Users extends DispatchSnippet with Logger {
   private object editFunction extends RequestVar[Option[() => NodeSeq]](None)
 
   private lazy val useEmail = Props.get("mail.enable").map(_.toBoolean) getOrElse false
-  private val emailRegex = """[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=""" +
-  """?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[A-Z]{2}|com|org|net|edu""" +
-  """|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\b"""
+  val emailRegex = """[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=""" +
+  """?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[a-zA-Z]{2}|com|org|net|edu""" +
+  """|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)"""
 
   def isLoggedIn(seq: NodeSeq) = if(User.currentUser.isDefined) seq else NodeSeq.Empty
   def isLoggedOut(seq: NodeSeq) = if(User.currentUser.isDefined) NodeSeq.Empty else seq
