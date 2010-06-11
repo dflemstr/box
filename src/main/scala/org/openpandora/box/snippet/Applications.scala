@@ -130,19 +130,19 @@ class Applications extends DispatchSnippet with Logger {
       bind("categories", categories,
            "category" -> makeCategory _)
 
-    def makeLanguage(language: NodeSeq): NodeSeq = {
+    def makeLanguage(langs: Seq[Locale])(language: NodeSeq): NodeSeq =
+      langs flatMap { lang =>
+        bind("language", language, "name" -> lang.getDisplayName(S.locale))
+      } toSeq
+
+    def makeLanguages(languages: NodeSeq): NodeSeq ={
       val langs = concreteInfos.map(_.language)
-      if(langs.isEmpty || (langs.size == 1 && langs.head == Locale.ENGLISH))
+      if(langs.size <= 1)
         NodeSeq.Empty
       else
-        langs flatMap { lang =>
-          bind("language", language, "name" -> lang.getDisplayName(S.locale))
-        } toSeq
+        bind("languages", languages,
+             "language" -> makeLanguage(langs) _)
     }
-
-    def makeLanguages(languages: NodeSeq): NodeSeq =
-      bind("languages", languages,
-           "language" -> makeLanguage _)
 
     def makeRating(rating: NodeSeq): NodeSeq = {
       val id = Helpers.nextFuncName
@@ -156,6 +156,10 @@ class Applications extends DispatchSnippet with Logger {
           try {
             require(rating > 0 && rating < 11)
             Database.ratings.insert(Rating(app, user, rating))
+            val (avrg, cnt) = from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(nvl(avg(rating.value), 0f), count)).single.measures
+            update(Database.applications)(a => where(a.id === app.id) set(a.ratingCount := cnt, a.ratingAverage := avrg))
+            app.ratingCount = cnt
+            app.ratingAverage = avrg
             S.notice(<p>{S.?("rating.created")}</p>)
           } catch {
             case _ =>
@@ -170,13 +174,6 @@ class Applications extends DispatchSnippet with Logger {
           JsCmds.Noop
       }
 
-      def current =
-        from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(avg(rating.value), count)).single.measures match {
-          case (None, count) => (5, count.toInt)
-          case (Some(avg), count) => (avg.toInt, count.toInt)
-        }
-
-
       def makeDisplay(average: Int, enabled: Boolean)(display: NodeSeq): NodeSeq =
         for {
           i <- 1 to 10
@@ -186,12 +183,10 @@ class Applications extends DispatchSnippet with Logger {
           node <- if(enabled) SHtml.a(doAddRating(i) _, template) else template
         } yield node
 
-      def render = {
-        val (average, count) = current
+      def render =
         bind("rating", rating,
-             "display" -> makeDisplay(average, User.currentUser.map(u => !hasRated(u)) getOrElse false) _,
-             "count" -> Text(count.toString))
-      }
+             "display" -> makeDisplay(app.ratingAverage.toInt, User.currentUser.map(u => !hasRated(u)) getOrElse false) _,
+             "count" -> Text(app.ratingCount.toString))
 
       <div id={id}>{render}</div>
     }
@@ -265,7 +260,7 @@ class Applications extends DispatchSnippet with Logger {
   def entry(entry: NodeSeq): NodeSeq = {
     val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap {x =>
       from(Database.applications, Database.packages)((app, pkg) =>
-        where(app.id === x and app.packageId === pkg.id) select(app, pkg)).headOption
+        where(app.id === x and app.packageId === pkg.id) select(app, pkg)).toSeq.headOption
     } getOrElse {
       S.error(<p>Invalid application id</p>)
       S.redirectTo(S.referer openOr "/")

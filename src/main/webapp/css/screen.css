@@ -503,9 +503,13 @@ textarea {
 
 /* Application lists */
 .star {
-    padding-left: 8px;
+    margin-top: 2px;
+    width: 8px;
+    height: 16px;
     overflow: hidden;
     background: url(../images/stars.png) no-repeat;
+    display: block;
+    float: left;
 }
 .star-disabled.star-even {
     background-position: 0 0;
@@ -578,7 +582,7 @@ textarea {
     display: block;
     padding: 0;
     font-size: medium;
-    border-radius: 1em;
+    border-radius: 1em 1em;
     padding: 0.5em;
     text-align: left;
     color: white;

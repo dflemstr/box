@@ -1,4 +1,4 @@
-package org.openpandora.box.rest
+package org.openpandora.box.dispatch
 
 import java.util.Date
 import net.liftweb.http.{Req, GetRequest, HeadRequest, PostRequest, LiftRules, JsonResponse, NotFoundResponse, InMemoryResponse}
@@ -9,7 +9,6 @@ import net.liftweb.http.js.JsExp
 import net.liftweb.http.LiftResponse
 import net.liftweb.http.S
 import net.liftweb.util.Helpers
-import org.openpandora.box.dispatch.Dispatcher
 import org.openpandora.box.model._
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Localization
@@ -24,8 +23,8 @@ object RestRepositoryApi {
 
 trait RestRepositoryApi extends Dispatcher
 
-private[rest] class RestRepositoryJsonApi(localization: Localization = Localization.default) extends RestRepositoryApi
-                                                                                                with Logger {
+private[dispatch] class RestRepositoryJsonApi(localization: Localization = Localization.default) extends RestRepositoryApi
+                                                                                                    with Logger {
   import localization._
 
   RepositoryUpdater.start()

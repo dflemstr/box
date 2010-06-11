@@ -25,7 +25,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Mailer
 import net.liftweb.util.Props
 import org.openpandora.box.dispatch.FileDispatcher
-import org.openpandora.box.rest.RestRepositoryApi
+import org.openpandora.box.dispatch.RestRepositoryApi
 import org.openpandora.box.model._
 import org.openpandora.box.util.filesystem.Filesystem
 import org.openpandora.box.util.packages.PackageManager
@@ -37,8 +37,8 @@ import org.openpandora.box.util.notifications.Poster
  */
 class Boot extends Logger {
   def boot {
-    configLift()
     createDatabase()
+    configLift()
     setupEmail()
     buildSitemap()
   }
@@ -49,9 +49,9 @@ class Boot extends Logger {
     import org.squeryl.SessionFactory
     import org.squeryl.PrimitiveTypeMode._
 
-    val driver = Props.get("db.driver") openOr "org.h2.Driver"
-    val url = Props.get("db.url")       openOr "jdbc:h2:mem:box;AUTO_SERVER=TRUE"
-    val user = Props.get("db.user")
+    val driver   = Props.get("db.driver") openOr "org.h2.Driver"
+    val url      = Props.get("db.url")    openOr "jdbc:h2:mem:box;AUTO_SERVER=TRUE"
+    val user     = Props.get("db.user")
     val password = Props.get("db.password")
     val userPass = for(u <- user.toOption; p <- password.toOption) yield (u, p)
     info("Connecting to database, driver=" + driver + " url=" + url + " user=" + user + " password=" + password)
@@ -60,13 +60,14 @@ class Boot extends Logger {
     Class.forName(driver)
 
     val adapter = driver match {
-      case "org.h2.Driver" => new H2Adapter
-      case "com.mysql.jdbc.Driver" => new MySQLAdapter
-      case "org.postgresql.Driver" => new PostgreSqlAdapter
+      case "org.h2.Driver"                   => new H2Adapter
+      case "com.mysql.jdbc.Driver"           => new MySQLAdapter
+      case "org.postgresql.Driver"           => new PostgreSqlAdapter
       case "oracle.jdbc.driver.OracleDriver" => new OracleAdapter
       case _ =>
-        error("Unsupported database driver: no adapter, url=" + url)
-        Predef.error("Unsupported database driver: no adapter, url=" + url)
+        val msg = "Unsupported database driver: no adapter, url=" + url
+        error       (msg)
+        Predef.error(msg)
     }
 
     userPass match {
@@ -106,7 +107,7 @@ class Boot extends Logger {
 
     val userMenu =
       Menu(Loc("User", List("user", "view"), S.?("user.view")),
-           Menu(Loc("UserLogin", List("user", "login"), S.?("user.login"), If(User.currentUser.isEmpty _, "Already logged in"))),
+           Menu(Loc("UserLogin", List("user", "login"), S.?("user.login"), If(User.currentUser.isEmpty _, S.?("user.loggedinalready")))),
            Menu(Loc("UserLogout", List("user", "logout"), S.?("user.logout"), isLoggedIn)),
            Menu(Loc("UserCreate", List("user", "create"), S.?("user.create"), isLoggedOut)),
            Menu(Loc("UserLostPassword", List("user", "lost-password"), S.?("user.lost-password"), If(useEmail _, "E-Mail system disabled"), isLoggedOut)),
@@ -166,7 +167,7 @@ class Boot extends Logger {
         RewriteResponse(List("applications", "show"), Map("id" -> id))
     }
 
-    LiftRules.statelessDispatchTable.prepend(FileDispatcher.default.dispatch)
+    LiftRules.dispatch.prepend(FileDispatcher.default.dispatch)
 
     LiftRules.dispatch.prepend(RestRepositoryApi.default.dispatch)
 

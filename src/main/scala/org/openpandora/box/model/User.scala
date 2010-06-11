@@ -41,12 +41,14 @@ case class User(@(Column @field)(length = 64)
   def login() {
     User._currentUser.remove()
     User._currentUserId.set(Some(id))
+    User.refresh()
   }
 
   def logout() {
     User._currentUser.remove()
     User._currentUserId.remove()
     S.request.foreach(_.request.session.terminate)
+    User.refresh()
   }
 }
 
@@ -58,8 +60,7 @@ object User {
 
   private object _currentUserId extends SessionVar[Option[Long]](None)
 
-  private object _currentUser extends RequestVar[Option[User]](currentUserId.flatMap(Database.users.lookup(_)))
-                                 with CleanRequestVarOnSessionTransition
+  private object _currentUser extends SessionVar[Option[User]](currentUserId.flatMap(Database.users.lookup(_)))
 
   def currentUserId = _currentUserId.is
   def currentUser = _currentUser.is

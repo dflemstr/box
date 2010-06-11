@@ -17,11 +17,14 @@ $(function() {
         yaxis: {
             tickDecimals: 0,
             min: 0
-        }
+        },
+        colors: ['#73C2FF', '#FFD969', '#8080FF', '#FFBF69', '#0A93FC', '#FFBF00', '#1717FC', '#FF9200']
     });
     $.plot($('#history-diagram'), [
     {
         data: hd,
+        label: 'Downloads that day',
+        color: '#C3D9FF',
         lines: {
             show: true,
             fill: true
@@ -33,7 +36,7 @@ $(function() {
     ], {
         xaxis: {
             mode: "time",
-            timeformat: "%d %b %y"
+            timeformat: "%d %b"
         },
         yaxis: {
             tickDecimals: 0,

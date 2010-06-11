@@ -14,7 +14,9 @@ case class Application(packageId:       Long, //id
                        versionRelease:  Int,
                        versionBuild:    Int,
                        @(Column @field)(length = 64)
-                       authorName:      Option[String]) extends LongKeyedEntity {
+                       authorName:      Option[String],
+                       var ratingCount:     Long,
+                       var ratingAverage:   Float) extends LongKeyedEntity {
   lazy val `package`:  ManyToOne[Package]  = Database.packagesToApplications.right(this)
 
   lazy val categories: OneToMany[Category] = Database.applicationsToCategories.left(this)
@@ -24,11 +26,11 @@ case class Application(packageId:       Long, //id
 
   final def pkg = `package` //alias
 
-  def this() = this(0l, "", 0, 0, 0, 0, Some(""))
+  def this() = this(0l, "", 0, 0, 0, 0, Some(""), 0, 0f)
 }
 
 object Application {
   def apply(`package`: Package, pxmlId: String, versionMajor: Int, versionMinor: Int, versionRelease: Int, versionBuild: Int, authorName: Option[String]): Application = {
-    Application(`package`.id, pxmlId: String, versionMajor, versionMinor, versionRelease, versionBuild, authorName)
+    Application(`package`.id, pxmlId: String, versionMajor, versionMinor, versionRelease, versionBuild, authorName, 0, 0f)
   }
 }

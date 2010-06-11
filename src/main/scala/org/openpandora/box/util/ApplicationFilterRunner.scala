@@ -35,48 +35,58 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
       case Success(expressions, _) =>
 
         //Split the filter expressions into separate sequences of strings
-        val titleRestrictions       = expressions collect {case FilterTitle(title)       => title}
-        val descriptionRestrictions = expressions collect {case FilterDescription(descr) => descr}
-        val keywordRestrictions     = expressions collect {case FilterKeyword(keyword)   => keyword}
-        val uploaderRestrictions    = expressions collect {case FilterUploader(uploader) => uploader}
-        val authorRestrictions      = expressions collect {case FilterAuthor(uploader)   => uploader}
-        val categoryRestrictions    = expressions collect {case FilterCategory(category) => category}
-
-        //Determine ordering: use the first expression found, or else sort by title
-        val ordering                = expressions.collect {case expr: OrderingExpression => expr}.headOption.getOrElse(OrderByTitle(false))
-
-        //Accumulate all version filter expressions
-        val versionRestriction      = expressions.foldLeft(VersionRestriction(None, None, None, None)) {(prev, expr) =>
-          expr match {
-            case FilterVersion(major, minor, release, build) =>
-              if(prev.major.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "major")}</p>)
-              if(prev.minor.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "minor")}</p>)
-              if(prev.release.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "release")}</p>)
-              if(prev.build.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "build")}</p>)
-              VersionRestriction(Some(major), Some(minor), Some(release), Some(build))
-            case FilterVersionMajor(major)     =>
-              if(prev.major.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "major")}</p>)
-              prev.copy(major = Some(major))
-            case FilterVersionMinor(minor)     =>
-              if(prev.minor.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "minor")}</p>)
-              prev.copy(minor = Some(minor))
-            case FilterVersionRelease(release) =>
-              if(prev.release.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "release")}</p>)
-              prev.copy(release = Some(release))
-            case FilterVersionBuild(build)     =>
-              if(prev.build.isDefined)
-                S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "build")}</p>)
-              prev.copy(build = Some(build))
-            case _ => prev
-          }
+        val titleRestrictionsBuilder       = Seq.newBuilder[String]
+        val descriptionRestrictionsBuilder = Seq.newBuilder[String]
+        val keywordRestrictionsBuilder     = Seq.newBuilder[String]
+        val uploaderRestrictionsBuilder    = Seq.newBuilder[String]
+        val authorRestrictionsBuilder      = Seq.newBuilder[String]
+        val categoryRestrictionsBuilder    = Seq.newBuilder[String]
+        var ordering: OrderingExpression   = OrderByTitle(false)
+        var versionRestriction             = VersionRestriction(None, None, None, None)
+        var max = 0
+        expressions foreach {
+          case FilterTitle(title)       => titleRestrictionsBuilder       += title
+          case FilterDescription(descr) => descriptionRestrictionsBuilder += descr
+          case FilterKeyword(keyword)   => keywordRestrictionsBuilder     += keyword
+          case FilterAuthor(author)     => authorRestrictionsBuilder      += author
+          case FilterUploader(uploader) => uploaderRestrictionsBuilder    += uploader
+          case FilterCategory(category) => categoryRestrictionsBuilder    += category
+          case o: OrderingExpression    => ordering = o
+          case MaxResults(n)            => max = n
+          case FilterVersion(major, minor, release, build) =>
+            if(versionRestriction.major.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "major")}</p>)
+            if(versionRestriction.minor.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "minor")}</p>)
+            if(versionRestriction.release.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "release")}</p>)
+            if(versionRestriction.build.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "build")}</p>)
+            versionRestriction = VersionRestriction(Some(major), Some(minor), Some(release), Some(build))
+          case FilterVersionMajor(major)     =>
+            if(versionRestriction.major.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "major")}</p>)
+            versionRestriction = versionRestriction.copy(major = Some(major))
+          case FilterVersionMinor(minor)     =>
+            if(versionRestriction.minor.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "minor")}</p>)
+            versionRestriction = versionRestriction.copy(minor = Some(minor))
+          case FilterVersionRelease(release) =>
+            if(versionRestriction.release.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "release")}</p>)
+            versionRestriction = versionRestriction.copy(release = Some(release))
+          case FilterVersionBuild(build)     =>
+            if(versionRestriction.build.isDefined)
+              S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", "build")}</p>)
+            versionRestriction = versionRestriction.copy(build = Some(build))
         }
+
+        val titleRestrictions       = titleRestrictionsBuilder.result()
+        val descriptionRestrictions = descriptionRestrictionsBuilder.result()
+        val keywordRestrictions     = keywordRestrictionsBuilder.result()
+        val uploaderRestrictions    = uploaderRestrictionsBuilder.result()
+        val authorRestrictions      = authorRestrictionsBuilder.result()
+        val categoryRestrictions    = categoryRestrictionsBuilder.result()
 
         val categoryAlternatives    = if(categoryRestrictions.isEmpty)
           Nil
@@ -95,12 +105,12 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
         val inhibitCategories = categoryAlternatives.isEmpty
 
         //This is the most epic query ever constructed
-        from(Database.applications,
-             Database.appMetas  .inhibitWhen(inhibitAppMetas),
-             Database.packages,
-             Database.ratings   .inhibitWhen(inhibitRatings),
-             Database.users     .inhibitWhen(inhibitUsers),
-             Database.categories.inhibitWhen(inhibitCategories)) {
+        val query = from(Database.applications,
+                         Database.appMetas  .inhibitWhen(inhibitAppMetas),
+                         Database.packages,
+                         Database.ratings   .inhibitWhen(inhibitRatings),
+                         Database.users     .inhibitWhen(inhibitUsers),
+                         Database.categories.inhibitWhen(inhibitCategories)) {
           (app, meta, pkg, rating, user, category) =>
           where (
             {
@@ -134,6 +144,8 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
               o.desc
           }
         }.distinct
+
+        if(max == 0) query else query.page(0, max)
       case ns @ NoSuccess(error, _) =>
         S.warning(<p>{S.?("filters.invalid")}</p> ++ <code>{error}</code>)
         all

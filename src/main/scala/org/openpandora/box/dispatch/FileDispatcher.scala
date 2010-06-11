@@ -15,7 +15,7 @@ object FileDispatcher {
 
 trait FileDispatcher extends Dispatcher
 
-class FileDispatcherImpl(fs: Filesystem = Filesystem.default) extends FileDispatcher {
+private[dispatch] class FileDispatcherImpl(fs: Filesystem = Filesystem.default) extends FileDispatcher {
   private def serve(file: File, mime: String, name: Option[String] = None) = () => {
     val stream = new BufferedInputStream(new FileInputStream(file))
     val maybeDisposition = name map (x => "Content-Disposition" -> ("attachment; filename=" + x))
@@ -29,7 +29,7 @@ class FileDispatcherImpl(fs: Filesystem = Filesystem.default) extends FileDispat
   }
 
   def servePackage(id: String)(implicit fs: Filesystem) = transaction {
-    from(Database.packages)(pkg => where(pkg.fileId === id) select(pkg)).headOption match {
+    from(Database.packages)(pkg => where(pkg.fileId === id) select(pkg)).toSeq.headOption match {
       case Some(pkg) =>
         val name = pkg.fileName
         User.currentUser match {

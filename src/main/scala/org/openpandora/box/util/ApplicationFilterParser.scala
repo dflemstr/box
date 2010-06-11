@@ -5,6 +5,7 @@ import scala.util.parsing.combinator.PackratParsers
 
 object ApplicationFilterParser {
   sealed trait Expression
+  case class MaxResults(num: Int) extends Expression
   case class FilterAuthor(author: String) extends Expression
   case class FilterUploader(uploader: String) extends Expression
   case class FilterKeyword(word: String) extends Expression
@@ -51,6 +52,7 @@ private[util] class ApplicationFilterParserImpl extends ApplicationFilterParser
   val minor: PackratParser[Expression]       = ("minor:" | "min:")        ~> numberArgs  ^^ (x => FilterVersionMinor(x.toInt))
   val release: PackratParser[Expression]     = ("release:" | "rel:")      ~> numberArgs  ^^ (x => FilterVersionRelease(x.toInt))
   val build: PackratParser[Expression]       = ("build:" | "bui:")        ~> numberArgs  ^^ (x => FilterVersionBuild(x.toInt))
+  val max: PackratParser[Expression]         = ("max:" | "maxResults:")   ~> numberArgs  ^^ (x => MaxResults(x.toInt))
   val version: PackratParser[Expression]     = ("version:" | "ver:")      ~> versionArgs ^^ ((FilterVersion.apply _).tupled)
   val keyword: PackratParser[Expression]     = stringArgs                                ^^ (FilterKeyword(_))
 
@@ -70,6 +72,7 @@ private[util] class ApplicationFilterParserImpl extends ApplicationFilterParser
     byName | byTime | byRating |
     major | minor | release | build | version |
     title | description | category | author | uploader |
+    max |
     keyword 
   )
 

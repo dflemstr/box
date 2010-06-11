@@ -59,7 +59,7 @@ class Users extends DispatchSnippet with Logger {
   def login(login: NodeSeq): NodeSeq = {
     var password = ""
     def doLogin() = {
-      from(Database.users)(user => where(user.username === username.is) select(user)).headOption match {
+      from(Database.users)(user => where(user.username === username.is) select(user)).toSeq.headOption match {
         case Some(user) if user.validated && (user.checkPassword(password)) =>
           user.login()
           S.notice(<p>{S.?("user.loggedin")}</p>)
@@ -181,7 +181,7 @@ class Users extends DispatchSnippet with Logger {
   }
 
   def passwordReset(resetPassword: NodeSeq, id: String): NodeSeq =
-    from(Database.users)(user => where(user.emailUid === id) select(user)).headOption match {
+    from(Database.users)(user => where(user.emailUid === id) select(user)).toSeq.headOption match {
       case Some(user) =>
         def doSet() = validateUser(false, true) match {
           case Seq() =>
@@ -217,7 +217,7 @@ class Users extends DispatchSnippet with Logger {
   }
 
   def lostPassword(lostPassword: NodeSeq): NodeSeq = {
-    def doResetPassword(email: String) = from(Database.users)(user => where(user.email === email) select(user)).headOption match {
+    def doResetPassword(email: String) = from(Database.users)(user => where(user.email === email) select(user)).toSeq.headOption match {
       case Some(user) if user.validated =>
         val resetLink = S.hostAndPath + "/user/reset-password?id=" + user.emailUid
 
