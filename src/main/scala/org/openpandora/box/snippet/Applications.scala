@@ -249,7 +249,7 @@ class Applications extends DispatchSnippet with Logger {
 
   def list(list: NodeSeq): NodeSeq = {
     val filter = (S.attr("filter") or S.param("filter") openOr "").trim
-    val apps = ApplicationFilterRunner.default.runFilter(filter)(ApplicationFilterParser.default)
+    val apps = ApplicationFilterRunner.default.runFilter(filter, S.locale)(ApplicationFilterParser.default)
 
     def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, "entry", entry))
 
