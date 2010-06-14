@@ -59,7 +59,7 @@ private[util] class ApplicationFilterParserImpl extends ApplicationFilterParser
   val byNameAsc: PackratParser[Expression]   = "orderby:titleasc"   ^^ (x => OrderByTitle(true))
   val byTimeAsc: PackratParser[Expression]   = "orderby:timeasc"    ^^ (x => OrderByTime(true))
   val byRatingAsc: PackratParser[Expression] = "orderby:ratingasc"  ^^ (x => OrderByRating(true))
-  val byName: PackratParser[Expression]      = "orderby:title"      ^^ (x => OrderByTitle(false))
+  val byName: PackratParser[Expression]      = "orderby:title"      ^^ (x => OrderByTitle(true))
   val byTime: PackratParser[Expression]      = "orderby:time"       ^^ (x => OrderByTime(true))
   val byRating: PackratParser[Expression]    = "orderby:rating"     ^^ (x => OrderByRating(false))
   val byNameDesc: PackratParser[Expression]  = "orderby:titledesc"  ^^ (x => OrderByTitle(false))

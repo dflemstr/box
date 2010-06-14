@@ -7,14 +7,7 @@ import javax.mail.PasswordAuthentication
 import net.liftweb.common.Box
 import net.liftweb.common.Full
 import net.liftweb.common.Logger
-import net.liftweb.http.DocType
-import net.liftweb.http.LiftRules
-import net.liftweb.http.OnDiskFileParamHolder
-import net.liftweb.http.ParsePath
-import net.liftweb.http.ResponseInfo
-import net.liftweb.http.RewriteRequest
-import net.liftweb.http.RewriteResponse
-import net.liftweb.http.S
+import net.liftweb.http._
 import net.liftweb.http.js.JE
 import net.liftweb.http.js.JsCmds
 import net.liftweb.http.provider.HTTPRequest

@@ -41,7 +41,6 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
           S.warning(<p>{S.?("filters.invalid")}</p> ++ <code>{error}</code>)
           runExpressions(Seq.empty, locale)
       }
-    info("Query: " + query.statement)
     query
   }
 
@@ -57,7 +56,7 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
     val authorRestrictionsBuilder      = Seq.newBuilder[String]
     val categoryRestrictionsBuilder    = Seq.newBuilder[String]
 
-    var ordering: OrderingExpression   = OrderByTitle(false)
+    var ordering: OrderingExpression   = OrderByTitle(true)
     var versionRestriction             = VersionRestriction(None, None, None, None)
     var max = 0
 
@@ -124,27 +123,18 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
     //This is the most epic query ever constructed
     val query = from(Database.applications,
                      Database.appMetas,
-                     Database.appMetas,
                      Database.packages,
                      Database.ratings   .inhibitWhen(inhibitRatings),
                      Database.users     .inhibitWhen(inhibitUsers),
                      Database.categories.inhibitWhen(inhibitCategories)) {
-      (app, metaEng, metaLoc, pkg, rating, user, category) =>
+      (app, metaEng, pkg, rating, user, category) =>
       where (
         {
-          (titleRestrictions map { restr =>
-              likeness(metaEng.title)(restr) or
-              likeness(metaLoc.title)(restr)
-            }) ++
-          (descriptionRestrictions map { restr =>
-              likeness(metaEng.description)(restr) or
-              likeness(metaLoc.description)(restr)
-            }) ++
+          (titleRestrictions map {likeness(metaEng.title)}) ++
+          (descriptionRestrictions map {likeness(metaEng.description)}) ++
           keywordRestrictions.map {restr =>
             likeness(metaEng.title)(restr) or
-            likeness(metaLoc.title)(restr) or
-            likeness(metaEng.description)(restr) or
-            likeness(metaLoc.description)(restr)
+            likeness(metaEng.description)(restr)
           } ++
           (uploaderRestrictions map likeness(user.get.username)) ++
           (authorRestrictions map maybeLikeness(app.authorName)) ++
@@ -162,7 +152,7 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
         }.reduceLeft[LogicalBoolean](_ and _)
       ).select(app, pkg).orderBy {
         val o: TypedExpressionNode[_] = (ordering match {
-            case _: OrderByTitle => metaLoc.title || metaEng.title //Ugly lexicographical trick
+            case _: OrderByTitle => metaEng.title
             case _: OrderByRating => avg(rating.get.value)
             case _: OrderByTime => pkg.uploadTime
           })
