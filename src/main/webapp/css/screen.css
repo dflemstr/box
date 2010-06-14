@@ -1323,7 +1323,7 @@ textarea {
 }
 
 .topmenu-item a {
-    font-size: 1.5em;
+    font-size: 1.7em;
 }
 
 .submenu {
@@ -1339,6 +1339,9 @@ textarea {
     border-bottom: 0.5em solid #107FC9;
     border-left: 0.5em solid #107FC9;
     border-right: 0.5em solid #107FC9;
+    -moz-border-radius: 0.5em;
+    -webkit-bottom-left-border-radius: 0.5em;
+    -webkit-bottom-right-border-radius: 0.5em;
     border-bottom-left-radius: 0.5em;
     border-bottom-right-radius: 0.5em;
     z-index: 2;
@@ -1457,6 +1460,9 @@ textarea {
 }
 
 .notification-wrapper {
+    -moz-border-radius: 1em;
+    -webkit-border-radius: 1em;
+    border-radius: 1em;
     position: relative;
     margin: 0 0 10px 0;
     padding: 0;
@@ -1466,7 +1472,6 @@ textarea {
     display: block;
     padding: 0;
     font-size: medium;
-    border-radius: 1em 1em;
     padding: 0.5em;
     text-align: left;
     color: white;
