@@ -1385,6 +1385,10 @@ textarea {
 
 
 /* Application lists */
+.field {
+    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+}
+
 .star {
     margin-top: 2px;
     width: 8px;
@@ -1502,5 +1506,3 @@ textarea {
 .warning-notification, .notice-notification {
     background-color: #393939;
 }
-
-
