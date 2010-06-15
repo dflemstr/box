@@ -15,8 +15,8 @@ import net.liftweb.http.js.JsCmds
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
-import org.openpandora.box.util.ApplicationFilterRunner
-import org.openpandora.box.util.ApplicationFilterParser
+import org.openpandora.box.util.ApplicationSearchRunner
+import org.openpandora.box.util.ApplicationSearchParser
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
@@ -32,8 +32,8 @@ class Applications extends DispatchSnippet with Logger {
   def dispatch = {
     case "create" => create
     case "list" => list
-    case "filter" => filter
-    case "filterField" => filterField
+    case "search" => search
+    case "searchField" => searchField
     case "entry" => entry
   }
 
@@ -123,7 +123,7 @@ class Applications extends DispatchSnippet with Logger {
     def makeCategory(category: NodeSeq): NodeSeq = categories.flatMap {cat =>
       val name = DotDesktopCategories(cat.value).toString
       bind("category", category,
-           "name" -> <a href={"/applications/list?filter=category:" + name}>{name}</a>)
+           "name" -> <a href={"/applications/list?search=category:" + name}>{name}</a>)
     } toSeq
 
     def makeCategories(categories: NodeSeq): NodeSeq =
@@ -208,7 +208,7 @@ class Applications extends DispatchSnippet with Logger {
         <img src={"http://www.gravatar.com/avatar/" + gravatar + "?s=" + size + "&d=identicon"} alt={name} class="avatar"/>
 
       bind(binding, template,
-           "name" -> <a href={"/applications/list?filter=uploader:" + name}>{name}</a>,
+           "name" -> <a href={"/applications/list?search=uploader:" + name}>{name}</a>,
            "largeavatar" -> gravatarImage(70),
            "avatar"      -> gravatarImage(30),
            "smallavatar" -> gravatarImage(16))
@@ -231,7 +231,7 @@ class Applications extends DispatchSnippet with Logger {
          "description" -> makeLazyString(info.description),
          "version" -> (makeLazyNode {
           val ver = Seq(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild).mkString(".")
-          (<a href={"/applications/list?filter=version:" + ver}>{ver}</a>)
+          (<a href={"/applications/list?search=version:" + ver}>{ver}</a>)
         }),
          "uploader" -> makePerson(pkg.user.single.id, "uploader") _,
          "time" -> makeLazyString(df.format(pkg.uploadTime)),
@@ -248,8 +248,8 @@ class Applications extends DispatchSnippet with Logger {
   }
 
   def list(list: NodeSeq): NodeSeq = {
-    val filter = (S.attr("filter") or S.param("filter") openOr "").trim
-    val apps = ApplicationFilterRunner.default.runFilter(filter, S.locale)(ApplicationFilterParser.default)
+    val search = (S.attr("search") or S.param("search") openOr "").trim
+    val apps = ApplicationSearchRunner.default.runSearch(search, S.locale)(ApplicationSearchParser.default)
 
     def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, "entry", entry))
 
@@ -268,8 +268,8 @@ class Applications extends DispatchSnippet with Logger {
     makeAppEntry(app._1, app._2, "entry", entry)
   }
 
-  def filter(filter: NodeSeq) = S.param("filter") map Text openOr NodeSeq.Empty
+  def search(search: NodeSeq) = S.param("search") map Text openOr NodeSeq.Empty
 
-  def filterField(filterField: NodeSeq): NodeSeq =
-    (<input type="text" name="filter" id="filter-field" value={S.param("filter") openOr ""}/>)
+  def searchField(searchField: NodeSeq): NodeSeq =
+    (<input type="text" name="search" id="search-field" value={S.param("search") openOr ""}/>)
 }

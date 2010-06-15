@@ -41,6 +41,6 @@ $(function() {
             if($(build).val())
                 result += ('build:' + $(build).val() + ' ');
         }
-        $('#filter-field').val(result.trim());
+        $('#search-field').val(result.trim());
     });
 });

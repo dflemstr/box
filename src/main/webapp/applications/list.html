@@ -36,12 +36,12 @@
                     </div>
                 </div>
                 <hr class="space"/></list:entry></lift:Applications.list><lift:bind-at name="footer">
-            <div id="filter-bar">
+            <div id="search-bar">
                 <form method="get" action="/applications/list" class="inline">
                     <p>
-                        <lift:Applications.filterField/>
-                        <input type="submit" value="Filter"/>
-                        <a href="/applications/filter"><lift:loc locid="html.advanced"/>...</a>
+                        <lift:Applications.searchField/>
+                        <input type="submit" value="Search"/>
+                        <a href="/applications/search"><lift:loc locid="html.advanced"/>...</a>
                     </p>
                 </form>
             </div></lift:bind-at>

@@ -11,44 +11,44 @@ import org.squeryl.dsl.ast.LogicalBoolean
 import org.squeryl.dsl.ast.TypedExpressionNode
 import org.squeryl.dsl.OneToMany
 
-object ApplicationFilterRunner {
-  val default: ApplicationFilterRunner = new ApplicationFilterRunnerImpl
+object ApplicationSearchRunner {
+  val default: ApplicationSearchRunner = new ApplicationSearchRunnerImpl
 }
 
-trait ApplicationFilterRunner {
-  def runFilter(filter: String, locale: Locale)(implicit p: ApplicationFilterParser): Query[(Application, Package)]
+trait ApplicationSearchRunner {
+  def runSearch(search: String, locale: Locale)(implicit p: ApplicationSearchParser): Query[(Application, Package)]
 }
 
-private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
+private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
                                                    with Logger {
 
   case class VersionRestriction(major: Option[Int], minor: Option[Int], release: Option[Int], build: Option[Int])
 
-  def runFilter(filter: String, locale: Locale)(implicit p: ApplicationFilterParser): Query[(Application, Package)] = {
+  def runSearch(search: String, locale: Locale)(implicit p: ApplicationSearchParser): Query[(Application, Package)] = {
     import p._
-    import ApplicationFilterParser._
+    import ApplicationSearchParser._
 
     def all = from(Database.applications, Database.packages)((app, pkg) =>
       where(app.packageId === pkg.id) select(app, pkg) orderBy(pkg.uploadTime))
     
-    val query = if(filter.isEmpty)
+    val query = if(search.isEmpty)
       runExpressions(Seq.empty, locale)
     else
-      parseAll(exprs, filter) match {
+      parseAll(exprs, search) match {
         case Success(expressions, _) =>
           runExpressions(expressions, locale)
         case ns @ NoSuccess(error, _) =>
-          S.warning(<p>{S.?("filters.invalid")}</p> ++ <code>{error}</code>)
+          S.warning(<p>{S.?("search.invalid")}</p> ++ <code>{error}</code>)
           runExpressions(Seq.empty, locale)
       }
     query
   }
 
-  def runExpressions(expressions: Seq[ApplicationFilterParser.Expression], locale: Locale) = {
-    import ApplicationFilterParser._
+  def runExpressions(expressions: Seq[ApplicationSearchParser.Expression], locale: Locale) = {
+    import ApplicationSearchParser._
     val lang = locale.toString
 
-    //Split the filter expressions into separate sequences of strings
+    //Split the search expressions into separate sequences of strings
     val titleRestrictionsBuilder       = Seq.newBuilder[String]
     val descriptionRestrictionsBuilder = Seq.newBuilder[String]
     val keywordRestrictionsBuilder     = Seq.newBuilder[String]
@@ -60,17 +60,17 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
     var versionRestriction             = VersionRestriction(None, None, None, None)
     var max = 0
 
-    @inline def warnVersion(field: String) = S.warning(<p>{S.?("filters.version.conflict").replace("%versionfield%", field)}</p>)
+    @inline def warnVersion(field: String) = S.warning(<p>{S.?("search.version.conflict").replace("%versionfield%", field)}</p>)
     expressions foreach {
-      case FilterTitle(title)       => titleRestrictionsBuilder       += title
-      case FilterDescription(descr) => descriptionRestrictionsBuilder += descr
-      case FilterKeyword(keyword)   => keywordRestrictionsBuilder     += keyword
-      case FilterAuthor(author)     => authorRestrictionsBuilder      += author
-      case FilterUploader(uploader) => uploaderRestrictionsBuilder    += uploader
-      case FilterCategory(category) => categoryRestrictionsBuilder    += category
+      case SearchTitle(title)       => titleRestrictionsBuilder       += title
+      case SearchDescription(descr) => descriptionRestrictionsBuilder += descr
+      case SearchKeyword(keyword)   => keywordRestrictionsBuilder     += keyword
+      case SearchAuthor(author)     => authorRestrictionsBuilder      += author
+      case SearchUploader(uploader) => uploaderRestrictionsBuilder    += uploader
+      case SearchCategory(category) => categoryRestrictionsBuilder    += category
       case o: OrderingExpression    => ordering = o
       case MaxResults(n)            => max = n
-      case FilterVersion(major, minor, release, build) =>
+      case SearchVersion(major, minor, release, build) =>
         if(versionRestriction.major.isDefined)
           warnVersion("major")
         if(versionRestriction.minor.isDefined)
@@ -80,19 +80,19 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
         if(versionRestriction.build.isDefined)
           warnVersion("build")
         versionRestriction = VersionRestriction(Some(major), Some(minor), Some(release), Some(build))
-      case FilterVersionMajor(major)     =>
+      case SearchVersionMajor(major)     =>
         if(versionRestriction.major.isDefined)
           warnVersion("major")
         versionRestriction = versionRestriction.copy(major = Some(major))
-      case FilterVersionMinor(minor)     =>
+      case SearchVersionMinor(minor)     =>
         if(versionRestriction.minor.isDefined)
           warnVersion("minor")
         versionRestriction = versionRestriction.copy(minor = Some(minor))
-      case FilterVersionRelease(release) =>
+      case SearchVersionRelease(release) =>
         if(versionRestriction.release.isDefined)
           warnVersion("release")
         versionRestriction = versionRestriction.copy(release = Some(release))
-      case FilterVersionBuild(build)     =>
+      case SearchVersionBuild(build)     =>
         if(versionRestriction.build.isDefined)
           warnVersion("build")
         versionRestriction = versionRestriction.copy(build = Some(build))
@@ -116,25 +116,25 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
     @inline def maybeLikeness(what: => Option[String])(to: String) = what like "%" + to + "%"
     @inline def maybeOmit[A](condition: Boolean, value: A) = if(condition) Seq() else Seq(value)
 
-    val inhibitRatings    = !ordering.isInstanceOf[OrderByRating]
     val inhibitUsers      = uploaderRestrictions.isEmpty
     val inhibitCategories = categoryAlternatives.isEmpty
+    val inhibitAppMetas   = titleRestrictions.isEmpty && descriptionRestrictions.isEmpty &&
+    keywordRestrictions.isEmpty && !ordering.isInstanceOf[OrderByTitle]
 
     //This is the most epic query ever constructed
     val query = from(Database.applications,
-                     Database.appMetas,
+                     Database.appMetas  .inhibitWhen(inhibitAppMetas),
                      Database.packages,
-                     Database.ratings   .inhibitWhen(inhibitRatings),
                      Database.users     .inhibitWhen(inhibitUsers),
                      Database.categories.inhibitWhen(inhibitCategories)) {
-      (app, metaEng, pkg, rating, user, category) =>
+      (app, metaEng, pkg, user, category) =>
       where (
         {
-          (titleRestrictions map {likeness(metaEng.title)}) ++
-          (descriptionRestrictions map {likeness(metaEng.description)}) ++
+          (titleRestrictions map {likeness(metaEng.get.title)}) ++
+          (descriptionRestrictions map {likeness(metaEng.get.description)}) ++
           keywordRestrictions.map {restr =>
-            likeness(metaEng.title)(restr) or
-            likeness(metaEng.description)(restr)
+            likeness(metaEng.get.title)(restr) or
+            likeness(metaEng.get.description)(restr)
           } ++
           (uploaderRestrictions map likeness(user.get.username)) ++
           (authorRestrictions map maybeLikeness(app.authorName)) ++
@@ -142,18 +142,17 @@ private[util] class ApplicationFilterRunnerImpl extends ApplicationFilterRunner
           (versionRestriction.minor map (app.versionMinor === _)) ++
           (versionRestriction.release map (app.versionRelease === _)) ++
           (versionRestriction.build map (app.versionBuild === _)) ++
-          maybeOmit(inhibitRatings, app.id === rating.get.applicationId) ++
           maybeOmit(inhibitCategories, app.id === category.get.applicationId) ++
           maybeOmit(inhibitUsers, user.get.id === pkg.userId) ++
           Seq(app.packageId === pkg.id,
               category.get.value in categoryAlternatives,
-              metaEng.applicationId === app.id,
-              metaEng.languageName === "en_US")
+              metaEng.get.applicationId === app.id,
+              metaEng.get.languageName === "en_US")
         }.reduceLeft[LogicalBoolean](_ and _)
       ).select(app, pkg).orderBy {
         val o: TypedExpressionNode[_] = (ordering match {
-            case _: OrderByTitle => metaEng.title
-            case _: OrderByRating => avg(rating.get.value)
+            case _: OrderByTitle => metaEng.get.title
+            case _: OrderByRating => app.ratingAverage
             case _: OrderByTime => pkg.uploadTime
           })
         if(ordering.ascending)

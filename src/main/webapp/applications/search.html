@@ -1,7 +1,7 @@
-<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/filter.js"/></head>
+<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/search.js"/></head>
                 <form method="get" action="/applications/list">
                     <fieldset>
-                        <legend><lift:loc locid="html.filter"/></legend>
+                        <legend><lift:loc locid="html.search"/></legend>
                         <div class="span-9">
                             <label for="keywords-field"><lift:loc locid="html.keywordslabel"/></label><br/>
                             <input type="text" id="keywords-field" class="changer"/><br/>
@@ -34,8 +34,8 @@
                             </fieldset>
                         </div>
                         <p>
-                            <input type="hidden" class="hide" name="filter" id="filter-field" value=""/>
-                            <input type="submit" value="Filter"/>
+                            <input type="hidden" class="hide" name="search" id="search-field" value=""/>
+                            <input type="submit" value="Search"/>
                         </p>
                     </fieldset>
                 </form>
