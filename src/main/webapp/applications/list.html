@@ -1,4 +1,4 @@
-<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/ratings.js"/></head><lift:Applications.list><list:entry>
+<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/ratings.js"/><script type="text/javascript" src="/js/search.js"/></head><lift:Applications.list><list:entry>
                 <div class="span-19 last">
                     <div class="border span-2 climb-2"><entry:image/></div>
                     <div class="span-14">
@@ -39,7 +39,19 @@
             <div id="search-bar">
                 <form method="get" action="/applications/list" class="inline">
                     <p>
+                        Search:
                         <lift:Applications.searchField/>
+                        order by
+                        <select id="ordering-field">
+                            <option value="title">title</option>
+                            <option value="rating">rating</option>
+                            <option value="time">upload time</option>
+                        </select>
+                        <select id="direction-field">
+                            <option value="default"></option>
+                            <option value="asc">ascending</option>
+                            <option value="desc">descending</option>
+                        </select>
                         <input type="submit" value="Search"/>
                         <a href="/applications/search"><lift:loc locid="html.advanced"/>...</a>
                     </p>

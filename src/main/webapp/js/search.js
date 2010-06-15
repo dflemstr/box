@@ -1,46 +1,52 @@
-$(function() {
-    $('.changer').change(function() {
-        var result = '', elems = [],
-            keywords = '#keywords-field',
-            title = '#title-field',
-            description = '#description-field',
-            category = '#category-field',
-            major = '#major-field',
-            minor = '#minor-field',
-            release = '#release-field',
-            build = '#build-field';
-        if($(keywords).val())
-            result += $(keywords).val() + ' ';
-        if($(title).val()) {
-            elems = $(title).val().split(' ');
-            for(elem in elems) {
-                result += ('title:' + elems[elem].trim() + ' ');
-            }
+$(function(){
+    var orderingField = $('#ordering-field'),
+        directionField = $('#direction-field'),
+        searchField = $('#search-field'),
+        title = 'title',
+        rating = 'rating',
+        time = 'time',
+        def = 'default',
+        asc = 'asc',
+        desc = 'desc',
+        updateSearch = function() {
+            var d = directionField.val();
+            searchField.val((searchField.val().replace(/orderby:[a-z]+/, '').trim() +
+                ' orderby:' + orderingField.val() + ((d == def) ? '' : d)).trim());
+        },
+        search = searchField.val(),
+        ordering = search.match('orderby:([a-z]+)');
+    if(ordering) {
+        ordering = ordering[1];
+        if(ordering == title) {
+            orderingField.val(title);
+            directionField.val(def);
+        } else if(ordering == title + asc) {
+            orderingField.val(title);
+            directionField.val(asc);
+        } else if(ordering == title + desc) {
+            orderingField.val(title);
+            directionField.val(desc);
+        } else if(ordering == rating) {
+            orderingField.val(rating);
+            directionField.val(def);
+        } else if(ordering == rating + asc) {
+            orderingField.val(rating);
+            directionField.val(asc);
+        } else if(ordering == rating + desc) {
+            orderingField.val(rating);
+            directionField.val(desc);
+        } else if(ordering == time) {
+            orderingField.val(time);
+            directionField.val(def);
+        } else if(ordering == time + asc) {
+            orderingField.val(time);
+            directionField.val(asc);
+        } else if(ordering == time + desc) {
+            orderingField.val(time);
+            directionField.val(desc);
         }
-        if($(description).val()) {
-            elems = $(description).val().split(' ');
-            for(elem in elems) {
-                result += ('description:' + elems[elem].trim() + ' ');
-            }
-        }
-        if($(category).val()) {
-            elems = $(category).val().split(' ');
-            for(elem in elems) {
-                result += ('category:' + elems[elem].trim() + ' ');
-            }
-        }
-        if($(major).val() && $(minor).val() && $(release).val() && $(build).val())
-            result += ('version:' + $(major).val() + '.' + $(minor).val() + '.' + $(release).val() + '.' + $(build).val() + ' ');
-        else {
-            if($(major).val())
-                result += ('major:' + $(major).val() + ' ');
-            if($(minor).val())
-                result += ('minor:' + $(minor).val() + ' ');
-            if($(release).val())
-                result += ('release:' + $(release).val() + ' ');
-            if($(build).val())
-                result += ('build:' + $(build).val() + ' ');
-        }
-        $('#search-field').val(result.trim());
-    });
+    }
+
+    orderingField.change(updateSearch);
+    directionField.change(updateSearch);
 });
