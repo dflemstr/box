@@ -3,7 +3,7 @@ package org.openpandora.box.util
 import scala.util.parsing.combinator.JavaTokenParsers
 import scala.util.parsing.combinator.PackratParsers
 
-object ApplicationSearchParser {
+object ApplicationQueryParser {
   sealed trait Expression
   case class MaxResults(num: Int) extends Expression
   case class SearchAuthor(author: String) extends Expression
@@ -20,24 +20,27 @@ object ApplicationSearchParser {
   sealed trait OrderingExpression extends Expression {
     val ascending: Boolean
   }
+  
   case class OrderByTitle(ascending: Boolean) extends OrderingExpression
   case class OrderByTime(ascending: Boolean) extends OrderingExpression
   case class OrderByRating(ascending: Boolean) extends OrderingExpression
+  case class OrderByPxmlId(ascending: Boolean) extends OrderingExpression
+  case class OrderByAuthor(ascending: Boolean) extends OrderingExpression
 
-  val default: ApplicationSearchParser = new ApplicationSearchParserImpl
+  val default: ApplicationQueryParser = new ApplicationQueryParserImpl
 }
 
-trait ApplicationSearchParser extends JavaTokenParsers {
-  val exprs: Parser[Seq[ApplicationSearchParser.Expression]]
+trait ApplicationQueryParser extends JavaTokenParsers {
+  val exprs: Parser[Seq[ApplicationQueryParser.Expression]]
 }
 
-private[util] class ApplicationSearchParserImpl extends ApplicationSearchParser
+private[util] class ApplicationQueryParserImpl extends ApplicationQueryParser
                                                    with PackratParsers {
-  import ApplicationSearchParser._
+  import ApplicationQueryParser._
 
-  val stringArgs: PackratParser[String] = (stringLiteral | ident)
+  val stringArgs: PackratParser[String] = (stringLiteral | ident | failure("Invalid string"))
 
-  val numberArgs = wholeNumber
+  val numberArgs = wholeNumber | failure("Invalid number")
 
   val versionArgs = wholeNumber ~ "." ~ wholeNumber ~ "." ~ wholeNumber ~ "." ~ wholeNumber ^^ {
     case maj ~ "." ~ min ~ "." ~ rev ~ "." ~ build => (maj.toInt, min.toInt, rev.toInt, build.toInt)
@@ -59,21 +62,27 @@ private[util] class ApplicationSearchParserImpl extends ApplicationSearchParser
   val byNameAsc: PackratParser[Expression]   = "orderby:titleasc"   ^^ (x => OrderByTitle(true))
   val byTimeAsc: PackratParser[Expression]   = "orderby:timeasc"    ^^ (x => OrderByTime(true))
   val byRatingAsc: PackratParser[Expression] = "orderby:ratingasc"  ^^ (x => OrderByRating(true))
+  val byPxmlIdAsc: PackratParser[Expression] = "orderby:pxmlidasc"  ^^ (x => OrderByPxmlId(true))
+  val byAuthorAsc: PackratParser[Expression] = "orderby:authorasc"  ^^ (x => OrderByAuthor(true))
   val byName: PackratParser[Expression]      = "orderby:title"      ^^ (x => OrderByTitle(true))
   val byTime: PackratParser[Expression]      = "orderby:time"       ^^ (x => OrderByTime(false))
   val byRating: PackratParser[Expression]    = "orderby:rating"     ^^ (x => OrderByRating(false))
+  val byPxmlId: PackratParser[Expression]    = "orderby:pxmlid"     ^^ (x => OrderByPxmlId(true))
+  val byAuthor: PackratParser[Expression]    = "orderby:author"     ^^ (x => OrderByAuthor(true))
   val byNameDesc: PackratParser[Expression]  = "orderby:titledesc"  ^^ (x => OrderByTitle(false))
   val byTimeDesc: PackratParser[Expression]  = "orderby:timedesc"   ^^ (x => OrderByTime(false))
   val byRatingDesc: PackratParser[Expression]= "orderby:ratingdesc" ^^ (x => OrderByRating(false))
+  val byPxmlIdDesc: PackratParser[Expression]= "orderby:pxmliddesc" ^^ (x => OrderByPxmlId(false))
+  val byAuthorDesc: PackratParser[Expression]= "orderby:authordesc" ^^ (x => OrderByAuthor(false))
 
   val expr: PackratParser[Expression] = (
-    byNameAsc | byTimeAsc | byRatingAsc |
-    byNameDesc | byTimeDesc | byRatingDesc |
-    byName | byTime | byRating |
+    byNameAsc  | byTimeAsc  | byRatingAsc  | byPxmlIdAsc  | byAuthorAsc  |
+    byNameDesc | byTimeDesc | byRatingDesc | byPxmlIdDesc | byAuthorDesc |
+    byName     | byTime     | byRating     | byPxmlId     | byAuthor     |
     major | minor | release | build | version |
     title | description | category | author | uploader |
     max |
-    keyword 
+    keyword | failure("Unknown function")
   )
 
   val exprs: PackratParser[Seq[Expression]] = rep1(expr)
