@@ -87,8 +87,10 @@ class Version(xml: NodeSeq)(implicit localization: Localization, locale: Locale)
 }
 
 class Author(xml: NodeSeq)(implicit localization: Localization, locale: Locale) extends DOM(xml) {
-  val name = (xml\"@name").text
-  val website = (xml\"@website").text
+  private val tmpName = (xml\"@name").text
+  private val tmpWebsite = (xml\"@website").text
+  val name = if(tmpName.isEmpty) None else Some(tmpName)
+  val website = if(tmpWebsite.isEmpty) None else Some(tmpWebsite)
 }
 
 class Category(xml: NodeSeq)(implicit localization: Localization, locale: Locale) extends DOM(xml) {

@@ -134,10 +134,7 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
 
   def addApplicationToPackage(pkg: Package, application: pnd.Application)(implicit pn: ProcessNotifier, user: User, filename: String) =
     try {
-      val an = application.author.map {a =>
-        val name = a.name
-        name.substring(0, minNumber(60, name.length))
-      }
+      val an = application.author.flatMap(_.name.map(name => name.substring(0, minNumber(60, name.length))))
       val app = Database.applications.insert(
         Application(
           `package` = pkg,
