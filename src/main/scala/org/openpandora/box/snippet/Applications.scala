@@ -16,7 +16,7 @@ import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
 import org.openpandora.box.util.ApplicationSearchRunner
-import org.openpandora.box.util.ApplicationSearchParser
+import org.openpandora.box.util.ApplicationQueryParser
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
@@ -67,16 +67,14 @@ class Applications extends DispatchSnippet with Logger {
                  "submit" -> SHtml.submit(S.?("Create"), doCreate))
   }
 
-  private def makeAppEntry(app: Application, pkg: Package,
+  private def makeAppEntry(app: Application, pkg: Package, metaEng: AppMeta, metaLoc: Option[AppMeta],
                            bindName: String, entry: NodeSeq) = {
     val locale = S.locale.toString.toLowerCase
     lazy val infos = app.metas
     lazy val categories = app.categories
     lazy val comments = app.comments
     lazy val concreteInfos = infos.toSeq
-    lazy val info = concreteInfos.find(_.languageName.toLowerCase == locale) orElse
-    concreteInfos.find(_.languageName.toLowerCase == locale.split("_")(0)) getOrElse
-    concreteInfos.find(_.languageName.toLowerCase == "en_us").get
+    val info = metaLoc getOrElse metaEng
     val applicationLink = (n: NodeSeq) => (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
     val downloadLink = (n: NodeSeq) => (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
     val image = if(pkg.hasImage)
@@ -226,15 +224,16 @@ class Applications extends DispatchSnippet with Logger {
     def makeLazyString(text: => String) = (_: NodeSeq) => Text(text)
 
     bind(bindName, entry,
-         "image" -> makeLazyNode(image),
-         "title" -> makeLazyNode(applicationLink(Text(info.title))),
-         "description" -> makeLazyString(info.description),
-         "version" -> (makeLazyNode {
+         "image" -> image,
+         "title" -> applicationLink(Text(info.title)),
+         "pxmlid" -> app.pxmlId,
+         "description" -> info.description,
+         "version" -> ({
           val ver = Seq(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild).mkString(".")
           (<a href={"/applications/list?search=version:" + ver}>{ver}</a>)
         }),
          "uploader" -> makePerson(pkg.user.single.id, "uploader") _,
-         "time" -> makeLazyString(df.format(pkg.uploadTime)),
+         "time" -> df.format(pkg.uploadTime),
          "author" -> makeAuthor _,
          "categories" -> makeCategories _,
          "languages" -> makeLanguages _,
@@ -244,28 +243,45 @@ class Applications extends DispatchSnippet with Logger {
          "link" -> applicationLink,
          "download" -> downloadLink,
          "fileSize" -> makeFileSize(Filesystem.default.getFile(pkg.fileId, PNDFile).length),
-         "downloadCount" -> makeLazyString(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString))
+         "downloadCount" -> ((_: NodeSeq) => Text(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString)))
   }
 
   def list(list: NodeSeq): NodeSeq = {
-    val search = (S.attr("search") or S.param("search") openOr "").trim
-    val apps = ApplicationSearchRunner.default.runSearch(search, S.locale)(ApplicationSearchParser.default)
+    import ApplicationSearchRunner._
+    val search = (S.attr("search") or S.param("search") toOption) map (_.trim)
+    val apps = search match {
+      case None | Some("") =>
+        default.runSearch(UseLocale(S.locale))
+      case Some(query) =>
+        default.runSearch(RunQuery(query)(ApplicationQueryParser.default),
+                          UseLocale(S.locale))
+    }
 
-    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, "entry", entry))
+    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, x._3, x._4, "entry", entry))
 
     bind("list", list,
          "entry" -> makeEntry _)
   }
 
   def entry(entry: NodeSeq): NodeSeq = {
+    val lang = Some(S.locale).filter(_.toString != "en_US").map(_.toString)
     val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap {x =>
-      from(Database.applications, Database.packages)((app, pkg) =>
-        where(app.id === x and app.packageId === pkg.id) select(app, pkg)).toSeq.headOption
+      from(Database.applications, Database.packages, Database.appMetas, Database.appMetas)((app, pkg, metaEng, metaLoc) =>
+        where(app.id === x and
+              app.packageId === pkg.id and
+              metaEng.applicationId === app.id and
+              metaEng.languageName === "en_US").
+        select(app,
+               pkg,
+               metaEng,
+               leftOuterJoin(metaLoc,
+                             metaLoc.applicationId === app.id and
+                             metaLoc.languageName === lang.orNull))).toSeq.headOption
     } getOrElse {
       S.error(<p>Invalid application id</p>)
       S.redirectTo(S.referer openOr "/")
     }
-    makeAppEntry(app._1, app._2, "entry", entry)
+    makeAppEntry(app._1, app._2, app._3, app._4, "entry", entry)
   }
 
   def search(search: NodeSeq) = S.param("search") map Text openOr NodeSeq.Empty

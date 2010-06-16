@@ -1389,7 +1389,7 @@ textarea {
     font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
-.star {
+.s, .star {
     margin-top: 2px;
     width: 8px;
     height: 16px;
@@ -1399,28 +1399,27 @@ textarea {
     float: left;
 }
 
-.star-disabled.star-even {
+.s-di.s-e, .star-disabled.star-even {
     background-position: 0 0;
 }
 
-.star-disabled.star-odd {
+.s-di.s-o, .star-disabled.star-odd {
     background-position: -8px 0;
 }
 
-.star-enabled.star-even {
+.s-en.s-e, .star-enabled.star-even {
     background-position: 0 -16px;
 }
 
-.star-enabled.star-odd {
+.s-en.s-o, .star-enabled.star-odd {
     background-position: -8px -16px;
 }
 
-.star-hover.star-even {
+.s-ho.s-e, .star-hover.star-even {
     background-position: 0 -32px;
 }
 
-
-.star-hover.star-odd {
+.s-ho.s-o, .star-hover.star-odd {
     background-position: -8px -32px;
 }
 

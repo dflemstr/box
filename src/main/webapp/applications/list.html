@@ -1,41 +1,45 @@
-<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/ratings.js"/><script type="text/javascript" src="/js/search.js"/></head><lift:Applications.list><list:entry>
-                <div class="span-19 last">
-                    <div class="border span-2 climb-2"><entry:image/></div>
-                    <div class="span-14">
-                        <h3 class="application-title span-14 last"><entry:title/></h3>
-                        <span class="span-3">
-                            <span class="quiet"><lift:loc locid="html.version"/></span> <span class="field"><entry:version/></span>
-                        </span>
-                        <span class="span-5">
-                            <span class="quiet"><lift:loc locid="html.uploaded"/></span> <span class="field"><entry:time/></span>
-                        </span>
-                        <span class="span-6 last"><entry:uploader>
-                            <span class="quiet"><lift:loc locid="html.uploader"/></span> <span class="field"><span class="small-image"><uploader:smallavatar/></span><uploader:name/></span>
-                        </entry:uploader></span>
-                        <span class="span-14 last"><entry:author>
-                            <span class="quiet"><lift:loc locid="html.author"/></span> <span class="field"><author:name/></span>
-                        </entry:author></span>
-                        <span class="span-14 last"><entry:categories>
-                            <span class="quiet"><lift:loc locid="html.categories"/></span> <span class="field"><categories:category><span class="category"><category:name/></span> </categories:category></span>
-                        </entry:categories></span>
-                    </div>
-                    <div class="span-3 last">
-                        <div class="span-3 last"><entry:rating>
-                            <rating:display>
-                                <display:enabled>
-                                    <enabled:even><span class="star star-enabled star-even"/></enabled:even>
-                                    <enabled:odd><span class="star star-enabled star-odd"/></enabled:odd>
-                                </display:enabled>
-                                <display:disabled>
-                                    <disabled:even><span class="star star-disabled star-even"/></disabled:even>
-                                    <disabled:odd><span class="star star-disabled star-odd"/></disabled:odd>
-                                </display:disabled>
-                            </rating:display>
-                            <span class="rating-count"><rating:count/></span>
-                        </entry:rating></div><div class="span-3 last button"><entry:link><lift:loc locid="html.details"/></entry:link></div>
-                    </div>
+<lift:surround with="default" at="main">
+    <head><script type="text/javascript" src="/js/ratings.js"/><script type="text/javascript" src="/js/search.js"/></head><lift:Applications.list><list:entry>
+            <div class="span-19 last">
+                <div class="border span-2 climb-2"><entry:image/></div>
+                <div class="span-14">
+                    <h3 class="application-title span-14 last"><entry:title/></h3>
+                    <span class="span-3">
+                        <span class="quiet"><lift:loc locid="html.version"/></span> <span class="field"><entry:version/></span>
+                    </span>
+                    <span class="span-5">
+                        <span class="quiet"><lift:loc locid="html.uploaded"/></span> <span class="field"><entry:time/></span>
+                    </span>
+                    <span class="span-6 last"><entry:uploader>
+                        <span class="quiet"><lift:loc locid="html.uploader"/></span> <span class="field"><span class="small-image"><uploader:smallavatar/></span><uploader:name/></span>
+                    </entry:uploader></span>
+                    <span class="span-8">
+                        <span class="quiet">PXML id</span> <span class="field"><entry:pxmlid/></span>
+                    </span>
+                    <span class="span-6 last"><entry:author>
+                        <span class="quiet"><lift:loc locid="html.author"/></span> <span class="field"><author:name/></span>
+                    </entry:author></span>
+                    <span class="span-14 last"><entry:categories>
+                        <span class="quiet"><lift:loc locid="html.categories"/></span> <span class="field"><categories:category><span class="category"><category:name/></span> </categories:category></span>
+                    </entry:categories></span>
                 </div>
-                <hr class="space"/></list:entry></lift:Applications.list><lift:bind-at name="footer">
+                <div class="span-3 last">
+                    <div class="span-3 last"><entry:rating>
+                        <rating:display>
+                            <display:enabled>
+                                <enabled:even><span class="s s-en s-e"/></enabled:even>
+                                <enabled:odd><span class="s s-en s-o"/></enabled:odd>
+                            </display:enabled>
+                            <display:disabled>
+                                <disabled:even><span class="s s-di s-e"/></disabled:even>
+                                <disabled:odd><span class="s s-di s-o"/></disabled:odd>
+                            </display:disabled>
+                        </rating:display>
+                        <span class="rating-count"><rating:count/></span>
+                    </entry:rating></div><div class="span-3 last button"><entry:link><lift:loc locid="html.details"/></entry:link></div>
+                </div>
+            </div>
+            <hr class="space"/></list:entry></lift:Applications.list><lift:bind-at name="footer">
             <div id="search-bar">
                 <form method="get" action="/applications/list" class="inline">
                     <p>
@@ -46,6 +50,8 @@
                             <option value="title">title</option>
                             <option value="rating">rating</option>
                             <option value="time">upload time</option>
+                            <option value="pxmlid">pxml id</option>
+                            <option value="author">author</option>
                         </select>
                         <select id="direction-field">
                             <option value="default"></option>
