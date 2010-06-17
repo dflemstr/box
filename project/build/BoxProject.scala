@@ -12,7 +12,6 @@ class BoxProject(info: ProjectInfo) extends DefaultWebProject(info) with hoffroc
   override def libraryDependencies = Set (
     "net.liftweb" % "lift-webkit" % liftVersion % "compile",
     "org.squeryl" %% "squeryl" % "0.9.4beta5" % "compile",
-    "junit" % "junit" % "4.5" % "test",
     "org.scala-tools.testing" %% "specs" % "1.6.5-SNAPSHOT" % "test",
     "org.eclipse.jetty" % "jetty-webapp" % "7.0.2.RC0" % "test",
     "com.h2database" % "h2" % "1.2.121" % "compile",
