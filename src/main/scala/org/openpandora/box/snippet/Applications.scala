@@ -28,47 +28,10 @@ import scala.xml.NodeSeq
 import scala.xml.Text
 import scala.xml.UnprefixedAttribute
 
-class Applications extends DispatchSnippet with Logger {
-  def dispatch = {
-    case "create" => create
-    case "list" => list
-    case "search" => search
-    case "searchField" => searchField
-    case "entry" => entry
-  }
-
-  private object upload extends RequestVar[Option[FileParamHolder]](None)
+object Applications {
   private object createCommentFunction extends RequestVar[Option[() => NodeSeq]](None)
-
-  def create(create: NodeSeq): NodeSeq = {
-    import PackageManager._
-    def doCreate() = {
-      def success() =
-        S.notice(<p>{S.?("package.uploaded")}</p> ++
-                 <p>{S.?("package.processing")}</p>)
-
-      upload.is match {
-        case Some(h) =>
-          PackageManager.default.makePackageFromStream(h.fileName, h.fileStream, User.currentUser getOrElse {
-              S.error(<p>{S.?("package.abortlogout")}</p>)
-              S.redirectTo(S.referer openOr "/")
-            })
-          success()
-        case None =>
-          S.error(<p>{S.?("package.void")}</p>)
-      }
-    }
-
-    val u = SHtml.fileUpload(x => upload.set(Some(x)))
-    val meta = new UnprefixedAttribute("id", "upload-field", u.attributes)
-
-    Helpers.bind("create", create,
-                 "upload" -> u % meta,
-                 "submit" -> SHtml.submit(S.?("Create"), doCreate))
-  }
-
-  private def makeAppEntry(app: Application, pkg: Package, metaEng: AppMeta, metaLoc: Option[AppMeta],
-                           bindName: String, entry: NodeSeq) = {
+  def makeAppEntry(app: Application, pkg: Package, metaEng: AppMeta, metaLoc: Option[AppMeta],
+                   bindName: String, entry: NodeSeq) = {
     val locale = S.locale.toString.toLowerCase
     lazy val infos = app.metas
     lazy val categories = app.categories
@@ -188,14 +151,14 @@ class Applications extends DispatchSnippet with Logger {
 
       <div id={id}>{render}</div>
     }
-    
+
     def makeAuthor(author: NodeSeq) = app.authorName match {
       case None => NodeSeq.Empty
       case Some(aname) =>
         bind("author", author,
              "name"-> aname)
     }
-    
+
     def makePerson(who: Long, binding: String)(template: NodeSeq) = {
       val name = User.nameFor(who)
       val user = Database.users.lookup(who).get
@@ -245,22 +208,91 @@ class Applications extends DispatchSnippet with Logger {
          "fileSize" -> makeFileSize(Filesystem.default.getFile(pkg.fileId, PNDFile).length),
          "downloadCount" -> ((_: NodeSeq) => Text(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString)))
   }
+}
+
+class Applications extends DispatchSnippet with Logger {
+  import Applications._
+  def dispatch = {
+    case "create" => create
+    case "list" => list
+    case "search" => search
+    case "searchField" => searchField
+    case "entry" => entry
+  }
+
+  private object upload extends RequestVar[Option[FileParamHolder]](None)
+
+  def create(create: NodeSeq): NodeSeq = {
+    import PackageManager._
+    def doCreate() = {
+      def success() =
+        S.notice(<p>{S.?("package.uploaded")}</p> ++
+                 <p>{S.?("package.processing")}</p>)
+
+      upload.is match {
+        case Some(h) =>
+          PackageManager.default.makePackageFromStream(h.fileName, h.fileStream, User.currentUser getOrElse {
+              S.error(<p>{S.?("package.abortlogout")}</p>)
+              S.redirectTo(S.referer openOr "/")
+            })
+          success()
+        case None =>
+          S.error(<p>{S.?("package.void")}</p>)
+      }
+    }
+
+    val u = SHtml.fileUpload(x => upload.set(Some(x)))
+    val meta = new UnprefixedAttribute("id", "upload-field", u.attributes)
+
+    Helpers.bind("create", create,
+                 "upload" -> u % meta,
+                 "submit" -> SHtml.submit(S.?("Create"), doCreate))
+  }
 
   def list(list: NodeSeq): NodeSeq = {
     import ApplicationSearchRunner._
-    val search = (S.attr("search") or S.param("search") toOption) map (_.trim)
-    val apps = search match {
-      case None | Some("") =>
-        default.runSearch(UseLocale(S.locale))
-      case Some(query) =>
-        default.runSearch(RunQuery(query)(ApplicationQueryParser.default),
-                          UseLocale(S.locale))
+    val search = (S.attr("search") or S.param("search") toOption) map (_.trim) getOrElse ""
+    val lazyload = (S.attr("lazyload") or S.param("lazyload") toOption) map (_.toInt)
+
+    def loadAppsOnPage(page: Option[(Int, Int)]) = ((search, page) match {
+        case ("", None) =>
+          default.runSearch(UseLocale(S.locale))
+        case ("", Some((start, max))) =>
+          default.runSearch(UseExplicitPagination(start, max),
+                            UseLocale(S.locale))
+        case (query, None) =>
+          default.runSearch(RunQuery(query)(ApplicationQueryParser.default),
+                            UseLocale(S.locale))
+        case (query, Some((start, max))) =>
+          default.runSearch(RunQuery(query)(ApplicationQueryParser.default),
+                            UseExplicitPagination(start, max),
+                            UseLocale(S.locale))
+      }).toSeq
+    def makeEntry(applications: Seq[(Application, Package, AppMeta, Option[AppMeta])])(entry: NodeSeq): NodeSeq =
+      applications flatMap (x => makeAppEntry(x._1, x._2, x._3, x._4, "entry", entry))
+
+    lazyload match {
+      case None =>
+        bind("list", list,
+             "entry" -> makeEntry(loadAppsOnPage(None)) _,
+             "loading" -> NodeSeq.Empty)
+      case Some(pageSize) =>
+        def loadPage(number: Int): NodeSeq = {
+          val id = Helpers.nextFuncName
+          val apps = loadAppsOnPage(Some((number * pageSize, pageSize)))
+
+          def makeLoading(loading: NodeSeq) = if(apps.size < pageSize)
+            NodeSeq.Empty
+          else
+            S.fmapFunc(() => JsCmds.Replace(id, loadPage(number + 1)))(name =>
+              (<div id={id} onloadmore={SHtml.makeAjaxCall(JE.Str(name)).toJsCmd + ";"}>{loading}</div>))
+
+          bind("list", list,
+               "entry" -> makeEntry(apps) _,
+               "loading" -> makeLoading _)
+        }
+        loadPage(0)
     }
-
-    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => makeAppEntry(x._1, x._2, x._3, x._4, "entry", entry))
-
-    bind("list", list,
-         "entry" -> makeEntry _)
   }
 
   def entry(entry: NodeSeq): NodeSeq = {

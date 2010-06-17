@@ -3,33 +3,33 @@
                 <p><lift:loc locid="html.loginview"/></p>
     </lift:Users.isLoggedOut>
     <lift:Users.isLoggedIn>
-        <head>
-            <script type="text/javascript">
-                var cd = <lift:UserStatistics.categoryDownloads/>;
-                var hd = <lift:UserStatistics.downloadHistory/>;
-            </script>
-            <script src="/js/user-diagrams.js"/>
-        </head>
-
+                <head><script type="text/javascript">var cd = <lift:UserStatistics.categoryDownloads/>;var hd = <lift:UserStatistics.downloadHistory/>;</script><script src="/js/user-diagrams.js"/></head>
                 <div class="span-6">
                     <h3><lift:loc locid="html.downloadhistory"/></h3>
                     <div class="span-6 climb-4 last" id="history-diagram"></div>
                     <h3><lift:loc locid="html.downloadsbycategory"/></h3>
                     <div class="span-6 climb-4 last" id="category-diagram"></div>
                 </div>
-                <div class="span-13 last">
-                    <h3>Filler</h3>
-                    <p>
-                        I don't know what to put here yet...
-                    </p>
-                    <p>
-                        Maybe an overview over which applications that <em>you</em> have
-                        downloaded also exist in newer reincarnations (aka: versions).
-                    </p>
-                    <p>
-                        Or what about some other kind of overview? Who knows what the
-                        future may bring.
-                    </p>
+                <div class="span-13 last"><lift:UserStatistics.upgradableApplications>
+                    <h2>Upgradable applications</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><lift:loc locid="html.title"/></th>
+                                <th><lift:loc locid="html.version"/></th>
+                                <th><lift:loc locid="html.uploaded"/></th>
+                                <th>&nbsp;</th>
+                            </tr>
+                        </thead>
+                        <tbody><list:entry>
+                            <tr>
+                                <td><entry:title/></td>
+                                <td><entry:version/></td>
+                                <td><entry:time/></td>
+                                <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
+                            </tr></list:entry>
+                        </tbody>
+                    </table></lift:UserStatistics.upgradableApplications>
                 </div>
     </lift:Users.isLoggedIn>
 </lift:surround>

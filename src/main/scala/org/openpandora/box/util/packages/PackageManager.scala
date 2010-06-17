@@ -6,10 +6,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.io.RandomAccessFile
-import java.nio.ByteBuffer
 import java.nio.channels.Channels
-import java.nio.channels.FileChannel
 import java.util.Locale
 import javax.imageio.ImageIO
 import net.liftweb.common.Logger
@@ -84,7 +81,9 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
     try {
       //Try to save the file
       val file = savePNDFile(id, inputStream)
-      val (pxmlFile, maybePngFile) = findPxmlAndPng(id, file)
+      val (pxmlFile, maybePngFile) = PNDBinaryInfo.default.findPxmlAndPng(id, file)
+
+      maybePngFile.map(loadAndResizePngFile(_, 64, 64))
 
       //Then, try to parse the PXML file, and if it succeeds, repack it
       val xml = cleanXMLFileAndLoad(pxmlFile)
@@ -232,17 +231,18 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
     file
   }
 
-  def findPxmlAndPng(id: String, file: File)(implicit fs: Filesystem) = {
-    val channel = makeChannel(file)
-    try {
-      val pxmlBeginning = findPxmlBeginning(channel)
-      extractPxmlAndPng(id, channel, pxmlBeginning)
-    } finally channel.close()
-  }
-
   def makePxml(xml: Elem)(implicit locale: Locale, localization: Localization): PXML = try new PXML(xml) catch {
     case err: RequirementException => throw ProcessNotifier.PxmlSyntaxError(Option(err.getMessage) getOrElse "")
   }
+
+  def loadAndResizePngFile(pngFile: File, maxWidth: Int, maxHeight: Int) =
+    try {
+      val image = ImageIO.read(pngFile)
+      val resizedImage = resizeImage(image, maxWidth, maxHeight)
+      ImageIO.write(resizedImage, "png", pngFile)
+    } catch {
+      case _ => throw ProcessNotifier.PngInvalidError
+    }
 
   def resizeImage(image: BufferedImage, maxWidth: Int, maxHeight: Int) = {
     val factor = minNumber(maxWidth / image.getWidth.toFloat, maxHeight / image.getHeight.toFloat)
@@ -255,115 +255,5 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
     g.drawRenderedImage(image, transform)
     g.dispose()
     result
-  }
-
-  val PndPxmlWindowSize = 65536
-  val MaxChunks = 16
-
-  @inline private def indexOf(data: ByteBuffer, start: Int, length: Int,
-                              pattern: Array[Byte], failure: Array[Int]) = {
-    //Use Knuth-Morris-Pratt to scan the data for a pattern
-    //This is a bit overkill but blazingly fast
-    var j = 0
-    var i = start
-    var result = -1
-    while(i < start + length && result < 0) {
-      while(j > 0 && pattern(j) != data.get(i))
-        j = failure(j - 1)
-
-      if(pattern(j) == data.get(i))
-        j += 1
-
-      if(j == pattern.length)
-        result = i - pattern.length + 1
-
-      i += 1
-    }
-    result
-  }
-
-  def makeChannel(file: File): FileChannel = new RandomAccessFile(file, "r").getChannel
-
-  def findPxmlBeginning(channel: FileChannel): Long = {
-    //Do some precomutations:
-    val buffer = ByteBuffer.allocateDirect(PndPxmlWindowSize)
-    val pxmlPattern = PNDBinaryInfo.PxmlHeader.toArray
-    val pxmlFailure = PNDBinaryInfo.PxmlHeaderKmpFailure.toArray
-    var i = 1
-
-    val pxmlBegin: Long = if(channel.size < PndPxmlWindowSize) {
-      //The whole file fits in the window, act accordingly
-      channel.position(0)
-      channel.read(buffer)
-      indexOf(buffer, 0, channel.size.toInt, pxmlPattern, pxmlFailure)
-    } else {
-      var result: Long = -1
-      while(result < 0 && i < MaxChunks) {
-        val offsetFromEnd = (PndPxmlWindowSize - PNDBinaryInfo.PxmlHeader.length) * i + PNDBinaryInfo.PxmlHeader.length
-        if(channel.size > offsetFromEnd) {
-          val pos = channel.size - offsetFromEnd
-          channel.position(pos)
-          channel.read(buffer)
-          val tmp = indexOf(buffer, 0, PndPxmlWindowSize, pxmlPattern, pxmlFailure)
-          if(tmp > 0)
-            result = pos + tmp
-          i += 1
-        }
-      }
-
-      if(result < 0)
-        throw ProcessNotifier.PxmlNotFoundError
-      result
-    }
-
-    pxmlBegin
-  }
-
-  def extractPxmlAndPng(id: String, channel: FileChannel, start: Long)(implicit fs: Filesystem) = {
-    channel.position(start)
-    val len = (channel.size - start).toInt
-    //TODO: don't load everything at once!
-    val buffer = ByteBuffer.allocateDirect(len)
-
-    channel.read(buffer)
-
-    //Try to find the end of the PXML file
-    val pxmlLength = indexOf(buffer, 0, len,
-                             PNDBinaryInfo.PxmlFooter.toArray,
-                             PNDBinaryInfo.PxmlFooterKmpFailure.toArray) + PNDBinaryInfo.PxmlFooter.length
-
-    if(pxmlLength < PNDBinaryInfo.PxmlFooter.length)
-      throw ProcessNotifier.PxmlTruncatedError
-
-    val pngStart = indexOf(buffer, pxmlLength, len - pxmlLength,
-                           PNDBinaryInfo.PngHeader.toArray,
-                           PNDBinaryInfo.PngHeaderKmpFailure.toArray)
-
-    //Write PXML file
-    val pxmlFile = fs.getFile(id, PXMLFile)
-    val pxmlChannel = new FileOutputStream(pxmlFile).getChannel
-    try {
-      channel.position(start)
-      pxmlChannel.transferFrom(channel, 0, pxmlLength)
-    } finally pxmlChannel.close()
-
-    //If we have a PNG image, write it too
-    val maybePngFile = if(pngStart > 0) {
-      val pngFile = fs.getFile(id, PNGImage)
-      val pngChannel = new FileOutputStream(pngFile).getChannel
-      try {
-        channel.position(start + pngStart)
-        pngChannel.transferFrom(channel, 0, len - pngStart)
-      } finally pngChannel.close()
-      try {
-        val image = ImageIO.read(pngFile)
-        val resizedImage = resizeImage(image, 64, 64)
-        ImageIO.write(resizedImage, "png", pngFile)
-      } catch {
-        case _ => throw ProcessNotifier.PngInvalidError
-      }
-      Some(pngFile)
-    } else None
-    (pxmlFile, maybePngFile)
   }
 }

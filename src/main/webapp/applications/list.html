@@ -1,5 +1,6 @@
 <lift:surround with="default" at="main">
-    <head><script type="text/javascript" src="/js/ratings.js"/><script type="text/javascript" src="/js/search.js"/></head><lift:Applications.list><list:entry>
+    <head><script type="text/javascript" src="/js/ratings.js"/><script type="text/javascript" src="/js/search.js"/><script type="text/javascript" src="/js/lazyloadlist.js"/></head>
+        <lift:Applications.list lazyload="5"><list:entry>
             <div class="span-19 last">
                 <div class="border span-2 climb-2"><entry:image/></div>
                 <div class="span-14">
@@ -39,7 +40,8 @@
                     </entry:rating></div><div class="span-3 last button"><entry:link><lift:loc locid="html.details"/></entry:link></div>
                 </div>
             </div>
-            <hr class="space"/></list:entry></lift:Applications.list><lift:bind-at name="footer">
+            <hr class="space"/></list:entry><list:loading>
+            <div id="lazy-loader" class="climb-2 span-19 last">Loading...</div></list:loading></lift:Applications.list><lift:bind-at name="footer">
             <div id="search-bar">
                 <form method="get" action="/applications/list" class="inline">
                     <p>

@@ -83,8 +83,8 @@ private[packages] class ProcessNotifierImpl(localization: Localization = Localiz
     Actor.react {
       case SendResolvedMessage(message, user, filename) =>
         import Poster._
-        val transformedTitle = loc(message.titleLocalization, user.language).replace("%filename%", Text(filename).text)
-        val transformedBody = message.replacements.foldLeft(loc(message.bodyLocalization, user.language))((res, n) => res.replace("%" + n._1 + "%", Text(n._2).text))
+        val transformedTitle = loc(message.titleLocalization, user.language).replace("%filename%", Text(filename).toString)
+        val transformedBody = message.replacements.foldLeft(loc(message.bodyLocalization, user.language))((res, n) => res.replace("%" + n._1 + "%", Text(n._2).toString))
         val kind = message match {
           case err: ErrorMessage => "error"
           case warn: WarningMessage => "warning"
