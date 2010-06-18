@@ -166,9 +166,11 @@ class Boot extends Logger {
 
     LiftRules.explicitlyParsedSuffixes += "pnd"
 
-    ResponseInfo.docType = {
-      case _ if S.getDocType._1 => S.getDocType._2
-      case _ => Full(DocType.xhtml11)
+    LiftRules.docType.default.set {(r: Req) =>
+      r match {
+        case _ if S.getDocType._1 => S.getDocType._2
+        case _ => Full(DocType.xhtml11)
+      }
     }
   }
 
