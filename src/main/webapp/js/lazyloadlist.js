@@ -2,12 +2,10 @@ var maybeLoadMore = function() {
     var nativeWind = window,
     wind = $(nativeWind),
     loader = $('#lazy-loader').parent(),
-    margin = 200,
-    top = wind.scrollTop() - margin,
     windJQHeight = wind.height(),
-    bottom = top + ((windJQHeight == 0) ? nativeWind.innerHeight : windJQHeight) + margin, //Height workaround for Chrome 5 and 6
+    windBottom = wind.scrollTop() + ((windJQHeight == 0) ? nativeWind.innerHeight : windJQHeight), //Height workaround for Chrome 5 and 6
     loaderTop = loader.offset().top;
-    if(loaderTop > top && loaderTop < bottom) {
+    if(loaderTop < windBottom + 200) {
         loader.trigger('loadmore');
     }
 }
