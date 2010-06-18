@@ -9,6 +9,8 @@ class BoxProject(info: ProjectInfo) extends DefaultWebProject(info) with hoffroc
 
   val liftVersion = "2.0-scala280-SNAPSHOT"
 
+  override val compileOptions = Seq(Deprecation, Unchecked, Optimise, ExplainTypes)
+
   override def libraryDependencies = Set (
     "net.liftweb" % "lift-webkit" % liftVersion % "compile",
     "org.squeryl" %% "squeryl" % "0.9.4beta5" % "compile",
