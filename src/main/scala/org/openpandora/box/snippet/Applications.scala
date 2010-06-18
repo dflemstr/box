@@ -277,21 +277,26 @@ class Applications extends DispatchSnippet with Logger {
              "entry" -> makeEntry(loadAppsOnPage(None)) _,
              "loading" -> NodeSeq.Empty)
       case Some(pageSize) =>
-        def loadPage(number: Int): NodeSeq = {
-          val id = Helpers.nextFuncName
+        def makeId = Helpers.nextFuncName
+        def loadPage(number: Int, id: String): NodeSeq = {
           val apps = loadAppsOnPage(Some((number * pageSize, pageSize)))
 
           def makeLoading(loading: NodeSeq) = if(apps.size < pageSize)
             NodeSeq.Empty
-          else
-            S.fmapFunc(() => JsCmds.Replace(id, loadPage(number + 1)))(name =>
-              (<div id={id} onloadmore={SHtml.makeAjaxCall(JE.Str(name)).toJsCmd + ";"}>{loading}</div>))
+          else {
+            val newId = makeId
+            S.mapFunc(id,
+                      () => (JsCmds.Replace(id, loadPage(number + 1, newId)) & JE.Call("bindLoadEvent", JE.Str(newId), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(newId + "=true")).cmd)).cmd))
+            (<div id={id}>{loading}</div> ++
+             (if(number == 0)
+               JsCmds.Script(JsCmds.OnLoad(JE.Call("bindLoadEvent", JE.Str(id), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(id + "=true")).cmd)).cmd)) else NodeSeq.Empty))
+          }
 
           bind("list", list,
                "entry" -> makeEntry(apps) _,
                "loading" -> makeLoading _)
         }
-        loadPage(0)
+        loadPage(0, makeId)
     }
   }
 
