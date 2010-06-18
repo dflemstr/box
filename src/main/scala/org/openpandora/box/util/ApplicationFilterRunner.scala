@@ -49,7 +49,8 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
                     orderDir:         OrderingDirection.Value = OrderingDirection.Ascending,
                     start:            Int                     = 0,
                     count:            Option[Int]             = None,
-                    locale:           Option[Locale]          = None)
+                    locale:           Option[Locale]          = None,
+                    showOldVersions:  Boolean                 = false)
 
   def runQuery(query: String, parser: ApplicationQueryParser, search: Search) = {
     import ApplicationQueryParser._
@@ -80,6 +81,7 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
         case OrderByAuthor(true)      => previous.copy(orderCol = OrderingColumn.Author, orderDir = OrderingDirection.Ascending)
         case OrderByAuthor(false)     => previous.copy(orderCol = OrderingColumn.Author, orderDir = OrderingDirection.Descending)
         case MaxResults(n)            => previous.copy(count = Some(n))
+        case ShowOlderVersions(value)   => previous.copy(showOldVersions = value)
         case SearchVersion(major, minor, release, build) =>
           if(previous.versionRestr.major.isDefined)
             warnVersion("major")
@@ -172,6 +174,7 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
           (search.versionRestr.build map (app.versionBuild === _)) ++
           maybeOmit(inhibitCategories, app.id === category.get.applicationId) ++
           maybeOmit(inhibitUsers, user.get.id === pkg.userId) ++
+          (maybeOmit(search.showOldVersions, app.newest === true)) ++
           Seq(app.packageId === pkg.id,
               category.get.value in categoryAlternatives,
               metaEng.applicationId === app.id,

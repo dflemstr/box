@@ -17,15 +17,20 @@ object ApplicationQueryParser {
   case class SearchVersionMinor(minor: Int) extends Expression
   case class SearchVersionRelease(release: Int) extends Expression
   case class SearchVersionBuild(build: Int) extends Expression
+
   sealed trait OrderingExpression extends Expression {
     val ascending: Boolean
   }
-  
   case class OrderByTitle(ascending: Boolean) extends OrderingExpression
   case class OrderByTime(ascending: Boolean) extends OrderingExpression
   case class OrderByRating(ascending: Boolean) extends OrderingExpression
   case class OrderByPxmlId(ascending: Boolean) extends OrderingExpression
   case class OrderByAuthor(ascending: Boolean) extends OrderingExpression
+
+  sealed trait ToggleExpression extends Expression {
+    val value: Boolean
+  }
+  case class ShowOlderVersions(value: Boolean) extends ToggleExpression
 
   val default: ApplicationQueryParser = new ApplicationQueryParserImpl
 }
@@ -75,10 +80,14 @@ private[util] class ApplicationQueryParserImpl extends ApplicationQueryParser
   val byPxmlIdDesc: PackratParser[Expression]= "orderby:pxmliddesc" ^^ (x => OrderByPxmlId(false))
   val byAuthorDesc: PackratParser[Expression]= "orderby:authordesc" ^^ (x => OrderByAuthor(false))
 
+  val doShowOld: PackratParser[Expression]   = "showold:true"       ^^ (x => ShowOlderVersions(true))
+  val dontShowOld: PackratParser[Expression] = "showold:false"      ^^ (x => ShowOlderVersions(false))
+
   val expr: PackratParser[Expression] = (
     byNameAsc  | byTimeAsc  | byRatingAsc  | byPxmlIdAsc  | byAuthorAsc  |
     byNameDesc | byTimeDesc | byRatingDesc | byPxmlIdDesc | byAuthorDesc |
     byName     | byTime     | byRating     | byPxmlId     | byAuthor     |
+    doShowOld | dontShowOld |
     major | minor | release | build | version |
     title | description | category | author | uploader |
     max |
