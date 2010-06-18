@@ -38,7 +38,7 @@ case class User(@(Column @field)(length = 64)
 
   def checkPassword(password: String) = (Helpers.hash(passwordSalt + password) == passwordHash)
 
-  lazy val gravatar = Helpers.hexEncode(Helpers.md5(email.toLowerCase.getBytes("UTF-8")))
+  def gravatar = Helpers.hexEncode(Helpers.md5(email.toLowerCase.getBytes("UTF-8")))
 
   def gravatarImage(size: Int) =
         <img src={"http://www.gravatar.com/avatar/" + gravatar + "?s=" + size + "&d=identicon"} alt={username} class="avatar"/>
