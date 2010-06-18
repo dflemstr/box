@@ -11,7 +11,10 @@
                     <div class="span-6 climb-4 last" id="category-diagram"></div>
                 </div>
                 <div class="span-13 last"><lift:UserStatistics.upgradableApplications>
-                    <h2>Upgradable applications</h2>
+                    <h3>Upgrades</h3>
+                    <p>
+                        Upgrades for packages you have downloaded.
+                    </p>
                     <table>
                         <thead>
                             <tr>
@@ -21,13 +24,13 @@
                                 <th>&nbsp;</th>
                             </tr>
                         </thead>
-                        <tbody><list:entry>
+                        <tbody><upgradableApplications:entry>
                             <tr>
                                 <td><entry:title/></td>
                                 <td><entry:version/></td>
                                 <td><entry:time/></td>
                                 <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
-                            </tr></list:entry>
+                            </tr></upgradableApplications:entry>
                         </tbody>
                     </table></lift:UserStatistics.upgradableApplications>
                 </div>
