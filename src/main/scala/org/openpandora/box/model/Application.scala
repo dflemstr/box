@@ -33,23 +33,29 @@ case class Application(packageId:       Long, //id
 
 object Application {
   def apply(`package`: Package, pxmlId: String, versionMajor: Int, versionMinor: Int, versionRelease: Int, versionBuild: Int, authorName: Option[String]): Application = {
-    val isNewest = (from(Database.applications)(app => where(
-        app.pxmlId === pxmlId and
-        (
-          (app.versionMajor   gt  versionMajor)
-        ) or (
-          (app.versionMajor   === versionMajor) and
-          (app.versionMinor   gt  versionMinor)
-        ) or (
-          (app.versionMajor   === versionMajor) and
-          (app.versionMinor   === versionMinor) and
-          (app.versionRelease gt  versionRelease)
-        ) or (
-          (app.versionMajor   === versionMajor) and
-          (app.versionMinor   === versionMinor) and
-          (app.versionRelease === versionRelease) and
-          (app.versionBuild   gt  versionBuild)
-        )) compute(count)): Long) == 0
+    val countQuery = from(Database.applications)(app => where(
+        app.pxmlId === pxmlId and (
+          (
+            (app.versionMajor   gt  versionMajor)
+          ) or (
+            (app.versionMajor   === versionMajor) and
+            (app.versionMinor   gt  versionMinor)
+          ) or (
+            (app.versionMajor   === versionMajor) and
+            (app.versionMinor   === versionMinor) and
+            (app.versionRelease gt  versionRelease)
+          ) or (
+            (app.versionMajor   === versionMajor) and
+            (app.versionMinor   === versionMinor) and
+            (app.versionRelease === versionRelease) and
+            (app.versionBuild   gt  versionBuild)
+          )
+        )) compute(count))
+    val isNewest = {
+      val count = (countQuery: Long)
+      info("count: " + count)
+      count == 0l
+    }
 
     if(isNewest) update(Database.applications)(app => where(app.pxmlId === pxmlId) set(app.newest := false))
 
