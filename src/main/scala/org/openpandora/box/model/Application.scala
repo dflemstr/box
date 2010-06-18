@@ -51,11 +51,7 @@ object Application {
             (app.versionBuild   gt  versionBuild)
           )
         )) compute(count))
-    val isNewest = {
-      val count = (countQuery: Long)
-      info("count: " + count)
-      count == 0l
-    }
+    val isNewest = ((countQuery: Long) == 0l)
 
     if(isNewest) update(Database.applications)(app => where(app.pxmlId === pxmlId) set(app.newest := false))
 
