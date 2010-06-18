@@ -383,7 +383,8 @@ input[type=text], input[type=password], input.text, input.title, textarea, selec
     border: 1px solid #bbb;
 }
 
-input[type=text]:focus, input[type=password]:focus, input.text:focus, input.title:focus, textarea:focus, select:focus {
+input[type=text]:focus, input[type=password]:focus,
+input.text:focus, input.title:focus, textarea:focus, select:focus {
     border-color: #666;
 }
 
@@ -466,7 +467,9 @@ form.inline p {
     background: url(src/grid.png);
 }
 
-.column, .span-1, .span-2, .span-3, .span-4, .span-5, .span-6, .span-7, .span-8, .span-9, .span-10, .span-11, .span-12, .span-13, .span-14, .span-15, .span-16, .span-17, .span-18, .span-19 {
+.column, .span-1, .span-2, .span-3, .span-4, .span-5, .span-6, .span-7, .span-8,
+.span-9, .span-10, .span-11, .span-12, .span-13, .span-14, .span-15, .span-16,
+.span-17, .span-18, .span-19 {
     float: left;
     margin-right: 10px;
 }
@@ -552,7 +555,16 @@ form.inline p {
     margin-right: 0;
 }
 
-input.span-1, textarea.span-1, input.span-2, textarea.span-2, input.span-3, textarea.span-3, input.span-4, textarea.span-4, input.span-5, textarea.span-5, input.span-6, textarea.span-6, input.span-7, textarea.span-7, input.span-8, textarea.span-8, input.span-9, textarea.span-9, input.span-10, textarea.span-10, input.span-11, textarea.span-11, input.span-12, textarea.span-12, input.span-13, textarea.span-13, input.span-14, textarea.span-14, input.span-15, textarea.span-15, input.span-16, textarea.span-16, input.span-17, textarea.span-17, input.span-18, textarea.span-18, input.span-19, textarea.span-19 {
+input.span-1, textarea.span-1, input.span-2, textarea.span-2,
+input.span-3, textarea.span-3, input.span-4, textarea.span-4,
+input.span-5, textarea.span-5, input.span-6, textarea.span-6,
+input.span-7, textarea.span-7, input.span-8, textarea.span-8,
+input.span-9, textarea.span-9, input.span-10, textarea.span-10,
+input.span-11, textarea.span-11, input.span-12, textarea.span-12,
+input.span-13, textarea.span-13, input.span-14, textarea.span-14,
+input.span-15, textarea.span-15, input.span-16, textarea.span-16,
+input.span-17, textarea.span-17, input.span-18, textarea.span-18,
+input.span-19, textarea.span-19 {
     border-left-width: 1px;
     border-right-width: 1px;
     padding-left: 5px;
@@ -875,7 +887,9 @@ input.span-19, textarea.span-19 {
     margin-left: -760px;
 }
 
-.pull-1, .pull-2, .pull-3, .pull-4, .pull-5, .pull-6, .pull-7, .pull-8, .pull-9, .pull-10, .pull-11, .pull-12, .pull-13, .pull-14, .pull-15, .pull-16, .pull-17, .pull-18, .pull-19 {
+.pull-1, .pull-2, .pull-3, .pull-4, .pull-5, .pull-6, .pull-7, .pull-8, .pull-9,
+.pull-10, .pull-11, .pull-12, .pull-13, .pull-14, .pull-15, .pull-16, .pull-17,
+.pull-18, .pull-19 {
     float: left;
     position: relative;
 }
@@ -956,7 +970,9 @@ input.span-19, textarea.span-19 {
     margin: 0 -760px 1.5em 760px;
 }
 
-.push-1, .push-2, .push-3, .push-4, .push-5, .push-6, .push-7, .push-8, .push-9, .push-10, .push-11, .push-12, .push-13, .push-14, .push-15, .push-16, .push-17, .push-18, .push-19 {
+.push-1, .push-2, .push-3, .push-4, .push-5, .push-6, .push-7, .push-8, .push-9,
+.push-10, .push-11, .push-12, .push-13, .push-14, .push-15, .push-16, .push-17,
+.push-18, .push-19 {
     float: right;
     position: relative;
 }

@@ -1,35 +1,35 @@
 <lift:surround with="default" at="main">
-                <p><lift:loc locid="html.newuser"/></p>
-                <lift:Users.create form="POST">
-                    <fieldset>
-                        <legend><lift:loc locid="html.createuser"/></legend>
-                        <div class="span-9">
-                            <p>
-                                <label for="username-field"><lift:loc locid="html.usernamelabel"/></label><br/>
-                                <create:username/>
-                            </p>
-                            <p>
-                                <label for="password-field"><lift:loc locid="html.passwordlabel"/></label><br/>
-                                <create:password/><br/>
-                                <label for="password-field"><lift:loc locid="html.repeatlabel"/></label><br/>
-                                <create:password/>
-                            </p>
-                        </div>
-                        <div class="span-9 last">
-                            <p>
-                                <label for="email-field"><lift:loc locid="html.emaillabel"/></label><br/>
-                                <create:email/>
-                            </p>
-                            <p>
-                                <label for="language-field"><lift:loc locid="html.languagelabel"/></label><br/>
-                                <create:language/><br/>
-                                <label for="timezone-field"><lift:loc locid="html.timezonelabel"/></label><br/>
-                                <create:timezone/>
-                            </p>
-                        </div>
+            <p><lift:loc locid="html.newuser"/></p>
+            <lift:Users.create form="POST">
+                <fieldset>
+                    <legend><lift:loc locid="html.createuser"/></legend>
+                    <div class="span-9">
                         <p>
-                            <create:submit/>
+                            <label for="username-field"><lift:loc locid="html.usernamelabel"/></label><br/>
+                            <create:username/>
                         </p>
-                    </fieldset>
-                </lift:Users.create>
+                        <p>
+                            <label for="password-field"><lift:loc locid="html.passwordlabel"/></label><br/>
+                            <create:password/><br/>
+                            <label for="password-field"><lift:loc locid="html.repeatlabel"/></label><br/>
+                            <create:password/>
+                        </p>
+                    </div>
+                    <div class="span-9 last">
+                        <p>
+                            <label for="email-field"><lift:loc locid="html.emaillabel"/></label><br/>
+                            <create:email/>
+                        </p>
+                        <p>
+                            <label for="language-field"><lift:loc locid="html.languagelabel"/></label><br/>
+                            <create:language/><br/>
+                            <label for="timezone-field"><lift:loc locid="html.timezonelabel"/></label><br/>
+                            <create:timezone/>
+                        </p>
+                    </div>
+                    <p>
+                        <create:submit/>
+                    </p>
+                </fieldset>
+            </lift:Users.create>
 </lift:surround>

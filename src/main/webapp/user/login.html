@@ -1,16 +1,16 @@
 <lift:surround with="default" at="main">
-                <lift:Users.login form="POST">
-                    <fieldset>
-                        <legend><lift:loc locid="html.login"/></legend>
-                        <p>
-                            <label for="username-field"><lift:loc locid="html.usernamelabel"/></label><br/>
-                            <login:username/><br/>
-                            <label for="password-field"><lift:loc locid="html.passwordlabel"/></label><br/>
-                            <login:password/>
-                        </p>
-                        <p>
-                            <login:submit/>
-                        </p>
-                    </fieldset>
-                </lift:Users.login>
+            <lift:Users.login form="POST">
+                <fieldset>
+                    <legend><lift:loc locid="html.login"/></legend>
+                    <p>
+                        <label for="username-field"><lift:loc locid="html.usernamelabel"/></label><br/>
+                        <login:username/><br/>
+                        <label for="password-field"><lift:loc locid="html.passwordlabel"/></label><br/>
+                        <login:password/>
+                    </p>
+                    <p>
+                        <login:submit/>
+                    </p>
+                </fieldset>
+            </lift:Users.login>
 </lift:surround>

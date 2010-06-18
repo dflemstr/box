@@ -1,10 +1,4 @@
-<lift:surround with="default" at="main">
-    <head>
-        <script type="text/javascript">
-            var hu = <lift:ApplicationStatistics.uploadHistory/>
-        </script>
-        <script type="text/javascript" src="/js/application-diagrams.js"/>
-    </head>
+<lift:surround with="default" at="main"><head><script type="text/javascript">var hu = <lift:ApplicationStatistics.uploadHistory/>;</script><script type="text/javascript" src="/js/application-diagrams.js"/></head>
             <p>
                 <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
                 <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
@@ -28,8 +22,8 @@
                             <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
                         </tr></list:entry>
                     </tbody>
-                </table></lift:Applications.list>
-            </div>
+                </table>
+            </lift:Applications.list></div>
             <div class="span-6 last">
                 <h2>Upload history</h2>
                 <div class="span-6 climb-4 last" id="history-diagram"></div>

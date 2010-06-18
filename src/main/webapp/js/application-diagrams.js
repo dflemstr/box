@@ -1,5 +1,5 @@
 $(function() {
-    $.plot($('#history-diagram'), [
+    $.plot($('#history-diagram'),[
     {
         data: hu,
         label: 'Tracked packages',
