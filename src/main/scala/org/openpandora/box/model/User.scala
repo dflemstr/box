@@ -6,8 +6,8 @@ import net.liftweb.http.CleanRequestVarOnSessionTransition
 import net.liftweb.http.RequestVar
 import net.liftweb.http.S
 import net.liftweb.http.SessionVar
-import org.squeryl.annotations._
 import net.liftweb.util.Helpers
+import org.squeryl.annotations._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.OneToMany
 import scala.annotation.target.field
@@ -37,6 +37,11 @@ case class User(@(Column @field)(length = 64)
   def language = Locale.getAvailableLocales.find(_.toString == languageName) getOrElse Locale.getDefault
 
   def checkPassword(password: String) = (Helpers.hash(passwordSalt + password) == passwordHash)
+
+  lazy val gravatar = Helpers.hexEncode(Helpers.md5(email.toLowerCase.getBytes("UTF-8")))
+
+  def gravatarImage(size: Int) =
+        <img src={"http://www.gravatar.com/avatar/" + gravatar + "?s=" + size + "&d=identicon"} alt={username} class="avatar"/>
 
   def login() {
     User._currentUser.remove()

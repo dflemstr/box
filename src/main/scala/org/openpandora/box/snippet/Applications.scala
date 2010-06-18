@@ -160,19 +160,14 @@ object Applications {
     }
 
     def makePerson(who: Long, binding: String)(template: NodeSeq) = {
-      val name = User.nameFor(who)
       val user = Database.users.lookup(who).get
-
-      lazy val gravatar = Helpers.hexEncode(Helpers.md5(user.email.toLowerCase.getBytes("UTF-8")))
-
-      def gravatarImage(size: Int) =
-        <img src={"http://www.gravatar.com/avatar/" + gravatar + "?s=" + size + "&d=identicon"} alt={name} class="avatar"/>
+      val name = user.username
 
       bind(binding, template,
            "name" -> <a href={"/applications/list?search=uploader:" + name}>{name}</a>,
-           "largeavatar" -> gravatarImage(70),
-           "avatar"      -> gravatarImage(30),
-           "smallavatar" -> gravatarImage(16))
+           "largeavatar" -> user.gravatarImage(70),
+           "avatar"      -> user.gravatarImage(30),
+           "smallavatar" -> user.gravatarImage(16))
     }
 
     val stepThreshold = 0.9
