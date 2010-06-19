@@ -30,13 +30,13 @@ import org.openpandora.box.util.notifications.Poster
  */
 class Boot extends Logger {
   def boot {
-    createDatabase()
+    establishDatabaseConnection()
     configLift()
     setupEmail()
     buildSitemap()
   }
 
-  private def createDatabase() {
+  private def establishDatabaseConnection() {
     import org.squeryl.adapters._
     import org.squeryl.Session
     import org.squeryl.SessionFactory
