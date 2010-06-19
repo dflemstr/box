@@ -14,7 +14,7 @@
                         <span class="quiet"><lift:loc locid="html.uploader"/></span> <span class="field"><span class="small-image"><uploader:smallavatar/></span><uploader:name/></span>
                     </entry:uploader></span>
                     <span class="span-8">
-                        <span class="quiet">PXML id</span> <span class="field"><entry:pxmlid/></span>
+                        <span class="quiet"><lift:loc locid="html.pxmlid"/></span> <span class="field"><entry:pxmlid/></span>
                     </span>
                     <span class="span-6 last"><entry:author>
                         <span class="quiet"><lift:loc locid="html.author"/></span> <span class="field"><author:name/></span>
@@ -40,26 +40,26 @@
                 </div>
             </div>
             <hr class="space"/></list:entry><list:loading>
-            <div id="lazy-loader" class="climb-2 span-19 last">Loading...</div></list:loading></lift:Applications.list><lift:bind-at name="footer">
+            <div id="lazy-loader" class="climb-2 span-19 last"><lift:loc locid="html.loading"/>...</div></list:loading></lift:Applications.list><lift:bind-at name="footer">
             <div id="search-bar">
                 <form method="get" action="/applications/list" class="inline">
                     <p>
-                        Search:
+                        <lift:loc locid="html.search"/>:
                         <lift:Applications.searchField/>
-                        order by
+                        <lift:loc locid="html.orderby"/>
                         <select id="ordering-field">
-                            <option value="title">title</option>
-                            <option value="rating">rating</option>
-                            <option value="time">upload time</option>
-                            <option value="pxmlid">pxml id</option>
-                            <option value="author">author</option>
+                            <option value="title"><lift:loc locid="html.order.title"/></option>
+                            <option value="rating"><lift:loc locid="html.order.rating"/></option>
+                            <option value="time"><lift:loc locid="html.order.time"/></option>
+                            <option value="pxmlid"><lift:loc locid="html.order.pxmlid"/></option>
+                            <option value="author"><lift:loc locid="html.order.author"/></option>
                         </select>
                         <select id="direction-field">
                             <option value="default"></option>
-                            <option value="asc">ascending</option>
-                            <option value="desc">descending</option>
+                            <option value="asc"><lift:loc locid="html.ordering.ascending"/></option>
+                            <option value="desc"><lift:loc locid="html.ordering.descending"/></option>
                         </select>
-                        <input type="submit" value="Search"/>
+                        <lift:LocSubmit locid="html.search"/>
                         <a href="/applications/search"><lift:loc locid="html.advanced"/>...</a>
                     </p>
                 </form>

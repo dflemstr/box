@@ -23,7 +23,7 @@ $(function() {
     $.plot($('#history-diagram'), [
     {
         data: hd,
-        label: 'Downloads that day',
+        label: locHd,
         color: '#C3D9FF',
         lines: {
             show: true,

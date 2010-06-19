@@ -103,7 +103,7 @@ class Boot extends Logger {
            Menu(Loc("UserLogin", List("user", "login"), S.?("user.login"), If(User.currentUser.isEmpty _, S.?("user.loggedinalready")))),
            Menu(Loc("UserLogout", List("user", "logout"), S.?("user.logout"), isLoggedIn)),
            Menu(Loc("UserCreate", List("user", "create"), S.?("user.create"), isLoggedOut)),
-           Menu(Loc("UserLostPassword", List("user", "lost-password"), S.?("user.lost-password"), If(useEmail _, "E-Mail system disabled"), isLoggedOut)),
+           Menu(Loc("UserLostPassword", List("user", "lost-password"), S.?("user.lost-password"), If(useEmail _, S.?("email.disabled")), isLoggedOut)),
            Menu(Loc("UserResetPassword", List("user", "reset-password"), S.?("user.reset-password"), Hidden, isLoggedOut)),
            Menu(Loc("UserEdit", List("user", "edit"), S.?("user.edit"), isLoggedIn)),
            Menu(Loc("UserChangePassword", List("user", "change-password"), S.?("user.change-password"), isLoggedIn)),

@@ -1,5 +1,5 @@
 <lift:surround with="default" at="main"><lift:Users.isLoggedOut>
-            <p><lift:loc locid="html.loginview"/></p></lift:Users.isLoggedOut><lift:Users.isLoggedIn><head><script type="text/javascript">var cd = <lift:UserStatistics.categoryDownloads/>;var hd = <lift:UserStatistics.downloadHistory/>;</script><script src="/js/user-diagrams.js"/></head>
+            <p><lift:loc locid="html.loginview"/></p></lift:Users.isLoggedOut><lift:Users.isLoggedIn><head><script type="text/javascript">var cd=<lift:UserStatistics.categoryDownloads/>;var hd = <lift:UserStatistics.downloadHistory/>;var locHd='<lift:loc locid="html.downloadsthatday"/>';</script><script src="/js/user-diagrams.js"/></head>
             <div class="span-6">
                 <h3><lift:loc locid="html.downloadhistory"/></h3>
                 <div class="span-6 climb-4 last" id="history-diagram"></div>
@@ -7,10 +7,8 @@
                 <div class="span-6 climb-4 last" id="category-diagram"></div>
             </div>
             <div class="span-13 last"><lift:UserStatistics.upgradableApplications>
-                <h3>Upgrades</h3>
-                <p>
-                    Upgrades for packages you have downloaded.
-                </p>
+                <h3><lift:loc locid="html.upgrades"/></h3>
+                <p><lift:loc locid="html.upgradesforyou"/></p>
                 <table>
                     <thead>
                         <tr>

@@ -2,7 +2,7 @@ $(function() {
     $.plot($('#history-diagram'),[
     {
         data: hu,
-        label: 'Tracked packages',
+        label: locHu,
         color: '#C3D9FF',
         lines: {
             show: true,
