@@ -8,9 +8,9 @@ import org.squeryl.annotations._
 import scala.annotation.target.field
 
 case class Package(userId:     Long,   //id
-                   @(Column @field)(length = 16) val
+                   @Column(length = 16)
                    fileId:     String, //unique
-                   @(Column @field)(length = 64) val
+                   @Column(length = 64)
                    fileName:   String,
                    uploadTime: Long,
                    hasImage:   Boolean) extends LongKeyedEntity {

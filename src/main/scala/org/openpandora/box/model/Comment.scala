@@ -8,7 +8,7 @@ import scala.annotation.target.field
 case class Comment(userId:        Long, //id
                    applicationId: Long, //id
                    time:          Long,
-                   @(Column @field)(length = 1024)
+                   @Column(length = 1024)
                    body:          String) extends LongKeyedEntity {
   def date = new Date(time)
   lazy val application: ManyToOne[Application] = Database.applicationsToComments.right(this)

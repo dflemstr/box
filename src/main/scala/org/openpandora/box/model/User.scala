@@ -12,20 +12,20 @@ import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.OneToMany
 import scala.annotation.target.field
 
-case class User(@(Column @field)(length = 64)
+case class User(@Column(length = 64)
                 username:     String,
-                @(Column @field)(length = 128)
+                @Column(length = 128)
                 email:        String, //email
-                @(Column @field)(length = 16)
+                @Column(length = 16)
                 passwordSalt: String, //salt
-                @(Column @field)(length = 30)
+                @Column(length = 30)
                 passwordHash: String, //hash
-                @(Column @field)(length = 6)
+                @Column(length = 6)
                 languageName: String, //lang
-                @(Column @field)(length = 32)
+                @Column(length = 32)
                 timeZoneName: String, //tz
                 admin:        Boolean,
-                @(Column @field)(length = 16)
+                @Column(length = 16)
                 emailUid:     String, //unique
                 validated:    Boolean) extends LongKeyedEntity {
   lazy val comments:         OneToMany[Comment]         = Database.usersToComments.left(this)
