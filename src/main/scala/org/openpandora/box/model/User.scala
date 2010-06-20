@@ -14,7 +14,7 @@ import scala.annotation.target.field
 
 case class User(@Column(length = 64)
                 username:     String,
-                @Column(length = 128)
+                @Column(length = 512)
                 email:        String, //email
                 @Column(length = 16)
                 passwordSalt: String, //salt

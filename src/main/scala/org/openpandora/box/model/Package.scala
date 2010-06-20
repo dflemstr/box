@@ -10,7 +10,7 @@ import scala.annotation.target.field
 case class Package(userId:     Long,   //id
                    @Column(length = 16)
                    fileId:     String, //unique
-                   @Column(length = 64)
+                   @Column(length = 512)
                    fileName:   String,
                    uploadTime: Long,
                    hasImage:   Boolean) extends LongKeyedEntity {

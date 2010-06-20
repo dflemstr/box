@@ -8,13 +8,13 @@ import scala.annotation.target.field
 
 
 case class Application(packageId:       Long, //id
-                       @Column(length = 256)
+                       @Column(length = 512)
                        pxmlId:          String,
                        versionMajor:    Int,
                        versionMinor:    Int,
                        versionRelease:  Int,
                        versionBuild:    Int,
-                       @Column(length = 64)
+                       @Column(length = 512)
                        authorName:      Option[String],
                        var ratingCount:     Long,
                        var ratingAverage:   Float,

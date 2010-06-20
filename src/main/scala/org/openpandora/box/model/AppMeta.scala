@@ -10,7 +10,7 @@ import scala.annotation.target.field
 case class AppMeta(applicationId:    Long,   //id
                    @Column(length = 6)
                    languageName:     String, //lang
-                   @Column(length = 64)
+                   @Column(length = 512)
                    title:            String,
                    @Column(length = 2048)
                    description:      String) extends LongKeyedEntity {

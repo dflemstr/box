@@ -118,7 +118,7 @@ class Users extends DispatchSnippet with Logger {
     def createFunc() =
       bind("create", create,
            "username" -> SHtml.text(username.is, username.set, "size" -> "64", "id" -> "username-field"),
-           "email"    -> SHtml.text(email.is, email.set, "size" -> "128", "id" -> "email-field"),
+           "email"    -> SHtml.text(email.is, email.set, "size" -> "512", "id" -> "email-field"),
            "password" -> SHtml.password_*("", S.LFuncHolder(passwords.set), "class" -> "password-field"),
            "language" -> SHtml.selectObj(Languages.localesAndNames(S.locale), Full(language.is), language.set, "id" -> "language-field"),
            "timezone" -> SHtml.selectObj(TimeZones.timeZonesAndCodes, Full(timeZone.is), timeZone.set, "id" -> "timezone-field"),

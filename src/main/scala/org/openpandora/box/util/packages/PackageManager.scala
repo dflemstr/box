@@ -92,8 +92,8 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
       val pxml = makePxml(xml)
 
       //If it loaded successfully, we can add it to the database
-      val namePart = filename.split('.').toSeq.dropRight(1).mkString
-      val fileName = (namePart.substring(0, minNumber(namePart.length, 60)) + ".pnd")
+      val namePart = if(filename contains ".") filename.split('.').toSeq.dropRight(1).mkString else filename
+      val fileName = ((namePart take 508) + ".pnd")
 
       transaction {
         val pkg = Database.packages.insert(
@@ -133,7 +133,7 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
 
   def addApplicationToPackage(pkg: Package, application: pnd.Application)(implicit pn: ProcessNotifier, user: User, filename: String) =
     try {
-      val an = application.author.flatMap(_.name.map(name => name.substring(0, minNumber(60, name.length))))
+      val an = application.author.flatMap(_.name.map(_ take 512))
       val app = Database.applications.insert(
         Application(
           `package` = pkg,
@@ -160,8 +160,8 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
           AppMeta(
             application = app,
             language = lang,
-            title = (if(locs._1.text.length > 64) locs._1.text.substring(0, 60) + "..." else locs._1.text),
-            description = (if(locs._2.text.length > 2048) locs._2.text.substring(0, 2044) + "..." else locs._2.text)
+            title = (locs._1.text take 512),
+            description = (locs._2.text take 2048)
           )
         )
       } catch {
