@@ -18,6 +18,16 @@ case class Package(userId:     Long,   //id
 
   lazy val applications: OneToMany[Application]     = Database.packagesToApplications.left(this)
   lazy val downloads:    OneToMany[PackageDownload] = Database.packagesToPackageDownloads.left(this)
+
+  def delete() = {
+    Database.ratings.deleteWhere(_.applicationId in from(Database.applications)(app => where(app.packageId === id) select(app.id)))
+    Database.appMetas.deleteWhere(_.applicationId in from(Database.applications)(app => where(app.packageId === id) select(app.id)))
+    Database.categories.deleteWhere(_.applicationId in from(Database.applications)(app => where(app.packageId === id) select(app.id)))
+    Database.comments.deleteWhere(_.applicationId in from(Database.applications)(app => where(app.packageId === id) select(app.id)))
+    Database.applications.deleteWhere(_.packageId === id)
+    Database.packageDownloads.deleteWhere(_.packageId === id)
+    Database.packages.delete(id)
+  }
 }
 
 object Package {

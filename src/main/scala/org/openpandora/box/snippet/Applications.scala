@@ -48,6 +48,16 @@ object Applications {
     val df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, S.locale)
     df.setTimeZone(S.timeZone)
 
+    def makeDelete(delete: NodeSeq) = User.currentUser match {
+      case Some(user) if user.id == pkg.userId || user.admin =>
+        def doDelete() = {
+          pkg.delete()
+          JsCmds.RedirectTo(S.hostAndPath + "/applications/list")
+        }
+        SHtml.a(doDelete _, delete)
+      case _ => NodeSeq.Empty
+    }
+
     def makeComment(comment: NodeSeq): NodeSeq = comments flatMap { c =>
       bind("comment", comment,
            "author" -> makePerson(c.userId, "author") _,
@@ -200,6 +210,7 @@ object Applications {
          "commentForm" -> makeCommentForm _,
          "link" -> applicationLink,
          "download" -> downloadLink,
+         "delete" -> makeDelete _,
          "fileSize" -> makeFileSize(Filesystem.default.getFile(pkg.fileId, PNDFile).length),
          "downloadCount" -> ((_: NodeSeq) => Text(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString)))
   }

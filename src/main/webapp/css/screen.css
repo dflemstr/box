@@ -1122,7 +1122,7 @@ a.button, button, fieldset input[type=submit], .button a {
     font-size: 100%;
     line-height: 130%;
     text-decoration: none;
-    color: #565656;
+    color: #565656 !important;
     cursor: pointer;
 }
 
@@ -1153,45 +1153,45 @@ button img, a.button img {
 button:hover, fieldset input[type=submit]:hover, a.button:hover, .button a:hover {
     background-color: #dff4ff;
     border: 1px solid #c2e1ef;
-    color: #336699;
+    color: #336699 !important;
 }
 
 a.button:active, .button a:active {
     background-color: #6299c5;
     border: 1px solid #6299c5;
-    color: #fff;
+    color: #fff !important;
 }
 
 body .positive {
-    color: #529214;
+    color: #529214 !important;
 }
 
 a.positive:hover, .positive a:hover, button.positive:hover {
     background-color: #E6EFC2;
     border: 1px solid #C6D880;
-    color: #529214;
+    color: #529214 !important;
 }
 
 a.positive:active, .positive a:active {
     background-color: #529214;
     border: 1px solid #529214;
-    color: #fff;
+    color: #fff !important;
 }
 
 body .negative {
-    color: #d12f19;
+    color: #d12f19 !important;
 }
 
 a.negative:hover, .negative a:hover, .negative button:hover, button.negative:hover {
     background-color: #fbe3e4;
     border: 1px solid #fbc2c4;
-    color: #d12f19;
+    color: #d12f19 !important;
 }
 
 a.negative:active, .negative a:active {
     background-color: #d12f19;
     border: 1px solid #d12f19;
-    color: #fff;
+    color: #fff !important;
 }
 
 
