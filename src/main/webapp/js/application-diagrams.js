@@ -7,9 +7,6 @@ $(function() {
         lines: {
             show: true,
             fill: true
-        },
-        points: {
-            show: true
         }
     }
     ], {
