@@ -25,10 +25,6 @@ $(function() {
         data: hd,
         label: locHd,
         color: '#C3D9FF',
-        lines: {
-            show: true,
-            fill: true
-        },
         points: {
             show: true
         }
