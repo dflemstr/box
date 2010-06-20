@@ -25,11 +25,11 @@ class ApplicationStatistics extends DispatchSnippet
     val uploadsCurrent: Long =
       from(Database.packages){pkg =>compute(count)}
 
-    val uploadsCurrentEntry = ((new Date).getTime.toLong, uploadsCurrent.toInt)
+    val uploadsCurrentEntry = ((new Date).getTime.toLong, uploadsCurrent.toInt - 1)
 
     Text((uploads.zipWithIndex :+ uploadsCurrentEntry) map ({
         case (time, uploads) =>
-        "[" + time.toString + "," + uploads.toString + "]"
+        "[" + (time + 1).toString + "," + uploads.toString + "]"
       }) mkString("[", ",", "]"))
   }
 }
