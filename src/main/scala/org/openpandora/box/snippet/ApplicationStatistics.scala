@@ -18,20 +18,18 @@ class ApplicationStatistics extends DispatchSnippet
     case "uploadHistory" => uploadHistory
   }
 
-  def round[A](f: NumericalExpression[A]) = new UnaryFloatOp[A](f, "round")
-
   def uploadHistory(downloadHistory: NodeSeq): NodeSeq = {
-    //Group stats by days
-    val groupWidth = (24*60*60*1000)
-    val uploadsLastMonth =
-      from(Database.packages){pkg =>
-        groupBy(round(pkg.uploadTime div groupWidth)) compute(count) orderBy(pkg.uploadTime asc)
-      }.toSeq
+    val uploads: Seq[Long] =
+      from(Database.packages){pkg => select(pkg.uploadTime) orderBy(pkg.uploadTime asc)}.toSeq
 
-    val counts = uploadsLastMonth.scanLeft(0l)((acc, next) => acc + next.measures)
-    val times = uploadsLastMonth.map(_.key.toLong * groupWidth)
-    Text(times zip counts map { upload: (Long, Long) =>
-        "[" + upload._1.toString + "," + upload._2.toString + "]"
-      } mkString("[", ",", "]"))
+    val uploadsCurrent: Long =
+      from(Database.packages){pkg =>compute(count)}
+
+    val uploadsCurrentEntry = ((new Date).getTime.toLong, uploadsCurrent.toInt)
+
+    Text((uploads.zipWithIndex :+ uploadsCurrentEntry) map ({
+        case (time, uploads) =>
+        "[" + time.toString + "," + uploads.toString + "]"
+      }) mkString("[", ",", "]"))
   }
 }
