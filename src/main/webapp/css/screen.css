@@ -102,7 +102,7 @@ a img {
 @font-face {
     font-family: 'TitilliumText999wt';
     src: url('../fonts/eot/TitilliumText-999wt.eot');
-    src: local('☺'), url('../fonts/woff/TitilliumText-999wt.woff') format('woff'), url('../fonts/ttf/TitilliumText-999wt.ttf') format('truetype'), url('../fonts/svg/TitilliumText-999wt.svg#webfont') format('svg');
+    src: local('�'), url('../fonts/woff/TitilliumText-999wt.woff') format('woff'), url('../fonts/ttf/TitilliumText-999wt.ttf') format('truetype'), url('../fonts/svg/TitilliumText-999wt.svg#webfont') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -110,7 +110,7 @@ a img {
 @font-face {
     font-family: 'TitilliumTitle';
     src: url('../fonts/eot/TitilliumTitle.eot');
-    src: local('☺'), url('../fonts/woff/TitilliumTitle.woff') format('woff'), url('../fonts/ttf/TitilliumTitle.ttf') format('truetype'), url('../fonts/svg/TitilliumTitle.svg#webfont') format('svg');
+    src: local('�'), url('../fonts/woff/TitilliumTitle.woff') format('woff'), url('../fonts/ttf/TitilliumTitle.ttf') format('truetype'), url('../fonts/svg/TitilliumTitle.svg#webfont') format('svg');
     font-weight: normal;
     font-style: normal;
 }
@@ -121,14 +121,15 @@ html {
 }
 
 body {
-    font-size: 75%;
+    font-size: 12px;
+    line-height: 18px;
     color: #222;
     background: #fff;
     font-family: "TitilliumText400wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "TitilliumText600wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText600wt";
     font-weight: normal;
     color: #111;
 }
@@ -157,14 +158,14 @@ h4 {
 }
 
 h5 {
+    font-family: "TitilliumText800wt";
     font-size: 1em;
-    font-weight: bold;
     margin-bottom: 1.5em;
 }
 
 h6 {
+    font-family: "TitilliumText800wt";
     font-size: 1em;
-    font-weight: bold;
 }
 
 h1 img, h2 img, h3 img, h4 img, h5 img, h6 img {
@@ -202,7 +203,7 @@ blockquote {
 }
 
 strong {
-    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText800wt";
 }
 
 em, dfn {
@@ -210,7 +211,7 @@ em, dfn {
 }
 
 dfn {
-    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText800wt";
 }
 
 sup, sub {
@@ -262,7 +263,7 @@ dl {
 }
 
 dl dt {
-    font-weight: bold;
+    font-family: "TitilliumText800wt";
 }
 
 dd {
@@ -275,7 +276,7 @@ table {
 }
 
 th {
-    font-weight: bold;
+    font-family: "TitilliumText800wt";
 }
 
 thead th {
@@ -299,14 +300,14 @@ caption {
 }
 
 .small {
-    font-family: "TitilliumText250wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText250wt";
     font-size: .8em;
     margin-bottom: 1.875em;
     line-height: 1.875em;
 }
 
 .large {
-    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText800wt";
     font-size: 1.2em;
     line-height: 2.5em;
     margin-bottom: 1.25em;
@@ -317,17 +318,17 @@ caption {
 }
 
 .quiet {
-    font-family: "TitilliumText250wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText250wt";
     color: #666;
 }
 
 .loud {
-    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText600wt";
     color: #000;
 }
 
 .highlight {
-    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText800wt";
     background: #ff0;
 }
 
@@ -364,7 +365,7 @@ caption {
 
 /* forms.css */
 label {
-    font-weight: bold;
+    font-family: "TitilliumText800wt";
 }
 
 fieldset {
@@ -374,7 +375,7 @@ fieldset {
 }
 
 legend {
-    font-weight: bold;
+    font-family: "TitilliumText800wt";
     font-size: 1.2em;
 }
 
@@ -464,7 +465,7 @@ form.inline p {
 }
 
 .showgrid {
-    background: url(src/grid.png);
+    background: url(grid.png);
 }
 
 .column, .span-1, .span-2, .span-3, .span-4, .span-5, .span-6, .span-7, .span-8,
@@ -1117,11 +1118,10 @@ a.button, button, fieldset input[type=submit], .button a {
     border-left: 1px solid #eee;
 
     background-color: #f5f5f5;
-    font-family: "TitilliumText400wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText800wt";
     font-size: 100%;
     line-height: 130%;
     text-decoration: none;
-    font-weight: bold;
     color: #565656;
     cursor: pointer;
 }
@@ -1139,7 +1139,6 @@ button[type] {
 
 *:first-child+html button[type] {
     padding: 4px 10px 3px 7px;
-       /* IE7 */
 }
 
 button img, a.button img {
@@ -1198,12 +1197,11 @@ a.negative:active, .negative a:active {
 
 /* Styling */
 .alt {
-    font-family: "TitilliumTitle", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumTitle";
 }
 
-
 .small-image img {
-    vertical-align: middle;
+    vertical-align: text-top;
     margin: 0 0.2em;
 }
 
@@ -1274,6 +1272,7 @@ textarea {
     color: #EDF7FF;
     background-color: #025D8C;
     border-bottom: 0.5em solid #107FC9;
+    margin-bottom: 0.5em
 }
 
 #row-0 a {
@@ -1402,11 +1401,11 @@ textarea {
 
 /* Application lists */
 .field {
-    font-family: "TitilliumText800wt", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "TitilliumText600wt";
 }
 
 .s, .star {
-    margin-top: 2px;
+    margin-top: 1px;
     width: 8px;
     height: 16px;
     overflow: hidden;
@@ -1435,12 +1434,12 @@ textarea {
     background-position: 0 -32px;
 }
 
-.s-ho.s-o, .star-hover.star-odd {
-    background-position: -8px -32px;
+.application-title {
+    margin-bottom: 0; /* skip one row */
 }
 
-.application-title {
-    margin-bottom: 0;
+.s-ho.s-o, .star-hover.star-odd {
+    background-position: -8px -32px;
 }
 
 .download-count {
@@ -1502,8 +1501,8 @@ textarea {
 }
 
 .notification-title {
+    font-family: "TitilliumText600wt";
     font-size: large;
-    font-weight: bold;
     padding-bottom: 0.1em;
     display: block;
     text-shadow: 1px 1px black;
@@ -1519,5 +1518,5 @@ textarea {
 }
 
 .warning-notification, .notice-notification {
-    background-color: #393939;
+    background-color: #222;
 }
