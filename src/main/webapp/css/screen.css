@@ -1400,8 +1400,15 @@ textarea {
 
 
 /* Application lists */
+.field-container {
+    overflow: hidden;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis;
+}
+
 .field {
     font-family: "TitilliumText600wt";
+    white-space: nowrap;
 }
 
 .s, .star {
@@ -1493,6 +1500,7 @@ textarea {
     padding: 0.5em;
     text-align: left;
     color: white;
+    min-height: 48px;
 }
 
 .notification p {
