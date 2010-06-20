@@ -167,7 +167,7 @@ object Applications {
            "name" -> <a href={"/applications/list?search=uploader:" + name}>{name}</a>,
            "largeavatar" -> user.gravatarImage(70),
            "avatar"      -> user.gravatarImage(30),
-           "smallavatar" -> user.gravatarImage(16))
+           "smallavatar" -> user.gravatarImage(12))
     }
 
     val stepThreshold = 0.9
