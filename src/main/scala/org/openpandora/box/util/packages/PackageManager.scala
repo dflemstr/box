@@ -108,6 +108,8 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
 
         for(application <- pxml.applications) addApplicationToPackage(pkg, application)
         PackageManagerImpl.this.info("A package was successfully added, id=" + pkg.id)
+
+        packageAddedCallbacks.foreach(_(pkg))
       }
       sendMessage(ProcessNotifier.PackageAdded)
     } catch {
