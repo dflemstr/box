@@ -91,6 +91,41 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
       //Now load the metadata in the PXML
       val pxml = makePxml(xml)
 
+      //Do some checks
+      for(application <- pxml.applications) {
+        val c = transaction {
+          from(Database.applications)(app =>
+            where(app.pxmlId === application.id and
+                  app.versionMajor === application.version.major and
+                  app.versionMinor === application.version.minor and
+                  app.versionRelease === application.version.release and
+                  app.versionBuild === application.version.build) compute(count)).toLong
+        }
+        if(c > 0)
+          throw new ProcessNotifier.ApplicationExistsError(
+            application.id,
+            Seq(application.version.major, application.version.minor, application.version.release, application.version.build).mkString(".")
+          )
+
+        if(pxml.applications.filter(app2 => app2.id == application.id &&
+                                    application.version.major == app2.version.major &&
+                                    application.version.minor == app2.version.minor &&
+                                    application.version.release == app2.version.release &&
+                                    application.version.build == app2.version.build).size > 1) {
+          throw new ProcessNotifier.DuplicateApplicationError(
+            application.id,
+            Seq(application.version.major, application.version.minor, application.version.release, application.version.build).mkString(".")
+          )
+        }
+        for(cat <- application.categories) {
+          val name = cat.name.toLowerCase
+          if(DotDesktopCategories.values.find(_.toString.toLowerCase == name).isEmpty)
+            throw new ProcessNotifier.PxmlSyntaxError(loc.loc("validation.application.invalidcat", user.language)
+                                                      .replace("%app%", application.id)
+                                                      .replace("%cat%", cat.name))
+        }
+      }
+
       //If it loaded successfully, we can add it to the database
       val namePart = if(filename contains ".") filename.split('.').toSeq.dropRight(1).mkString else filename
       val fileName = ((namePart take 508) + ".pnd")

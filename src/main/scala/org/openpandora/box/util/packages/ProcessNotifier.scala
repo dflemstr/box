@@ -48,6 +48,16 @@ object ProcessNotifier {
     override val replacements = Map("error" -> error)
   }
 
+  case class ApplicationExistsError(applicationId: String, version: String) extends ErrorMessage {
+    val kind = "applicationexistserror"
+    override val replacements = Map("id" -> applicationId, "version" -> version)
+  }
+
+  case class DuplicateApplicationError(applicationId: String, version: String) extends ErrorMessage {
+    val kind = "duplicateapplicationerror"
+    override val replacements = Map("id" -> applicationId, "version" -> version)
+  }
+
   case object PngInvalidError extends ErrorMessage {
     val kind = "pnginvaliderror"
   }
