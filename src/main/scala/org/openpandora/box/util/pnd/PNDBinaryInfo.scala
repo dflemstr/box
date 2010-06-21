@@ -110,26 +110,25 @@ private[pnd] class PNDBinaryInfoImpl extends PNDBinaryInfo {
     val buffer = ByteBuffer.allocateDirect(PndPxmlWindowSize)
     val pxmlPattern = PxmlHeader.toArray
     val pxmlFailure = PxmlHeaderKmpFailure.toArray
-    var i = 1
 
     val pxmlBegin: Long = if(channel.size < PndPxmlWindowSize) {
       //The whole file fits in the window, act accordingly
-      channel.position(0)
-      channel.read(buffer)
+      channel.read(buffer, 0l)
       indexOf(buffer, 0, channel.size.toInt, pxmlPattern, pxmlFailure)
     } else {
+      var i = 1
       var result: Long = -1
       while(result < 0 && i < MaxChunks) {
-        val offsetFromEnd = (PndPxmlWindowSize - PxmlHeader.length) * i + PxmlHeader.length
+        val offsetFromEnd = (PndPxmlWindowSize - PxmlHeader.length - 1) * i + PxmlHeader.length + 1
         if(channel.size > offsetFromEnd) {
           val pos = channel.size - offsetFromEnd
-          channel.position(pos)
-          channel.read(buffer)
+          channel.read(buffer, pos)
           val tmp = indexOf(buffer, 0, PndPxmlWindowSize, pxmlPattern, pxmlFailure)
-          if(tmp > 0)
+          buffer.clear()
+          if(tmp > -1)
             result = pos + tmp
           i += 1
-        }
+        } else i = MaxChunks //break
       }
 
       if(result < 0)
@@ -153,12 +152,11 @@ private[pnd] class PNDBinaryInfoImpl extends PNDBinaryInfo {
   }
 
   def extractPxmlAndPng(channel: FileChannel, start: Long, pxmlStream: OutputStream, pngStream: OutputStream): Boolean = {
-    channel.position(start)
     val len = (channel.size - start).toInt
     //TODO: don't load everything at once!
     val buffer = ByteBuffer.allocateDirect(len)
 
-    channel.read(buffer)
+    channel.read(buffer, start)
 
     //Try to find the end of the PXML file
     val pxmlLength = indexOf(buffer, 0, len,
