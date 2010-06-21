@@ -57,76 +57,61 @@ a img {
     border: none;
 }
 
-/* fontin */
+/* aller */
 @font-face {
-    font-family: 'Fontin';
-    src: url('../fonts/eot/fontin-bold-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-bold-webfont.woff') format('woff'), url('../fonts/ttf/fontin-bold-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-bold-webfont.svgz#webfontJNwH56ag') format('svg'), url('../fonts/svg/fontin-bold-webfont.svg#webfontJNwH56ag') format('svg');
+    font-family: 'Aller';
+    src: url('../fonts/eot/aller-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-webfont.woff') format('woff'), url('../fonts/ttf/aller-webfont.ttf') format('truetype'), url('../fonts/svgz/aller-webfont.svgz#webfont8jJR96vT') format('svg'), url('../fonts/svg/aller-webfont.svg#webfont8jJR96vT') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Aller';
+    src: url('../fonts/eot/aller-bold-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-bold-webfont.woff') format('woff'), url('../fonts/ttf/aller-bold-webfont.ttf') format('truetype'), url('../fonts/svgz/aller-bold-webfont.svgz#webfont9iPLysDs') format('svg'), url('../fonts/svg/aller-bold-webfont.svg#webfont9iPLysDs') format('svg');
     font-weight: bold;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Fontin';
-    src: url('../fonts/eot/fontin-italic-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-italic-webfont.woff') format('woff'), url('../fonts/ttf/fontin-italic-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-italic-webfont.svgz#webfontAbktnclK') format('svg'), url('../fonts/svg/fontin-italic-webfont.svg#webfontAbktnclK') format('svg');
-    font-weight: normal;
-    font-style: italic;
-}
-
-@font-face {
-    font-family: 'Fontin';
-    src: url('../fonts/eot/fontin-regular-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-regular-webfont.woff') format('woff'), url('../fonts/ttf/fontin-regular-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-regular-webfont.svgz#webfontOcccjLOU') format('svg'), url('../fonts/svg/fontin-regular-webfont.svg#webfontOcccjLOU') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'FontinSmallCaps';
-    src: url('../fonts/eot/fontin-smallcaps-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-smallcaps-webfont.woff') format('woff'), url('../fonts/ttf/fontin-smallcaps-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-smallcaps-webfont.svgz#webfontiquHzvD8') format('svg'), url('../fonts/svg/fontin-smallcaps-webfont.svg#webfontiquHzvD8') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-@font-face {
-    font-family: 'FontinSans';
-    src: url('../fonts/eot/fontin-sans-bold-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-sans-bold-webfont.woff') format('woff'), url('../fonts/ttf/fontin-sans-bold-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-sans-bold-webfont.svgz#webfontXTLCwC3N') format('svg'), url('../fonts/svgz/fontin-sans-bold-webfont.svg#webfontXTLCwC3N') format('svg');
-    font-weight: bold;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'FontinSans';
-    src: url('../fonts/eot/fontin-sans-bold-italic-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-sans-bold-italic-webfont.woff') format('woff'), url('../fonts/ttf/fontin-sans-bold-italic-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-sans-bold-italic-webfont.svgz#webfont5gMq4kHA') format('svg'), url('../fonts/svgz/fontin-sans-bold-italic-webfont.svg#webfont5gMq4kHA') format('svg');
+    font-family: 'Aller';
+    src: url('../fonts/eot/aller-bold-italic-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-bold-italic-webfont.woff') format('woff'), url('../fonts/ttf/aller-bold-italic-webfont.ttf') format('truetype'), url('../fonts/svgz/aller-bold-italic-webfont.svgz#webfontbXJE8Cww') format('svg'), url('../fonts/svg/aller-bold-italic-webfont.svg#webfontbXJE8Cww') format('svg');
     font-weight: bold;
     font-style: italic;
 }
 
 @font-face {
-    font-family: 'FontinSans';
-    src: url('../fonts/eot/fontin-sans-italic-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-sans-italic-webfont.woff') format('woff'), url('../fonts/ttf/fontin-sans-italic-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-sans-italic-webfont.svgz#webfont8i5QpsYa') format('svg'), url('../fonts/svgz/fontin-sans-italic-webfont.svg#webfont8i5QpsYa') format('svg');
+    font-family: 'AllerDisplay';
+    src: url('../fonts/eot/aller-display-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-display-webfont.woff') format('woff'), url('../fonts/ttf/aller-display-webfont.ttf') format('truetype'), url('../fonts/svgz/aller-display-webfont.svgz#webfont210tyh8U') format('svg'), url('../fonts/svg/aller-display-webfont.svg#webfont210tyh8U') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Aller';
+    src: url('../fonts/eot/aller-italic-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-italic-webfont.woff') format('woff'), url('../fonts/ttf/aller-italic-webfont.ttf') format('truetype'), url('../fonts/svgz/aller-italic-webfont.svgz#webfonthRxwOjJQ') format('svg'), url('../fonts/svg/aller-italic-webfont.svg#webfonthRxwOjJQ') format('svg');
     font-weight: normal;
     font-style: italic;
 }
 
 @font-face {
-    font-family: 'FontinSans';
-    src: url('../fonts/eot/fontin-sans-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-sans-webfont.woff') format('woff'), url('../fonts/ttf/fontin-sans-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-sans-webfont.svgz#webfont4bqNapyR') format('svg'), url('../fonts/svgz/fontin-sans-webfont.svg#webfont4bqNapyR') format('svg');
+    font-family: 'AllerLight';
+    src: url('../fonts/eot/aller-light-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-light-webfont.woff') format('woff'), url('../fonts/ttf/aller-light-webfont.ttf') format('truetype'), url('../fonts/svgz/ller-light-webfont.svgz#webfontLBqHmAJt') format('svg'), url('../fonts/svg/aller-light-webfont.svg#webfontLBqHmAJt') format('svg');
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'FontinSansSmallCaps';
-    src: url('../fonts/eot/fontin-sans-smallcaps-webfont.eot');
-    src: local('�'), url('../fonts/woff/fontin-sans-smallcaps-webfont.woff') format('woff'), url('../fonts/ttf/fontin-sans-smallcaps-webfont.ttf') format('truetype'), url('../fonts/svgz/fontin-sans-smallcaps-webfont.svgz#webfontMTrcdYu3') format('svg'), url('../fonts/svg/fontin-sans-smallcaps-webfont.svg#webfontMTrcdYu3') format('svg');
+    font-family: 'AllerLight';
+    src: url('../fonts/eot/aller-light-italic-webfont.eot');
+    src: local('�'), url('../fonts/woff/aller-light-italic-webfont.woff') format('woff'), url('../fonts/ttf/aller-light-italic-webfont.ttf') format('truetype'), url('../fonts/svgz/aller-light-italic-webfont.svgz#webfontE1eP4kih') format('svg'), url('../fonts/svg/aller-light-italic-webfont.svg#webfontE1eP4kih') format('svg');
     font-weight: normal;
-    font-style: normal;
+    font-style: italic;
 }
 
 /* typography */
@@ -139,11 +124,10 @@ body {
     line-height: 18px;
     color: #222;
     background: #fff;
-    font-family: "Fontin", "Helvetica Neue", Arial, Helvetica, sans-serif;
+    font-family: "Aller", "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: "FontinSans";
     font-weight: bold;
     color: #111;
 }
@@ -290,7 +274,6 @@ table {
 }
 
 th {
-    font-family: "FontinSans";
     font-weight: bold;
 }
 
@@ -315,14 +298,12 @@ caption {
 }
 
 .small {
-    font-family: "Fontin";
     font-size: .8em;
     margin-bottom: 1.875em;
     line-height: 1.875em;
 }
 
 .large {
-    font-family: "Fontin";
     font-size: 1.2em;
     line-height: 2.5em;
     margin-bottom: 1.25em;
@@ -333,7 +314,7 @@ caption {
 }
 
 .quiet {
-    font-family: "FontinSans";
+    font-family: "AllerLight";
     color: #666;
 }
 
@@ -343,7 +324,7 @@ caption {
 }
 
 .highlight {
-    font-family: "FontinSmallCaps";
+    font-weight: bold;
     background: #ff0;
 }
 
@@ -380,7 +361,6 @@ caption {
 
 /* forms.css */
 label {
-    font-family: "FontinSans";
     font-weight: bold;
 }
 
@@ -391,7 +371,7 @@ fieldset {
 }
 
 legend {
-    font-family: "FontinSmallCaps";
+    font-family: "AllerDisplay";
     font-size: 1.2em;
 }
 
@@ -1134,7 +1114,6 @@ a.button, button, fieldset input[type=submit], .button a {
     border-left: 1px solid #eee;
 
     background-color: #f5f5f5;
-    font-family: "FontinSans";
     font-weight: bold;
     font-size: 100%;
     line-height: 130%;
@@ -1214,8 +1193,8 @@ a.negative:active, .negative a:active {
 
 /* Styling */
 .alt {
-    font-family: "FontinSans";
-    font-weight: bold;
+    font-family: "AllerDisplay";
+    font-weight: normal;
 }
 
 .small-image img {
@@ -1390,7 +1369,7 @@ textarea {
     padding: 0 1em;
     display: block;
     white-space: nowrap;
-    font-family: "FontinSans";
+    font-family: "AllerLight";
 }
 
 .menu-item a:hover, .menu-item a.active {
