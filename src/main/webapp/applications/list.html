@@ -1,0 +1,68 @@
+<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/ratings.js"/><script type="text/javascript" src="/js/search.js"/><script type="text/javascript" src="/js/lazyloadlist.js"/></head>
+        <lift:Applications.list lazyload="5"><list:entry>
+            <div class="span-19 last">
+                <div class="border span-2 climb-2"><entry:image/></div>
+                <div class="span-14">
+                    <h3 class="application-title span-14 last"><entry:title/></h3>
+                    <span class="span-3 field-container">
+                        <span class="quiet"><lift:loc locid="html.version"/></span>&nbsp;<span class="field"><entry:version/></span>
+                    </span>
+                    <span class="span-5 field-container">
+                        <span class="quiet"><lift:loc locid="html.uploaded"/></span>&nbsp;<span class="field"><entry:time/></span>
+                    </span>
+                    <span class="span-6 last field-container"><entry:uploader>
+                        <span class="quiet"><lift:loc locid="html.uploader"/></span>&nbsp;<span class="field"><span class="small-image"><uploader:smallavatar/></span><uploader:name/></span>
+                    </entry:uploader></span>
+                    <span class="span-8 field-container">
+                        <span class="quiet"><lift:loc locid="html.pxmlid"/></span>&nbsp;<span class="field"><entry:pxmlid/></span>
+                    </span>
+                    <span class="span-6 last field-container"><entry:author>
+                        <span class="quiet"><lift:loc locid="html.author"/></span>&nbsp;<span class="field"><author:name/></span>
+                    </entry:author></span>
+                    <span class="span-14 last field-container"><entry:categories>
+                        <span class="quiet"><lift:loc locid="html.categories"/></span>&nbsp;<span class="field"><categories:category><span class="category"><category:name/></span> </categories:category></span>
+                    </entry:categories></span>
+                </div>
+                <div class="span-3 last">
+                    <div class="span-3 last"><entry:rating>
+                        <rating:display>
+                            <display:enabled>
+                                <enabled:even><span class="s s-en s-e"/></enabled:even>
+                                <enabled:odd><span class="s s-en s-o"/></enabled:odd>
+                            </display:enabled>
+                            <display:disabled>
+                                <disabled:even><span class="s s-di s-e"/></disabled:even>
+                                <disabled:odd><span class="s s-di s-o"/></disabled:odd>
+                            </display:disabled>
+                        </rating:display>
+                        <span class="rating-count"><rating:count/></span>
+                    </entry:rating></div><div class="span-3 last button"><entry:link><lift:loc locid="html.details"/></entry:link></div>
+                </div>
+            </div>
+            <hr class="space"/></list:entry><list:loading>
+            <div id="lazy-loader" class="climb-2 span-19 last"><lift:loc locid="html.loading"/>...</div></list:loading></lift:Applications.list>
+            <div id="filler" class="climb-1 span-19 last"/><lift:bind-at name="footer">
+            <div id="search-bar">
+                <form method="get" action="/applications/list" class="inline">
+                    <p>
+                        <lift:loc locid="html.search"/>:
+                        <lift:Applications.searchField/>
+                        <lift:loc locid="html.orderby"/>
+                        <select id="ordering-field">
+                            <option value="title"><lift:loc locid="html.order.title"/></option>
+                            <option value="rating"><lift:loc locid="html.order.rating"/></option>
+                            <option value="time"><lift:loc locid="html.order.time"/></option>
+                            <option value="pxmlid"><lift:loc locid="html.order.pxmlid"/></option>
+                            <option value="author"><lift:loc locid="html.order.author"/></option>
+                        </select>
+                        <select id="direction-field">
+                            <option value="default"></option>
+                            <option value="asc"><lift:loc locid="html.ordering.ascending"/></option>
+                            <option value="desc"><lift:loc locid="html.ordering.descending"/></option>
+                        </select>
+                        <lift:LocSubmit locid="html.search"/>
+                        <a href="/applications/search"><lift:loc locid="html.advanced"/>...</a>
+                    </p>
+                </form>
+            </div></lift:bind-at>
+</lift:surround>

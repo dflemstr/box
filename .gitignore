@@ -1,0 +1,8 @@
+.*
+!.gitignore
+*~
+pom.xml
+target
+*_managed
+project/boot/
+

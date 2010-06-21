@@ -1,0 +1,42 @@
+<lift:surround with="default" at="main"><head><script type="text/javascript" src="/js/search-advanced.js"/></head>
+            <form method="get" action="/applications/list">
+                <fieldset>
+                    <legend><lift:loc locid="html.search"/></legend>
+                    <div class="span-9">
+                        <label for="keywords-field"><lift:loc locid="html.keywordslabel"/></label><br/>
+                        <input type="text" id="keywords-field" class="changer"/><br/>
+                        <label for="title-field"><lift:loc locid="html.titlelabel"/></label><br/>
+                        <input type="text" id="title-field" class="changer"/><br/>
+                        <label for="description-field"><lift:loc locid="html.descriptionlabel"/></label><br/>
+                        <input type="text" id="description-field" class="changer"/>
+                    </div>
+                    <div class="span-9 last">
+                        <label for="category-field"><lift:loc locid="html.categorylabel"/></label><br/>
+                        <input type="text" id="category-field" class="changer"/>
+                        <fieldset class="span-9 last">
+                            <legend><lift:loc locid="html.version"/></legend>
+                            <div class="span-2">
+                                <label for="major-field"><lift:loc locid="html.majorlabel"/></label><br/>
+                                <input type="text" id="major-field" class="changer number"/>
+                            </div>
+                            <div class="span-2">
+                                <label for="minor-field"><lift:loc locid="html.minorlabel"/></label><br/>
+                                <input type="text" id="minor-field" class="changer number"/>
+                            </div>
+                            <div class="span-2">
+                                <label for="release-field"><lift:loc locid="html.releaselabel"/></label><br/>
+                                <input type="text" id="release-field" class="changer number"/>
+                            </div>
+                            <div class="span-2 last">
+                                <label for="build-field"><lift:loc locid="html.buildlabel"/></label><br/>
+                                <input type="text" id="build-field" class="changer number"/>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <p>
+                        <input type="hidden" class="hide" name="search" id="search-field" value=""/>
+                        <lift:LocSubmit locid="html.search"/>
+                    </p>
+                </fieldset>
+            </form>
+</lift:surround>

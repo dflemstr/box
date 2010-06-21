@@ -1,0 +1,32 @@
+<lift:surround with="default" at="main"><head><script type="text/javascript">var hu=<lift:ApplicationStatistics.uploadHistory/>;var locHu='<lift:loc locid="html.trackedpackages"/>';</script><script type="text/javascript" src="/js/application-diagrams.js"/></head>
+            <p>
+                <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
+                <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
+            </p>
+            <div class="span-13"><lift:Applications.list search="orderby:timedesc max:5">
+                <h3><lift:loc locid="html.recentuploads"/></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><lift:loc locid="html.title"/></th>
+                            <th><lift:loc locid="html.version"/></th>
+                            <th><lift:loc locid="html.uploaded"/></th>
+                            <th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody><list:entry>
+                        <tr>
+                            <td><entry:title/></td>
+                            <td><entry:version/></td>
+                            <td><entry:time/></td>
+                            <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
+                        </tr></list:entry>
+                    </tbody>
+                </table>
+            </lift:Applications.list></div>
+            <div class="span-6 last">
+                <h3><lift:loc locid="html.uploadhistory"/></h3>
+                <div class="span-6 climb-4 last" id="history-diagram"></div>
+            </div>
+</lift:surround>
+

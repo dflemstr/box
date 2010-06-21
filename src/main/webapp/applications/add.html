@@ -1,0 +1,15 @@
+<lift:surround with="default" at="main">
+            <p><lift:loc locid="html.addapps"/></p>
+            <p><lift:loc locid="html.addinfo"/></p>
+            <lift:Applications.create form="POST" multipart="true">
+                <fieldset>
+                    <legend><lift:loc locid="html.uploadpnd"/></legend>
+                    <p>
+                        <label for="upload-field"><lift:loc locid="html.pndfilelabel"/></label><create:upload/>
+                    </p>
+                    <p>
+                        <create:submit/>
+                    </p>
+                </fieldset>
+            </lift:Applications.create>
+</lift:surround>

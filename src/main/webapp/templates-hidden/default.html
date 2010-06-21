@@ -1,0 +1,55 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta name="description" content="Your source for PND packages" />
+    <meta name="keywords" content="OpenPandora,Pandora,PND,Applications,Download,Upload" />
+
+    <title><lift:loc locid="application"/> - <lift:Menu.title/></title>
+
+    <link rel="stylesheet" href="/css/screen.css" type="text/css" media="screen, projection"/>
+    <link rel="stylesheet" href="/css/print.css" type="text/css" media="print"/>
+    <!--[if lt IE 8]> <link rel="stylesheet" href="/css/ie.css" type="text/css" media="screen, projection"/> <![endif]-->
+    <!--[if IE]> <script type="text/javascript" src="/js/excanvas.js"></script> <![endif]-->
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.js"/>
+    <script type="text/javascript" src="/js/jquery.gritter.js"/>
+    <script type="text/javascript" src="/js/jquery.flot.js"/>
+    <script type="text/javascript" src="/classpath/json.js"/>
+    <script type="text/javascript" src="/js/main.js"/>
+</head>
+<body>
+    <div id="row-0" class="row">
+        <div id="header" class="container">
+            <div id="logo" class="span-4">
+                <h1 class="bottom alt"><a href="/"><lift:loc locid="application"/></a></h1>
+            </div>
+            <div id="ajax-container" class="span-1">
+                <img id="ajax-indicator" class="hide" src="/images/throbber.gif" alt="Pending AJAX calls" title="Pending AJAX calls"/>
+            </div>
+            <div id="navigation" class="span-14 last"><lift:MenuSystem.build active:class="active" path:class="menu-path">
+                <build:items><ul class="topmenu menu"><items:item>
+                    <li class="topmenu-item menu-item">
+                        <div class="menu-entry"><item:menu/></div><item:items>
+                        <ul class="submenu menu"><items:item>
+                            <li class="submenu-item menu-item">
+                                <div class="menu-entry"><item:menu/></div>
+                            </li></items:item>
+                        </ul>
+                        <div class="menu-dropdown-arrow"/></item:items>
+                    </li></items:item>
+                </ul></build:items></lift:MenuSystem.build>
+            </div>
+        </div>
+    </div>
+    <div id="row-1" class="row">
+        <div id="main" class="container">
+            <h2><lift:Menu.title/></h2><lift:bind name="main"/>
+        </div>
+    </div>
+    <div id="row-2" class="row">
+        <div id="footer" class="container"><lift:bind name="footer"/>
+        </div>
+    </div><lift:Users.isLoggedIn>
+    <lift:Notifications.indicator/></lift:Users.isLoggedIn>
+<lift:Notifications.script/>
+</body>
+</html>

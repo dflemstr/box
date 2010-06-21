@@ -1,0 +1,22 @@
+<lift:surround with="default" at="main">
+            <lift:Users.edit form="POST">
+                <fieldset>
+                    <legend><lift:loc locid="html.edituser"/></legend>
+                    <p class="span-9">
+                        <label for="username-field"><lift:loc locid="html.usernamelabel"/></label><br/>
+                        <edit:username/><br/>
+                        <label for="email-field"><lift:loc locid="html.emaillabel"/></label><br/>
+                        <edit:email/>
+                    </p>
+                    <p class="span-9 last">
+                        <label for="language-field"><lift:loc locid="html.languagelabel"/></label><br/>
+                        <edit:language/><br/>
+                        <label for="timezone-field"><lift:loc locid="html.timezonelabel"/></label><br/>
+                        <edit:timezone/>
+                    </p>
+                    <p>
+                        <edit:submit/>
+                    </p>
+                </fieldset>
+            </lift:Users.edit>
+</lift:surround>

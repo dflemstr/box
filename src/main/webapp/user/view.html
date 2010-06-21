@@ -1,0 +1,32 @@
+<lift:surround with="default" at="main"><lift:Users.isLoggedOut>
+            <p><lift:loc locid="html.loginview"/></p></lift:Users.isLoggedOut><lift:Users.isLoggedIn><head><script type="text/javascript">var cd=<lift:UserStatistics.categoryDownloads/>;var hd = <lift:UserStatistics.downloadHistory/>;var locHd='<lift:loc locid="html.downloadsthatday"/>';</script><script src="/js/user-diagrams.js"/></head>
+            <div class="span-6">
+                <h3><lift:loc locid="html.downloadhistory"/></h3>
+                <div class="span-6 climb-4 last" id="history-diagram"></div>
+                <h3><lift:loc locid="html.downloadsbycategory"/></h3>
+                <div class="span-6 climb-4 last" id="category-diagram"></div>
+            </div>
+            <div class="span-13 last"><lift:UserStatistics.upgradableApplications>
+                <h3><lift:loc locid="html.upgrades"/></h3>
+                <p><lift:loc locid="html.upgradesforyou"/></p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><lift:loc locid="html.title"/></th>
+                            <th><lift:loc locid="html.version"/></th>
+                            <th><lift:loc locid="html.uploaded"/></th>
+                            <th>&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody><upgradableApplications:entry>
+                        <tr>
+                            <td><entry:title/></td>
+                            <td><entry:version/></td>
+                            <td><entry:time/></td>
+                            <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
+                        </tr></upgradableApplications:entry>
+                    </tbody>
+                </table>
+            </lift:UserStatistics.upgradableApplications></div></lift:Users.isLoggedIn>
+</lift:surround>
+
