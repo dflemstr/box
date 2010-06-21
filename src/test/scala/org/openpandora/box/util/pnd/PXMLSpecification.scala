@@ -11,7 +11,7 @@ object PXMLSpecification extends Specification("PXML-checks and PXML-DOM specifi
 
   def expose = addToSusVerb("expose")
 
-  "The PXML representation" should expose {
+  "The PXML DOM representation" should expose {
     "the <PXML> tag, taking care to" >> {
       "detect PXML application declarations of version" >> {
         "1.0" in {
@@ -25,16 +25,20 @@ object PXMLSpecification extends Specification("PXML-checks and PXML-DOM specifi
           pxml2.applications must haveSize(2)
         }
       }
+      "fail on empty input" in {
+        (new PXML(<PXML></PXML>)) must throwA[RequirementException]
+      }
     }
     "the <application> tag, taking care to" >> {
       "check whether it reproduces ids correctly" in {
-        val id = "foobar" + scala.util.Random.nextLong
-        val appXML = <application id={id}>{applicationMinimalBody}</application>
-        val application = new Application(appXML)
-        application.id must be(id)
+        val ids = Seq.fill(100)("foobar" + scala.util.Random.nextLong)
+        ids.foreach {id =>
+          val appXML = <application id={id}>{applicationMinimalBody}</application>
+          val application = new Application(appXML)
+          application.id must_== id
+        }
       }
     }
-    //TODO: more tests
   }
 
   lazy val applicationMinimalBody: scala.xml.NodeSeq =
