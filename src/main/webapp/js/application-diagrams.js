@@ -11,11 +11,14 @@ $(function() {
     }
     ], {
         xaxis: {
-            mode: "time"
+            mode: 'time'
         },
         yaxis: {
             tickDecimals: 0,
             min: 0
+        },
+        legend: {
+            position: 'nw'
         }
     });
 });
