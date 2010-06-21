@@ -76,7 +76,7 @@
 		_item_count: 0,
 		_is_setup: 0,
 		_tpl_close: '<div class="notification-close"></div>',
-		_tpl_item: '<div id="notification-[[number]]" class="notification-wrapper [[item_class]]" style="display:none"><div class="notification">[[image]]<div class="[[class_name]]"><span class="notification-title">[[username]]</span>[[text]]</div></div></div>',
+		_tpl_item: '<div id="notification-[[number]]" class="notification-wrapper [[item_class]]" style="display:none"><div class="notification">[[image]]<div class="[[class_name]]"><h3>[[username]]</h3>[[text]]</div></div></div>',
 		_tpl_wrap: '<div id="notifications-wrapper"></div>',
 	    
 		/**
@@ -123,7 +123,7 @@
 				this._custom_timer = time_alive;
 			}
 			
-			var image_str = (image != '') ? '<img src="' + image + '" class="notification-image" />' : '',
+			var image_str = (image != '') ? '<img src="' + image + '" />' : '',
 				class_name = (image != '') ? 'notification-with-image' : 'notification-without-image';
 			
 			// String replacements on the template

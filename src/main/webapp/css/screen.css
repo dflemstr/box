@@ -1515,10 +1515,8 @@ textarea {
 .notification {
     display: block;
     padding: 0;
-    font-size: medium;
     padding: 0.5em;
-    text-align: left;
-    color: white;
+    color: #fff;
     min-height: 48px;
 }
 
@@ -1527,22 +1525,36 @@ textarea {
     margin: 0;
 }
 
-.notification-title {
-    font-family: "FontinSans";
-    font-weight: bold;
-    font-size: large;
-    padding-bottom: 0.1em;
+.notification h3 {
+    color: #fff;
+    margin-bottom: 0;
     display: block;
-    text-shadow: 1px 1px black;
+    text-shadow: black 1px 1px 4px;
 }
 
-.notification-image {
+.notification a {
+    color: #0A93FC;
+}
+
+.notification a:hover {
+    color: #73C2FF;
+}
+
+.notification img {
     float: left;
     margin-right: 0.5em;
 }
 
 .error-notification {
     background-color: #800;
+}
+
+.error-notification a {
+    color: #f88;
+}
+
+.error-notification a:hover {
+    color: #faa;
 }
 
 .warning-notification, .notice-notification {
