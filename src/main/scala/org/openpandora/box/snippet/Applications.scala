@@ -12,6 +12,7 @@ import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JE
 import net.liftweb.http.js.JsCmds
+import net.liftweb.util.AltXML
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
 import org.openpandora.box.model._
@@ -24,9 +25,7 @@ import org.openpandora.box.util.filesystem._
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.OneToMany
 import scala.math._
-import scala.xml.NodeSeq
-import scala.xml.Text
-import scala.xml.UnprefixedAttribute
+import scala.xml.{Comment => _, _}
 
 object Applications {
   private object createCommentFunction extends RequestVar[Option[() => NodeSeq]](None)
@@ -254,6 +253,11 @@ class Applications extends DispatchSnippet with Logger {
                  "upload" -> u % meta,
                  "submit" -> SHtml.submit(S.?("Create"), doCreate))
   }
+  
+  def fixHtml(uid: String, content: NodeSeq): String =
+    AltXML.toXML(Group(S.session.map(s => s.fixHtml(s.processSurroundAndInclude("JS SetHTML id: " + uid, content))).openOr(content)),
+                 false, true, S.ieMode).encJs
+
 
   def list(list: NodeSeq): NodeSeq = {
     import ApplicationSearchRunner._
@@ -292,10 +296,14 @@ class Applications extends DispatchSnippet with Logger {
           else {
             val newId = makeId
             S.mapFunc(id,
-                      () => (JsCmds.Replace(id, loadPage(number + 1, newId)) & JE.Call("bindLoadEvent", JE.Str(newId), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(newId + "=true")).cmd)).cmd))
-            (<div id={id}>{loading}</div> ++
-             (if(number == 0)
-               JsCmds.Script(JsCmds.OnLoad(JE.Call("bindLoadEvent", JE.Str(id), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(id + "=true")).cmd)).cmd)) else NodeSeq.Empty))
+                      () => {
+                val newContent = fixHtml("inline", loadPage(number + 1, newId))
+                (
+                  (JE.JsRaw("jQuery('#" + id + "').replaceWith(" + newContent + ")")).cmd &
+                  JE.Call("bindLoadEvent", JE.Str(newId), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(newId + "=true")).cmd)).cmd
+                )
+              })
+            ((<div id={id}>{loading}</div>) ++ (if(number == 0) JsCmds.Script(JsCmds.OnLoad(JE.Call("bindLoadEvent", JE.Str(id), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(id + "=true")).cmd)).cmd)) else NodeSeq.Empty))
           }
 
           bind("list", list,
