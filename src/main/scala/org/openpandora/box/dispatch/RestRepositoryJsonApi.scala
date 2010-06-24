@@ -72,6 +72,7 @@ private[dispatch] class RestRepositoryJsonApi(localization: Localization = Local
     }
 
     PackageManager.default.registerPackageAddedCallback(update)
+    PackageManager.default.registerPackageRemovedCallback(update)
     
     def act = Actor.loop {
       Actor.react {

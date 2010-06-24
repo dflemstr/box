@@ -41,8 +41,11 @@ object PackageManager {
 
 trait PackageManager {
   def makePackageFromStream(filename: String, input: InputStream, user: User)
+  def removePackage(pkg: Package)
   def registerPackageAddedCallback(callback: Package => Unit)
   def unregisterPackageAddedCallback(callback: Package => Unit)
+  def registerPackageRemovedCallback(callback: Package => Unit)
+  def unregisterPackageRemovedCallback(callback: Package => Unit)
 }
 
 private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
@@ -53,13 +56,16 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
   start()
 
   def registerPackageAddedCallback(callback: Package => Unit) = packageAddedCallbacks +:= callback
-
   def unregisterPackageAddedCallback(callback: Package => Unit) = packageAddedCallbacks = packageAddedCallbacks filterNot (_ == callback)
+
+  def registerPackageRemovedCallback(callback: Package => Unit) = packageRemovedCallbacks +:= callback
+  def unregisterPackageRemovedCallback(callback: Package => Unit) = packageRemovedCallbacks = packageRemovedCallbacks filterNot (_ == callback)
 
   def makePackageFromStream(filename: String, input: InputStream, user: User) =
     this! MakePackageFromStream(filename, input, user)
 
   var packageAddedCallbacks: Seq[Package => Unit] = Seq.empty
+  var packageRemovedCallbacks: Seq[Package => Unit] = Seq.empty
 
   case class MakePackageFromStream(filename: String, input: InputStream, user: User)
 
@@ -69,6 +75,11 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
         createPackage(filename, inputStream, user)(fs, pn, loc)
       case x => info("PackageManager received an unknown message, message=" + x)
     }
+  }
+
+  def removePackage(pkg: Package) = {
+    packageRemovedCallbacks foreach (_(pkg))
+    pkg.delete()
   }
 
   def createPackage(filename: String, inputStream: InputStream, user: User)(implicit fs: Filesystem, pn: ProcessNotifier, loc: Localization) = {

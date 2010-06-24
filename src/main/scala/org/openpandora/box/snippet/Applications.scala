@@ -51,7 +51,7 @@ object Applications {
     def makeDelete(delete: NodeSeq) = User.currentUser match {
       case Some(user) if user.id == pkg.userId || user.admin =>
         def doDelete() = {
-          pkg.delete()
+          PackageManager.default.removePackage(pkg)
           JsCmds.RedirectTo(S.hostAndPath + "/applications/list")
         }
         SHtml.a(doDelete _, delete)
