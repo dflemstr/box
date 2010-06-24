@@ -3,6 +3,14 @@
                 <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
                 <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
             </p>
+            <h3>Browse by category</h3>
+            <p class="span-19 last">
+                <span class="span-2"><a href="/applications/list?search=category:Game+orderby:timedesc">Game</a></span>
+                <span class="span-2"><a href="/applications/list?search=category:Emulator+orderby:timedesc">Emulator</a></span>
+                <span class="span-2"><a href="/applications/list?search=category:Network+orderby:timedesc">Internet</a></span>
+                <span class="span-2"><a href="/applications/list?search=category:Office+orderby:timedesc">Office</a></span>
+                <span class="span-2"><a href="/applications/list?search=category:System+orderby:timedesc">System</a></span>
+            </p>
             <div class="span-13"><lift:Applications.list search="orderby:timedesc max:5">
                 <h3><lift:loc locid="html.recentuploads"/></h3>
                 <table>
