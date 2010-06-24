@@ -78,8 +78,8 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
   }
 
   def removePackage(pkg: Package) = {
-    packageRemovedCallbacks foreach (_(pkg))
     pkg.delete()
+    packageRemovedCallbacks foreach (_(pkg))
   }
 
   def createPackage(filename: String, inputStream: InputStream, user: User)(implicit fs: Filesystem, pn: ProcessNotifier, loc: Localization) = {
