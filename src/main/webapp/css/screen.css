@@ -1398,6 +1398,10 @@ textarea {
 
 
 /* Application lists */
+.cloud {
+    font-size: 2em;
+}
+
 .field-container {
     overflow: hidden;
     -o-text-overflow: ellipsis;

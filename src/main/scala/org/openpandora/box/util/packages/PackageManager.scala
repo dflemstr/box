@@ -94,7 +94,10 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
       val file = savePNDFile(id, inputStream)
       val (pxmlFile, maybePngFile) = PNDBinaryInfo.default.findPxmlAndPng(id, file)
 
-      maybePngFile.map(loadAndResizePngFile(_, 64, 64))
+      maybePngFile.map { file =>
+        loadAndResizePngFile(file, file, 64, 64)
+        loadAndResizePngFile(file, Filesystem.default.getFile(id + "-16", PNGImage), 16, 16)
+      }
 
       //Then, try to parse the PXML file, and if it succeeds, repack it
       val xml = cleanXMLFileAndLoad(pxmlFile)
@@ -283,11 +286,11 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
     case err: RequirementException => throw ProcessNotifier.PxmlSyntaxError(Option(err.getMessage) getOrElse "")
   }
 
-  def loadAndResizePngFile(pngFile: File, maxWidth: Int, maxHeight: Int) =
+  def loadAndResizePngFile(pngFile: File, outFile: File, maxWidth: Int, maxHeight: Int) =
     try {
       val image = ImageIO.read(pngFile)
       val resizedImage = resizeImage(image, maxWidth, maxHeight)
-      ImageIO.write(resizedImage, "png", pngFile)
+      ImageIO.write(resizedImage, "png", outFile)
     } catch {
       case _ => throw ProcessNotifier.PngInvalidError
     }

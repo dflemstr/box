@@ -43,6 +43,10 @@ object Applications {
       (<img src={"/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
     else
       NodeSeq.Empty
+    val image16 = if(pkg.hasImage)
+      (<img src={"/file/image/" + pkg.fileId + "-16.png"} alt={pkg.fileName}/>)
+    else
+      NodeSeq.Empty
 
     val df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, S.locale)
     df.setTimeZone(S.timeZone)
@@ -192,6 +196,7 @@ object Applications {
 
     bind(bindName, entry,
          "image" -> image,
+         "smallimage" -> image16,
          "title" -> applicationLink(Text(info.title)),
          "pxmlid" -> app.pxmlId,
          "description" -> info.description,
@@ -263,6 +268,9 @@ class Applications extends DispatchSnippet with Logger {
     import ApplicationSearchRunner._
     val search = (S.attr("search") or S.param("search") toOption) map (_.trim) getOrElse ""
     val lazyload = (S.attr("lazyload") or S.param("lazyload") toOption) map (_.toInt)
+
+    if(S.param("search").isDefined)
+      Database.searchKeywords.insert(search.split("""\s+""").filterNot(_ contains ':').map(keyw => SearchKeyword(keyw.take(256).toLowerCase)))
 
     def loadAppsOnPage(page: Option[(Int, Int)]) = ((search, page) match {
         case ("", None) =>
