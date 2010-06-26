@@ -3,17 +3,19 @@
                 <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
                 <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
             </p>
-            <div class="span-9">
-                <h3>Popular categories</h3>
-                <p class="cloud">
-                    <lift:ApplicationStatistics.categoryCloud/>
-                </p>
-            </div>
-            <div class="span-10 last">
-                <h3>Popular searches</h3>
-                <p class="cloud">
-                    <lift:ApplicationStatistics.searchCloud/>
-                </p>
+            <div class="span-19 last">
+                <div class="span-9">
+                    <h3>Popular categories</h3>
+                    <p class="cloud">
+                        <lift:ApplicationStatistics.categoryCloud/>
+                    </p>
+                </div>
+                <div class="span-10 last">
+                    <h3>Popular searches</h3>
+                    <p class="cloud">
+                        <lift:ApplicationStatistics.searchCloud/>
+                    </p>
+                </div>
             </div>
             <div class="span-6"><lift:Applications.list search="orderby:timedesc max:5">
                 <h3><lift:loc locid="html.recentuploads"/></h3>
