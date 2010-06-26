@@ -42,7 +42,7 @@ class ApplicationStatistics extends DispatchSnippet
     val max = if(counts.isEmpty) 0.0 else counts.values.max.toDouble
     counts.keys.flatMap {category =>
       val catName = DotDesktopCategories(category).toString
-      <a href={"/applications/list?search=category:" + catName} class="category-cloud-element" style={"font-size:" + ((counts(category) - min) / (max - min) + 0.5) + "em;"}>{catName}</a>
+      <a href={"/applications/list?search=category:" + catName} class="category-cloud-element" style={"font-size:" + ((counts(category) - min) / (max - min) + 0.5) + "em;"}>{catName}</a> ++ Text(" ")
     }.toSeq
   }
 
@@ -51,7 +51,7 @@ class ApplicationStatistics extends DispatchSnippet
     val min = if(counts.isEmpty) 0.0 else counts.values.min.toDouble
     val max = if(counts.isEmpty) 0.0 else counts.values.max.toDouble
     counts.keys.flatMap {keyword =>
-      <a href={"/applications/list?search=" + keyword} class="keyword-cloud-element" style={"font-size:" + ((counts(keyword) - min) / (max - min) + 0.5) + "em;"}>{keyword}</a>
+      <a href={"/applications/list?search=" + keyword} class="keyword-cloud-element" style={"font-size:" + ((counts(keyword) - min) / (max - min) + 0.5) + "em;"}>{keyword}</a> ++ Text(" ")
     }.toSeq
   }
 }
