@@ -7,7 +7,7 @@ import net.liftweb.http.RequestVar
 import net.liftweb.http.S
 import net.liftweb.http.SessionVar
 import net.liftweb.util.Helpers
-import org.squeryl.annotations._
+import org.squeryl.annotations.Column
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.OneToMany
 import scala.annotation.target.field

@@ -2,9 +2,8 @@ package org.openpandora.box.comet
 
 import net.liftweb.common.Logger
 import net.liftweb.http.CometActor
-import net.liftweb.http.js.JE._
+import net.liftweb.http.js.JE
 import org.openpandora.box.util.notifications.Poster
-import org.openpandora.box.util.notifications.Poster._
 import scala.xml.NodeSeq
 
 trait NotificationDispatcher {
@@ -30,6 +29,6 @@ class NotificationDispatcherComet extends NotificationDispatcher
   override def localShutdown() = Poster.default.unregisterNotificationDispatcher(this)
 
   override def lowPriority = {
-    case PostMessage(kind, title, body) => partialUpdate(Call("displayNotice", Str(kind), Str(title.toString), Str(body.toString), JsNull).cmd)
+    case PostMessage(kind, title, body) => partialUpdate(JE.Call("displayNotice", JE.Str(kind), JE.Str(title.toString), JE.Str(body.toString), JE.JsNull).cmd)
   }
 }

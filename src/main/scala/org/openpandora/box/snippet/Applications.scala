@@ -12,36 +12,46 @@ import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.http.js.JE
 import net.liftweb.http.js.JsCmds
+import net.liftweb.util.AltXML
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
-import org.openpandora.box.model._
+import org.openpandora.box.model.Application
+import org.openpandora.box.model.AppMeta
+import org.openpandora.box.model.Comment
+import org.openpandora.box.model.Database
+import org.openpandora.box.model.Package
+import org.openpandora.box.model.Rating
+import org.openpandora.box.model.SearchKeyword
+import org.openpandora.box.model.User
 import org.openpandora.box.util.ApplicationSearchRunner
 import org.openpandora.box.util.ApplicationQueryParser
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
-import org.openpandora.box.util.filesystem._
+import org.openpandora.box.util.filesystem.Filesystem
+import org.openpandora.box.util.filesystem.PNDFile
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.OneToMany
 import scala.math._
-import scala.xml.NodeSeq
-import scala.xml.Text
-import scala.xml.UnprefixedAttribute
+import scala.xml.{Comment => _, _}
 
 object Applications {
   private object createCommentFunction extends RequestVar[Option[() => NodeSeq]](None)
   def makeAppEntry(app: Application, pkg: Package, metaEng: AppMeta, metaLoc: Option[AppMeta],
                    bindName: String, entry: NodeSeq) = {
     val locale = S.locale.toString.toLowerCase
-    lazy val infos = app.metas
-    lazy val categories = app.categories
-    lazy val comments = app.comments
-    lazy val concreteInfos = infos.toSeq
+    lazy val infos = app.metas.toSeq
+    lazy val categories = app.categories.toSeq
+    lazy val comments = app.comments.toSeq
     val info = metaLoc getOrElse metaEng
     val applicationLink = (n: NodeSeq) => (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
     val downloadLink = (n: NodeSeq) => (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
     val image = if(pkg.hasImage)
       (<img src={"/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
+    else
+      NodeSeq.Empty
+    val image16 = if(pkg.hasImage)
+      (<img src={"/file/image/" + pkg.fileId + "-16.png"} alt={pkg.fileName}/>)
     else
       NodeSeq.Empty
 
@@ -51,19 +61,19 @@ object Applications {
     def makeDelete(delete: NodeSeq) = User.currentUser match {
       case Some(user) if user.id == pkg.userId || user.admin =>
         def doDelete() = {
-          pkg.delete()
+          PackageManager.default.removePackage(pkg)
           JsCmds.RedirectTo(S.hostAndPath + "/applications/list")
         }
         SHtml.a(doDelete _, delete)
       case _ => NodeSeq.Empty
     }
 
-    def makeComment(comment: NodeSeq): NodeSeq = comments flatMap { c =>
+    def makeComment(comment: NodeSeq): NodeSeq = comments.flatMap({ c =>
       bind("comment", comment,
            "author" -> makePerson(c.userId, "author") _,
            "date"   -> df.format(c.time),
            "body"   -> c.body)
-    } toSeq
+    }).toSeq
 
     def makeComments(template: NodeSeq): NodeSeq = if(comments.isEmpty)
       NodeSeq.Empty
@@ -107,7 +117,7 @@ object Applications {
       } toSeq
 
     def makeLanguages(languages: NodeSeq): NodeSeq ={
-      val langs = concreteInfos.map(_.language)
+      val langs = infos.map(_.language)
       if(langs.size <= 1)
         NodeSeq.Empty
       else
@@ -193,6 +203,7 @@ object Applications {
 
     bind(bindName, entry,
          "image" -> image,
+         "smallimage" -> image16,
          "title" -> applicationLink(Text(info.title)),
          "pxmlid" -> app.pxmlId,
          "description" -> info.description,
@@ -254,11 +265,19 @@ class Applications extends DispatchSnippet with Logger {
                  "upload" -> u % meta,
                  "submit" -> SHtml.submit(S.?("Create"), doCreate))
   }
+  
+  def fixHtml(uid: String, content: NodeSeq): String =
+    AltXML.toXML(Group(S.session.map(s => s.fixHtml(s.processSurroundAndInclude("JS SetHTML id: " + uid, content))).openOr(content)),
+                 false, true, S.ieMode).encJs
+
 
   def list(list: NodeSeq): NodeSeq = {
     import ApplicationSearchRunner._
     val search = (S.attr("search") or S.param("search") toOption) map (_.trim) getOrElse ""
     val lazyload = (S.attr("lazyload") or S.param("lazyload") toOption) map (_.toInt)
+
+    if(S.param("search").isDefined)
+      Database.searchKeywords.insert(search.split("""\s+""").filterNot(_ contains ':').map(keyw => SearchKeyword(keyw.take(256).toLowerCase)))
 
     def loadAppsOnPage(page: Option[(Int, Int)]) = ((search, page) match {
         case ("", None) =>
@@ -292,10 +311,14 @@ class Applications extends DispatchSnippet with Logger {
           else {
             val newId = makeId
             S.mapFunc(id,
-                      () => (JsCmds.Replace(id, loadPage(number + 1, newId)) & JE.Call("bindLoadEvent", JE.Str(newId), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(newId + "=true")).cmd)).cmd))
-            (<div id={id}>{loading}</div> ++
-             (if(number == 0)
-               JsCmds.Script(JsCmds.OnLoad(JE.Call("bindLoadEvent", JE.Str(id), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(id + "=true")).cmd)).cmd)) else NodeSeq.Empty))
+                      () => {
+                val newContent = fixHtml("inline", loadPage(number + 1, newId))
+                (
+                  (JE.JsRaw("jQuery('#" + id + "').replaceWith(" + newContent + ")")).cmd &
+                  JE.Call("bindLoadEvent", JE.Str(newId), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(newId + "=true")).cmd)).cmd
+                )
+              })
+            ((<div id={id}>{loading}</div>) ++ (if(number == 0) JsCmds.Script(JsCmds.OnLoad(JE.Call("bindLoadEvent", JE.Str(id), JE.AnonFunc(SHtml.makeAjaxCall(JE.Str(id + "=true")).cmd)).cmd)) else NodeSeq.Empty))
           }
 
           bind("list", list,

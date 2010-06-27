@@ -17,6 +17,7 @@ object Database extends Schema
   val packageDownloads = table[PackageDownload]("packageDownloads")
   val ratings          = table[Rating]         ("ratings")
   val users            = table[User]           ("users")
+  val searchKeywords   = table[SearchKeyword]  ("searchKeywords")
 
   val applicationsToAppMetas     = oneToManyRelation(applications, appMetas)        .via((a, am) => a.id === am.applicationId)
   val applicationsToCategories   = oneToManyRelation(applications, categories)      .via((a, c)  => a.id === c .applicationId)

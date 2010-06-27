@@ -3,23 +3,54 @@
                 <lift:loc locid="greeting"/><lift:Users.isLoggedOut>
                 <lift:loc locid="html.loginmsg"/></lift:Users.isLoggedOut>
             </p>
-            <div class="span-13"><lift:Applications.list search="orderby:timedesc max:5">
+            <div class="span-19 last">
+                <div class="span-9">
+                    <h3><lift:loc locid="html.popularcategories"/></h3>
+                    <p class="cloud">
+                        <lift:ApplicationStatistics.categoryCloud/>
+                    </p>
+                </div>
+                <div class="span-10 last">
+                    <h3>Popular searches</h3>
+                    <p class="cloud">
+                        <lift:ApplicationStatistics.searchCloud/>
+                    </p>
+                </div>
+            </div>
+            <div class="span-6"><lift:Applications.list search="orderby:timedesc max:5">
                 <h3><lift:loc locid="html.recentuploads"/></h3>
                 <table>
                     <thead>
                         <tr>
+                            <th style="width: 16px;">&nbsp;</th>
                             <th><lift:loc locid="html.title"/></th>
                             <th><lift:loc locid="html.version"/></th>
-                            <th><lift:loc locid="html.uploaded"/></th>
-                            <th>&nbsp;</th>
                         </tr>
                     </thead>
                     <tbody><list:entry>
                         <tr>
+                            <td class="small-image"><entry:smallimage/></td>
                             <td><entry:title/></td>
                             <td><entry:version/></td>
-                            <td><entry:time/></td>
-                            <td><entry:link><lift:loc locid="html.details"/></entry:link></td>
+                        </tr></list:entry>
+                    </tbody>
+                </table>
+            </lift:Applications.list></div>
+            <div class="span-7"><lift:Applications.list search="orderby:ratingdesc max:5">
+                <h3><lift:loc locid="html.popularapplications"/></h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 16px;">&nbsp;</th>
+                            <th><lift:loc locid="html.title"/></th>
+                            <th><lift:loc locid="html.version"/></th>
+                        </tr>
+                    </thead>
+                    <tbody><list:entry>
+                        <tr>
+                            <td class="small-image"><entry:smallimage/></td>
+                            <td><entry:title/></td>
+                            <td><entry:version/></td>
                         </tr></list:entry>
                     </tbody>
                 </table>
