@@ -1,13 +1,16 @@
 package bootstrap.liftweb
 
-import java.util.Locale
-import java.util.TimeZone
-import javax.mail.Authenticator
-import javax.mail.PasswordAuthentication
 import net.liftweb.common.Box
 import net.liftweb.common.Full
 import net.liftweb.common.Logger
-import net.liftweb.http._
+import net.liftweb.http.DocType
+import net.liftweb.http.LiftRules
+import net.liftweb.http.OnDiskFileParamHolder
+import net.liftweb.http.ParsePath
+import net.liftweb.http.Req
+import net.liftweb.http.RewriteRequest
+import net.liftweb.http.RewriteResponse
+import net.liftweb.http.S
 import net.liftweb.http.js.JE
 import net.liftweb.http.js.JsCmds
 import net.liftweb.http.provider.HTTPRequest
@@ -19,7 +22,8 @@ import net.liftweb.util.Mailer
 import net.liftweb.util.Props
 import org.openpandora.box.dispatch.FileDispatcher
 import org.openpandora.box.dispatch.RestRepositoryApi
-import org.openpandora.box.model._
+import org.openpandora.box.model.Database
+import org.openpandora.box.model.User
 import org.openpandora.box.util.filesystem.Filesystem
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.packages.ProcessNotifier
@@ -30,6 +34,7 @@ import org.openpandora.box.util.notifications.Poster
  */
 class Boot extends Logger {
   def boot {
+    info("Running in " + Props.mode + " mode.")
     establishDatabaseConnection()
     configLift()
     setupEmail()
@@ -82,6 +87,8 @@ class Boot extends Logger {
   private lazy val useEmail = Props.get("mail.enable").map(_.toBoolean) openOr false
 
   private def setupEmail() = if(useEmail) {
+    import javax.mail.Authenticator
+    import javax.mail.PasswordAuthentication
     Props.get("mail.smtp.host").foreach(System.setProperty("mail.smtp.host", _))
     Props.get("mail.smtp.auth").foreach(System.setProperty("mail.smtp.auth", _))
     for {
@@ -125,10 +132,10 @@ class Boot extends Logger {
     LiftRules.loggedInTest = Full(User.currentUser.isDefined _)
 
     LiftRules.timeZoneCalculator = (request: Box[HTTPRequest]) =>
-    (User.currentUser map (_.timeZone) getOrElse TimeZone.getDefault)
+    (User.currentUser map (_.timeZone) getOrElse java.util.TimeZone.getDefault)
 
     LiftRules.localeCalculator = (request: Box[HTTPRequest]) =>
-    (User.currentUser map (_.language) getOrElse (request flatMap (_.locale) openOr Locale.getDefault))
+    (User.currentUser map (_.language) getOrElse (request flatMap (_.locale) openOr java.util.Locale.getDefault))
 
     LiftRules.ajaxStart =
       Full(JE.Call("startAjax").cmd _)

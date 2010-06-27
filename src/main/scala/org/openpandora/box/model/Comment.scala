@@ -2,7 +2,7 @@ package org.openpandora.box.model
 
 import java.util.Date
 import org.squeryl.dsl.ManyToOne
-import org.squeryl.annotations._
+import org.squeryl.annotations.Column
 import scala.annotation.target.field
 
 case class Comment(userId:        Long, //id

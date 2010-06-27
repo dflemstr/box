@@ -2,7 +2,7 @@ package org.openpandora.box.model
 
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.dsl.OneToMany
-import org.squeryl.annotations._
+import org.squeryl.annotations.Column
 import org.squeryl.PrimitiveTypeMode._
 import scala.annotation.target.field
 

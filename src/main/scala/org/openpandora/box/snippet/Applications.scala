@@ -15,13 +15,21 @@ import net.liftweb.http.js.JsCmds
 import net.liftweb.util.AltXML
 import net.liftweb.util.Helpers
 import net.liftweb.util.Helpers._
-import org.openpandora.box.model._
+import org.openpandora.box.model.Application
+import org.openpandora.box.model.AppMeta
+import org.openpandora.box.model.Comment
+import org.openpandora.box.model.Database
+import org.openpandora.box.model.Package
+import org.openpandora.box.model.Rating
+import org.openpandora.box.model.SearchKeyword
+import org.openpandora.box.model.User
 import org.openpandora.box.util.ApplicationSearchRunner
 import org.openpandora.box.util.ApplicationQueryParser
 import org.openpandora.box.util.DotDesktopCategories
 import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
-import org.openpandora.box.util.filesystem._
+import org.openpandora.box.util.filesystem.Filesystem
+import org.openpandora.box.util.filesystem.PNDFile
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.OneToMany
 import scala.math._
@@ -32,10 +40,9 @@ object Applications {
   def makeAppEntry(app: Application, pkg: Package, metaEng: AppMeta, metaLoc: Option[AppMeta],
                    bindName: String, entry: NodeSeq) = {
     val locale = S.locale.toString.toLowerCase
-    lazy val infos = app.metas
-    lazy val categories = app.categories
-    lazy val comments = app.comments
-    lazy val concreteInfos = infos.toSeq
+    lazy val infos = app.metas.toSeq
+    lazy val categories = app.categories.toSeq
+    lazy val comments = app.comments.toSeq
     val info = metaLoc getOrElse metaEng
     val applicationLink = (n: NodeSeq) => (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
     val downloadLink = (n: NodeSeq) => (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
@@ -61,12 +68,12 @@ object Applications {
       case _ => NodeSeq.Empty
     }
 
-    def makeComment(comment: NodeSeq): NodeSeq = comments flatMap { c =>
+    def makeComment(comment: NodeSeq): NodeSeq = comments.flatMap({ c =>
       bind("comment", comment,
            "author" -> makePerson(c.userId, "author") _,
            "date"   -> df.format(c.time),
            "body"   -> c.body)
-    } toSeq
+    }).toSeq
 
     def makeComments(template: NodeSeq): NodeSeq = if(comments.isEmpty)
       NodeSeq.Empty
@@ -110,7 +117,7 @@ object Applications {
       } toSeq
 
     def makeLanguages(languages: NodeSeq): NodeSeq ={
-      val langs = concreteInfos.map(_.language)
+      val langs = infos.map(_.language)
       if(langs.size <= 1)
         NodeSeq.Empty
       else

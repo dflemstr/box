@@ -4,7 +4,7 @@ import java.util.Date
 import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.dsl.OneToMany
-import org.squeryl.annotations._
+import org.squeryl.annotations.Column
 import scala.annotation.target.field
 
 case class Package(userId:     Long,   //id

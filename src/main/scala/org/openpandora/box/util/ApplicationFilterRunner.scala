@@ -59,7 +59,7 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
         expressions
       case parser.NoSuccess(err, _) =>
         S.warning(<p>{S.?("search.invalid")}</p> ++ <code>{err}</code>)
-	Seq.empty
+    Seq.empty
     }
     @inline def warnVersion(field: String) = S.warning(<p>{S.?("search.version.conflict").replace("%versionfield%", field)}</p>)
     expressions.foldLeft(search) { (previous, expr) =>
