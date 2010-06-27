@@ -15,6 +15,7 @@ class BoxProject(info: ProjectInfo) extends DefaultWebProject(info) with hoffroc
     "org.scala-tools.testing" %% "specs" % "1.6.5-SNAPSHOT" % "test",
     "org.eclipse.jetty" % "jetty-webapp" % "7.0.2.RC0" % "test",
     "com.h2database" % "h2" % "1.2.121" % "compile",
-    "mysql" % "mysql-connector-java" % "5.0.5" % "compile"
+    "mysql" % "mysql-connector-java" % "5.0.5" % "compile",
+    "postgresql" % "postgresql" % "8.4-701.jdbc3" % "compile"
   ) ++ super.libraryDependencies
 }
