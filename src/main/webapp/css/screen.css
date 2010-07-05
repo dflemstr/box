@@ -1274,7 +1274,6 @@ textarea {
     background-color: #025D8C;
     background: -moz-linear-gradient(top, #107FC9, #025D8C);
     background: -webkit-gradient(linear, left top, left bottom, from(#107FC9), to(#025D8C));
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#107FC9', endColorstr='#025D8C');
     margin-bottom: 1em;
     -webkit-box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 0 0.25em 0.5em rgba(0, 0, 0, 0.5);
@@ -1309,7 +1308,6 @@ textarea {
     background-color: #025D8C;
     background: -moz-linear-gradient(top, #107FC9, #025D8C);
     background: -webkit-gradient(linear, left top, left bottom, from(#107FC9), to(#025D8C));
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#107FC9', endColorstr='#025D8C');
     -webkit-box-shadow: 0 -0.25em 0.5em rgba(0, 0, 0, 0.5);
     -moz-box-shadow: 0 -0.25em 0.5em rgba(0, 0, 0, 0.5);
     box-shadow: 0 -0.25em 0.5em rgba(0, 0, 0, 0.5);

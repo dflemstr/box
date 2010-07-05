@@ -93,3 +93,15 @@ button, input.button {
     position: relative;
     top: 0.25em;
 }
+
+#row-0 {
+    position: relative !important;
+    margin-bottom: -3em !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#107FC9', endColorstr='#025D8C');
+}
+
+#row-2 {
+    position: relative !important;
+    margin-top: -2em !important;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#107FC9', endColorstr='#025D8C');
+}
