@@ -19,13 +19,11 @@
 <body>
     <div id="row-0" class="row">
         <div id="header" class="container">
-            <div id="logo" class="span-4">
+            <div class="span-19">
                 <h1 class="bottom alt"><a href="/"><lift:loc locid="application"/></a></h1>
-            </div>
-            <div id="ajax-container" class="span-1">
-                <img id="ajax-indicator" class="hide" src="/images/throbber.gif" alt="Pending AJAX calls" title="Pending AJAX calls"/>
-            </div>
-            <div id="navigation" class="span-14 last"><lift:MenuSystem.build active:class="active" path:class="menu-path">
+                <span class="alt" style="font-size: 2em;">&#8196;</span>
+                <h2 class="bottom alt"><lift:Menu.title/></h2>
+                <img id="ajax-indicator" class="hide" src="/images/throbber.gif" alt="Pending AJAX calls"/><lift:MenuSystem.build active:class="active" path:class="menu-path">
                 <build:items><ul class="topmenu menu"><items:item>
                     <li class="topmenu-item menu-item">
                         <div class="menu-entry"><item:menu/></div><item:items>
@@ -42,7 +40,7 @@
     </div>
     <div id="row-1" class="row">
         <div id="main" class="container">
-            <h2><lift:Menu.title/></h2><lift:bind name="main"/>
+            <div style="height: 4em;" class="span-19 last"/><lift:bind name="main"/>
         </div>
     </div>
     <div id="row-2" class="row">
