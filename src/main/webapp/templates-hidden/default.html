@@ -20,10 +20,7 @@
     <div id="row-0" class="row">
         <div id="header" class="container">
             <div class="span-19">
-                <h1 class="bottom alt"><a href="/"><lift:loc locid="application"/></a></h1>
-                <span class="alt" style="font-size: 2em;">&#8196;</span>
-                <h2 class="bottom alt"><lift:Menu.title/></h2>
-                <img id="ajax-indicator" class="hide" src="/images/throbber.gif" alt="Pending AJAX calls"/><lift:MenuSystem.build active:class="active" path:class="menu-path">
+                <lift:MenuSystem.build active:class="active" path:class="menu-path">
                 <build:items><ul class="topmenu menu"><items:item>
                     <li class="topmenu-item menu-item">
                         <div class="menu-entry"><item:menu/></div><item:items>
@@ -34,7 +31,10 @@
                         </ul>
                         <div class="menu-dropdown-arrow"/></item:items>
                     </li></items:item>
-                </ul></build:items></lift:MenuSystem.build>
+                </ul></build:items></lift:MenuSystem.build><h1 class="bottom alt"><a href="/"><lift:loc locid="application"/></a></h1>
+                <span class="alt" style="font-size: 2em;">&#8196;</span>
+                <h2 class="bottom alt"><lift:Menu.title/></h2>
+                <img id="ajax-indicator" class="hide" src="/images/throbber.gif" alt="Pending AJAX calls"/>
             </div>
         </div>
     </div>
