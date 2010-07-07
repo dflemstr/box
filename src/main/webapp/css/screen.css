@@ -1209,8 +1209,10 @@ textarea {
 }
 
 #row-0 {
-    top: 0;
     position: fixed;
+    top: 0;
+    left: 0;
+    height: 3em;
     z-index: 1;
     color: #EDF7FF;
     background-color: #025D8C;
@@ -1230,8 +1232,8 @@ textarea {
     color: #73C2FF;
 }
 
-
 #row-1 {
+    padding-top: 4em;
 }
 
 #row-1 a {
@@ -1243,8 +1245,9 @@ textarea {
 }
 
 #row-2 {
-    bottom: 0;
     position: fixed;
+    bottom: 0;
+    left: 0;
     z-index: 1;
     color: #EDF7FF;
     background-color: #025D8C;
