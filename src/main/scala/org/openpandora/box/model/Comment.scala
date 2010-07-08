@@ -3,13 +3,17 @@ package org.openpandora.box.model
 import java.util.Date
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.annotations.Column
+import org.squeryl.KeyedEntity
+import org.squeryl.dsl.CompositeKey3
+import org.squeryl.PrimitiveTypeMode._
 import scala.annotation.target.field
 
 case class Comment(userId:        Long, //id
                    applicationId: Long, //id
                    time:          Long,
                    @Column(length = 1024)
-                   body:          String) extends LongKeyedEntity {
+                   body:          String) extends KeyedEntity[CompositeKey3[Long, Long, Long]] {
+  def id = compositeKey(userId, applicationId, time)
   def date = new Date(time)
   lazy val application: ManyToOne[Application] = Database.applicationsToComments.right(this)
   lazy val user:        ManyToOne[User]        = Database.usersToComments.right(this)
