@@ -47,8 +47,22 @@ object Database extends Schema
   usersToRatings            .foreingKeyDeclaration.constrainReference(onDelete cascade)
 
   def buildLoanWrapper(): LoanWrapper = new LoanWrapper {
-    def apply[A](f: => A): A = transaction{
-      f
+    def apply[A](f: => A): A = transaction {
+
+      /***DEBUG
+      var numberOfQueries = 0l
+      Session.currentSession.setLogger(msg => {
+          msg.lines.foreach(line => info("Squeryl: " + line))
+          if(msg startsWith "Select") {
+            numberOfQueries += 1
+            info("(This was query #" + numberOfQueries + ")")
+          }
+        })***/
+      val result = f
+      /***DEBUG
+      if(numberOfQueries > 0)
+        info("This request used " + numberOfQueries + " queries")***/
+      result
     }
   }
 }
