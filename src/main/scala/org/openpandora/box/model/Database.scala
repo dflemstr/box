@@ -1,11 +1,10 @@
 package org.openpandora.box.model
 
 import org.squeryl.Schema
-import org.squeryl.Session
 import net.liftweb.common.Logger
-import net.liftweb.util.DynoVar
 import net.liftweb.util.LoanWrapper
 import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.Session
 
 object Database extends Schema
                    with Logger {
@@ -32,9 +31,38 @@ object Database extends Schema
   val usersToPackages            = oneToManyRelation(users,        packages)        .via((u, p)  => u.id === p .userId)
   val usersToRatings             = oneToManyRelation(users,        ratings)         .via((u, r)  => u.id === r .userId)
 
+  applicationsToAppMetas    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToCategories  .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToAppMetas    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToCategories  .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToComments    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToRatings     .foreingKeyDeclaration.constrainReference(onDelete cascade)
+
+  packagesToApplications    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  packagesToPackageDownloads.foreingKeyDeclaration.constrainReference(onDelete cascade)
+
+  usersToComments           .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToPackageDownloads   .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToPackages           .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToRatings            .foreingKeyDeclaration.constrainReference(onDelete cascade)
+
   def buildLoanWrapper(): LoanWrapper = new LoanWrapper {
-    def apply[A](f: => A): A = transaction{
-      f
+    def apply[A](f: => A): A = transaction {
+
+      /***DEBUG
+      var numberOfQueries = 0l
+      Session.currentSession.setLogger(msg => {
+          msg.lines.foreach(line => info("Squeryl: " + line))
+          if(msg startsWith "Select") {
+            numberOfQueries += 1
+            info("(This was query #" + numberOfQueries + ")")
+          }
+        })***/
+      val result = f
+      /***DEBUG
+      if(numberOfQueries > 0)
+        info("This request used " + numberOfQueries + " queries")***/
+      result
     }
   }
 }

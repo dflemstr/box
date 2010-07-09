@@ -1,11 +1,10 @@
 package org.openpandora.box.model
 
 import java.util.Date
-import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.annotations.Column
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.dsl.OneToMany
-import org.squeryl.annotations.Column
-import scala.annotation.target.field
+import org.squeryl.PrimitiveTypeMode._
 
 case class Package(userId:     Long,   //id
                    @Column(length = 16)

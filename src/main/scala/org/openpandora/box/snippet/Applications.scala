@@ -3,7 +3,7 @@ package org.openpandora.box.snippet
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
-import net.liftweb.common.Full
+import java.util.TimeZone
 import net.liftweb.common.Logger
 import net.liftweb.http.DispatchSnippet
 import net.liftweb.http.FileParamHolder
@@ -26,62 +26,61 @@ import org.openpandora.box.model.User
 import org.openpandora.box.util.ApplicationSearchRunner
 import org.openpandora.box.util.ApplicationQueryParser
 import org.openpandora.box.util.DotDesktopCategories
-import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.filesystem.Filesystem
 import org.openpandora.box.util.filesystem.PNDFile
 import org.squeryl.PrimitiveTypeMode._
-import org.squeryl.dsl.OneToMany
 import scala.math._
-import scala.xml.{Comment => _, _}
+import scala.xml.Group
+import scala.xml.NodeSeq
+import scala.xml.Text
+import scala.xml.UnprefixedAttribute
 
 object Applications {
   private object createCommentFunction extends RequestVar[Option[() => NodeSeq]](None)
-  def makeAppEntry(app: Application, pkg: Package, metaEng: AppMeta, metaLoc: Option[AppMeta],
-                   bindName: String, entry: NodeSeq) = {
-    val locale = S.locale.toString.toLowerCase
-    lazy val infos = app.metas.toSeq
-    lazy val categories = app.categories.toSeq
-    lazy val comments = app.comments.toSeq
-    val info = metaLoc getOrElse metaEng
-    val applicationLink = (n: NodeSeq) => (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
-    val downloadLink = (n: NodeSeq) => (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
-    val image = if(pkg.hasImage)
-      (<img src={"/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
-    else
-      NodeSeq.Empty
-    val image16 = if(pkg.hasImage)
-      (<img src={"/file/image/" + pkg.fileId + "-16.png"} alt={pkg.fileName}/>)
-    else
-      NodeSeq.Empty
+  
+  def makeDelete(user: Option[User], pkg: Package)(delete: NodeSeq) = user match {
+    case Some(user) if user.id == pkg.userId || user.admin =>
+      def doDelete() = {
+        PackageManager.default.removePackage(pkg)
+        JsCmds.RedirectTo(S.hostAndPath + "/applications/list")
+      }
+      SHtml.a(doDelete _, delete)
+    case _ => NodeSeq.Empty
+  }
 
-    val df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, S.locale)
-    df.setTimeZone(S.timeZone)
+  def makePerson(user: User, binding: String)(template: NodeSeq) = {
+    val name = user.username
+    bind(binding, template,
+         "name" -> <a href={"/applications/list?search=uploader:" + name}>{name}</a>,
+         "largeavatar" -> user.gravatarImage(70),
+         "avatar"      -> user.gravatarImage(30),
+         "smallavatar" -> user.gravatarImage(12))
+  }
 
-    def makeDelete(delete: NodeSeq) = User.currentUser match {
-      case Some(user) if user.id == pkg.userId || user.admin =>
-        def doDelete() = {
-          PackageManager.default.removePackage(pkg)
-          JsCmds.RedirectTo(S.hostAndPath + "/applications/list")
-        }
-        SHtml.a(doDelete _, delete)
-      case _ => NodeSeq.Empty
-    }
+  def localizedDateFormat(locale: Locale, timeZone: TimeZone) = {
+    val df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale)
+    df.setTimeZone(timeZone)
+    df
+  }
 
-    def makeComment(comment: NodeSeq): NodeSeq = comments.flatMap({ c =>
-      bind("comment", comment,
-           "author" -> makePerson(c.userId, "author") _,
-           "date"   -> df.format(c.time),
-           "body"   -> c.body)
-    }).toSeq
+  def makeComment(app: Application, df: DateFormat)(template: NodeSeq): NodeSeq =
+    app.commentsWithUsersSeq.flatMap({
+        case (comment, user) =>
+          bind("comment", template,
+               "author" -> makePerson(user, "author") _,
+               "date"   -> df.format(comment.time),
+               "body"   -> comment.body)
+      }).toSeq
 
-    def makeComments(template: NodeSeq): NodeSeq = if(comments.isEmpty)
-      NodeSeq.Empty
-    else
-      bind("comments", template,
-           "comment" -> makeComment _)
+  def makeComments(app: Application, df: DateFormat)(template: NodeSeq): NodeSeq = if(app.commentsSeq.isEmpty)
+    NodeSeq.Empty
+  else
+    bind("comments", template,
+         "comment" -> makeComment(app, df) _)
 
-    def makeCommentForm(commentForm: NodeSeq): NodeSeq = createCommentFunction.is.map(_()) getOrElse (User.currentUser match {
+  def makeCommentForm(user: Option[User], app: Application)(commentForm: NodeSeq): NodeSeq =
+    createCommentFunction.is.map(_()) getOrElse (user match {
         case Some(user) =>
           var text = ""
           def doCreateComment(): Unit = text match {
@@ -101,129 +100,182 @@ object Applications {
         case None => NodeSeq.Empty
       })
 
-    def makeCategory(category: NodeSeq): NodeSeq = categories.flatMap {cat =>
-      val name = DotDesktopCategories(cat.value).toString
-      bind("category", category,
-           "name" -> <a href={"/applications/list?search=category:" + name}>{name}</a>)
+  def makeCategory(app: Application)(category: NodeSeq): NodeSeq = app.categoriesSeq.flatMap {cat =>
+    val name = DotDesktopCategories(cat.value).toString
+    bind("category", category,
+         "name" -> <a href={"/applications/list?search=category:" + name}>{name}</a>)
+  } toSeq
+
+  def makeCategories(app: Application)(categories: NodeSeq): NodeSeq =
+    bind("categories", categories,
+         "category" -> makeCategory(app) _)
+
+  def makeLanguage(langs: Seq[Locale], locale: Locale)(language: NodeSeq): NodeSeq =
+    langs flatMap { lang =>
+      bind("language", language, "name" -> lang.getDisplayName(locale))
     } toSeq
 
-    def makeCategories(categories: NodeSeq): NodeSeq =
-      bind("categories", categories,
-           "category" -> makeCategory _)
+  def makeLanguages(app: Application, locale: Locale)(languages: NodeSeq): NodeSeq ={
+    val langs = app.metasSeq.map(_.language)
+    if(langs.size <= 1)
+      NodeSeq.Empty
+    else
+      bind("languages", languages,
+           "language" -> makeLanguage(langs, locale) _)
+  }
 
-    def makeLanguage(langs: Seq[Locale])(language: NodeSeq): NodeSeq =
-      langs flatMap { lang =>
-        bind("language", language, "name" -> lang.getDisplayName(S.locale))
-      } toSeq
+  def makeRating(app: Application, mayEdit: Boolean = false)(rating: NodeSeq): NodeSeq = {
+    val id = Helpers.nextFuncName
+    def redraw() = JsCmds.SetHtml(id, render)
 
-    def makeLanguages(languages: NodeSeq): NodeSeq ={
-      val langs = infos.map(_.language)
-      if(langs.size <= 1)
-        NodeSeq.Empty
-      else
-        bind("languages", languages,
-             "language" -> makeLanguage(langs) _)
+    def doAddRating(rating: Int)() = User.currentUser match {
+      case Some(user) if !app.hasRated(user) =>
+        try {
+          require(rating > 0 && rating < 11)
+          Database.ratings.insert(Rating(app, user, rating))
+          val (avrg, cnt) = from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(nvl(avg(rating.value), 0f), count)).single.measures
+          update(Database.applications)(a => where(a.id === app.id) set(a.ratingCount := cnt, a.ratingAverage := avrg))
+          app.ratingCount = cnt
+          app.ratingAverage = avrg
+          S.notice(<p>{S.?("rating.created")}</p>)
+        } catch {
+          case _ =>
+            S.error(<p>{S.?("rating.invalid")}</p>)
+        }
+        redraw()
+      case Some(user) =>
+        S.error(<p>{S.?("rating.alreadyrated")}</p>)
+        JsCmds.Noop
+      case None =>
+        S.error(<p>{S.?("rating.mustlogin")}</p>)
+        JsCmds.Noop
     }
 
-    def makeRating(rating: NodeSeq): NodeSeq = {
-      val id = Helpers.nextFuncName
-      def redraw() = JsCmds.SetHtml(id, render)
+    def makeDisplay(average: Int, enabled: Boolean)(display: NodeSeq): NodeSeq =
+      for {
+        i <- 1 to 10
+        kind = if(i <= average) "enabled" else "disabled"
+        evenOrOddTemplate = Helpers.chooseTemplate("display", kind, rating)
+        template = Helpers.chooseTemplate(kind, if(i % 2 == 1) "even" else "odd", evenOrOddTemplate) //Reverse even/odd, because firstEntry==1
+        node <- if(enabled) SHtml.a(doAddRating(i) _, template) else template
+      } yield node
 
-      def hasRated(user: User) =
-        from(Database.ratings)(rating => where(rating.userId === user.id and rating.applicationId === app.id) compute(count)) > 0
+    def render =
+      bind("rating", rating,
+           "display" -> makeDisplay(app.ratingAverage.toInt, mayEdit) _,
+           "count" -> Text(app.ratingCount.toString))
 
-      def doAddRating(rating: Int)() = User.currentUser match {
-        case Some(user) if !hasRated(user) =>
-          try {
-            require(rating > 0 && rating < 11)
-            Database.ratings.insert(Rating(app, user, rating))
-            val (avrg, cnt) = from(Database.ratings)(rating => where(rating.applicationId === app.id) compute(nvl(avg(rating.value), 0f), count)).single.measures
-            update(Database.applications)(a => where(a.id === app.id) set(a.ratingCount := cnt, a.ratingAverage := avrg))
-            app.ratingCount = cnt
-            app.ratingAverage = avrg
-            S.notice(<p>{S.?("rating.created")}</p>)
-          } catch {
-            case _ =>
-              S.error(<p>{S.?("rating.invalid")}</p>)
-          }
-          redraw()
-        case Some(user) =>
-          S.error(<p>{S.?("rating.alreadyrated")}</p>)
-          JsCmds.Noop
-        case None =>
-          S.error(<p>{S.?("rating.mustlogin")}</p>)
-          JsCmds.Noop
-      }
+    <div id={id}>{render}</div>
+  }
 
-      def makeDisplay(average: Int, enabled: Boolean)(display: NodeSeq): NodeSeq =
-        for {
-          i <- 1 to 10
-          kind = if(i <= average) "enabled" else "disabled"
-          evenOrOddTemplate = Helpers.chooseTemplate("display", kind, rating)
-          template = Helpers.chooseTemplate(kind, if(i % 2 == 1) "even" else "odd", evenOrOddTemplate) //Reverse even/odd, because firstEntry==1
-          node <- if(enabled) SHtml.a(doAddRating(i) _, template) else template
-        } yield node
-
-      def render =
-        bind("rating", rating,
-             "display" -> makeDisplay(app.ratingAverage.toInt, User.currentUser.map(u => !hasRated(u)) getOrElse false) _,
-             "count" -> Text(app.ratingCount.toString))
-
-      <div id={id}>{render}</div>
-    }
-
-    def makeAuthor(author: NodeSeq) = app.authorName match {
-      case None => NodeSeq.Empty
-      case Some(aname) =>
-        bind("author", author,
-             "name"-> aname)
-    }
-
-    def makePerson(who: Long, binding: String)(template: NodeSeq) = {
-      val user = Database.users.lookup(who).get
-      val name = user.username
-
-      bind(binding, template,
-           "name" -> <a href={"/applications/list?search=uploader:" + name}>{name}</a>,
-           "largeavatar" -> user.gravatarImage(70),
-           "avatar"      -> user.gravatarImage(30),
-           "smallavatar" -> user.gravatarImage(12))
-    }
-
+  def makeFileSize(size: Long) =  {
     val stepThreshold = 0.9
-    def makeFileSize(size: Long) = size match {
+    size match {
       case b if size < stepThreshold * 1024 => S.?("bytes").replace("%n%", b.toString)
       case kb if size < stepThreshold * 1024*1024 => S.?("kilobytes").replace("%n%", (round(10.0 * kb / 1024.0) / 10.0).toString)
       case mb if size < stepThreshold * 1024*1024*1024 => S.?("megabytes").replace("%n%", (round(mb * 10.0 / (1024.0 * 1024.0)) / 10.0).toString)
       case gb => S.?("gigabytes").replace("%n%", (round(gb * 10.0 / (1024.0 * 1024.0 * 1024.0)) / 10.0).toString)
     }
+  }
 
-    def makeLazyNode(node: => NodeSeq) = (_: NodeSeq) => node
-    def makeLazyString(text: => String) = (_: NodeSeq) => Text(text)
+  def makeGravatar(email: String) = Helpers.hexEncode(Helpers.md5(email.toLowerCase.getBytes("UTF-8")))
+
+  def makeGravatarImage(email: String, gravatar: String, size: Int) = //We can expose the email here, since it's in the PXML anyways
+    (<img src={"http://www.gravatar.com/avatar/" + gravatar + ".png?s=" + size + "&d=identicon"} alt={email} title={email} class="avatar" width={size.toString} height={size.toString}/>)
+
+  def makeAuthor(app: Application)(author: NodeSeq) = (app.authorName, app.authorURL, app.authorEmail) match {
+    case (Some(name), Some(url), Some(email)) =>
+      val gravatar = makeGravatar(email)
+      bind("author", author,
+           "name"        -> <a href={url}>{name}</a>,
+           "largeavatar" -> makeGravatarImage(email, gravatar, 70),
+           "avatar"      -> makeGravatarImage(email, gravatar, 30),
+           "smallavatar" -> makeGravatarImage(email, gravatar, 12))
+    case (Some(name), Some(url), _) =>
+      bind("author", author,
+           "name"        -> <a href={url}>{name}</a>,
+           "largeavatar" -> NodeSeq.Empty,
+           "avatar"      -> NodeSeq.Empty,
+           "smallavatar" -> NodeSeq.Empty)
+    case (Some(name), _, _) =>
+      bind("author", author,
+           "name"        -> name,
+           "largeavatar" -> NodeSeq.Empty,
+           "avatar"      -> NodeSeq.Empty,
+           "smallavatar" -> NodeSeq.Empty)
+    case _ => NodeSeq.Empty
+  }
+ 
+  def makeImage16(pkg: Package) = if(pkg.hasImage)
+    (<img src={"/file/image/" + pkg.fileId + "-16.png"} alt={pkg.fileName}/>)
+  else
+    NodeSeq.Empty
+
+  def makeImage(pkg: Package) = if(pkg.hasImage)
+    (<img src={"/file/image/" + pkg.fileId + ".png"} alt={pkg.fileName}/>)
+  else
+    NodeSeq.Empty
+
+  def makeApplicationLink(app: Application)(n: NodeSeq) =
+    (<a href={"/applications/" + app.id + "/show"}>{n}</a>)
+
+  def makeDownloadLink(pkg: Package)(n: NodeSeq) =
+    (<a href={"/file/package/" + pkg.fileId + ".pnd"}>{n}</a>)
+
+  def makeVersionLink(app: Application)(n: NodeSeq) =
+    (<a href={"/applications/list?search=version:" + app.version}>{n}</a>)
+
+  def makeDownloadCount(pkg: Package)(n: NodeSeq) =
+    Text(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString)
+
+  def makeAppEntry(app: Application, bindName: String)(entry: NodeSeq) = {
+    val pkg = app.pkg.single
+    val user = pkg.user.single
+    val meta = app.metas.where(_.languageName === "en_US").head
+    val locale = S.locale
+    val localeName = locale.toString.toLowerCase
+    val metaLoc = app.metas.where(_.languageName like localeName).headOption
+
+    val df = localizedDateFormat(S.locale, S.timeZone)
 
     bind(bindName, entry,
-         "image" -> image,
-         "smallimage" -> image16,
-         "title" -> applicationLink(Text(info.title)),
+         "image" -> makeImage(pkg),
+         "smallimage" -> makeImage16(pkg),
+         "titleAndLink" -> makeApplicationLink(app)(Text(meta.title)),
+         "title" -> meta.title,
          "pxmlid" -> app.pxmlId,
-         "description" -> info.description,
-         "version" -> ({
-          val ver = Seq(app.versionMajor, app.versionMinor, app.versionRelease, app.versionBuild).mkString(".")
-          (<a href={"/applications/list?search=version:" + ver}>{ver}</a>)
-        }),
-         "uploader" -> makePerson(pkg.user.single.id, "uploader") _,
+         "description" -> meta.description,
+         "version" -> makeVersionLink(app)(Text(app.version)),
+         "uploader" -> makePerson(user, "uploader") _,
          "time" -> df.format(pkg.uploadTime),
-         "author" -> makeAuthor _,
-         "categories" -> makeCategories _,
-         "languages" -> makeLanguages _,
-         "rating" -> makeRating _,
-         "comments" -> makeComments _,
-         "commentForm" -> makeCommentForm _,
-         "link" -> applicationLink,
-         "download" -> downloadLink,
-         "delete" -> makeDelete _,
+         "author" -> makeAuthor(app) _,
+         "categories" -> makeCategories(app) _,
+         "languages" -> makeLanguages(app, S.locale) _,
+         "rating" -> makeRating(app, User.currentUser.map(app.hasRated) getOrElse false) _,
+         "comments" -> makeComments(app, df) _,
+         "commentForm" -> makeCommentForm(User.currentUser, app) _,
+         "link" -> makeApplicationLink(app) _,
+         "download" -> makeDownloadLink(pkg) _,
+         "delete" -> makeDelete(User.currentUser, pkg) _,
          "fileSize" -> makeFileSize(Filesystem.default.getFile(pkg.fileId, PNDFile).length),
-         "downloadCount" -> ((_: NodeSeq) => Text(from(Database.packageDownloads)(dl => where(dl.packageId === pkg.id) compute(count)).single.measures.toString)))
+         "downloadCount" -> makeDownloadCount(pkg) _)
+  }
+
+  def makeLightweightAppEntry(app: Application, pkg: Package, user: User, meta: AppMeta, bindName: String)(entry: NodeSeq) = {
+    val df = localizedDateFormat(S.locale, S.timeZone)
+    bind(bindName, entry,
+         "image" -> makeImage(pkg),
+         "smallimage" -> makeImage16(pkg),
+         "title" -> meta.title,
+         "titleAndLink" -> makeApplicationLink(app)(Text(meta.title)),
+         "description" -> meta.description,
+         "time" -> df.format(pkg.uploadTime),
+         "pxmlid" -> app.pxmlId,
+         "version" -> makeVersionLink(app)(Text(app.version)),
+         "rating" -> makeRating(app, User.currentUser.map(app.hasRated) getOrElse false) _,
+         "author" -> makeAuthor(app) _,
+         "link" -> makeApplicationLink(app) _,
+         "uploader" -> makePerson(user, "uploader") _)
   }
 }
 
@@ -270,7 +322,6 @@ class Applications extends DispatchSnippet with Logger {
     AltXML.toXML(Group(S.session.map(s => s.fixHtml(s.processSurroundAndInclude("JS SetHTML id: " + uid, content))).openOr(content)),
                  false, true, S.ieMode).encJs
 
-
   def list(list: NodeSeq): NodeSeq = {
     import ApplicationSearchRunner._
     val search = (S.attr("search") or S.param("search") toOption) map (_.trim) getOrElse ""
@@ -293,8 +344,8 @@ class Applications extends DispatchSnippet with Logger {
                             UseExplicitPagination(start, max),
                             UseLocale(S.locale))
       }).toSeq
-    def makeEntry(applications: Seq[(Application, Package, AppMeta, Option[AppMeta])])(entry: NodeSeq): NodeSeq =
-      applications flatMap (x => makeAppEntry(x._1, x._2, x._3, x._4, "entry", entry))
+    def makeEntry(applications: Seq[(Application, Package, User, AppMeta)])(entry: NodeSeq): NodeSeq =
+      applications flatMap (x => makeLightweightAppEntry(x._1, x._2, x._3, x._4, "entry")(entry))
 
     lazyload match {
       case None =>
@@ -332,22 +383,12 @@ class Applications extends DispatchSnippet with Logger {
   def entry(entry: NodeSeq): NodeSeq = {
     val lang = Some(S.locale).filter(_.toString != "en_US").map(_.toString)
     val app = S.param("id") flatMap (x => tryo(x.toLong)) flatMap {x =>
-      from(Database.applications, Database.packages, Database.appMetas, Database.appMetas)((app, pkg, metaEng, metaLoc) =>
-        where(app.id === x and
-              app.packageId === pkg.id and
-              metaEng.applicationId === app.id and
-              metaEng.languageName === "en_US").
-        select(app,
-               pkg,
-               metaEng,
-               leftOuterJoin(metaLoc,
-                             metaLoc.applicationId === app.id and
-                             metaLoc.languageName === lang.orNull))).toSeq.headOption
+      Database.applications.lookup(x)
     } getOrElse {
       S.error(<p>Invalid application id</p>)
       S.redirectTo(S.referer openOr "/")
     }
-    makeAppEntry(app._1, app._2, app._3, app._4, "entry", entry)
+    makeAppEntry(app, "entry")(entry)
   }
 
   def search(search: NodeSeq) = S.param("search") map Text openOr NodeSeq.Empty
