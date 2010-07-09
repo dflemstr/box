@@ -17,7 +17,6 @@ class UserStatistics extends DispatchSnippet
     case "downloadHistory" => downloadHistory
     case "categoryDownloads" => categoryDownloads
     case "upgradableApplications" => upgradable
-    case "recommendedApplications" => recommended
   }
 
   def downloadHistory(downloadHistory: NodeSeq): NodeSeq = {
@@ -48,44 +47,28 @@ class UserStatistics extends DispatchSnippet
   }
   
   def upgradable(upgradable: NodeSeq): NodeSeq = {
-    val userId = User.currentUserId getOrElse 0l
+    val user = User.currentUser.get
     val lang = Some(S.locale).filter(_.toString != "en_US").map(_.toString)
     val apps =
       from(Database.applications, Database.applications,
            Database.packages,
-           Database.appMetas, Database.appMetas)((oldApp, newApp, pkg, metaEng, metaLoc) =>
+           Database.appMetas)((oldApp, newApp, pkg, meta) =>
         where(
           oldApp.id in (
             from(Database.applications, Database.packageDownloads){(app, download) =>
-              where(app.packageId === download.packageId and download.userId === userId) select(app.id)
+              where(app.packageId === download.packageId and download.userId === user.id) select(app.id)
             }
           ) and
           newApp.newest === true and
           oldApp.newest === false and
           newApp.pxmlId === oldApp.pxmlId and
           newApp.packageId === pkg.id and
-          metaEng.applicationId === newApp.id and
-          metaEng.languageName === "en_US").
-        select(newApp,
-               pkg,
-               metaEng,
-               leftOuterJoin(metaLoc,
-                             metaLoc.applicationId === newApp.id and
-                             metaLoc.languageName === lang.orNull))).distinct
+          meta.applicationId === newApp.id and
+          meta.languageName === "en_US").select(newApp, pkg, meta)).distinct
 
-    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => Applications.makeAppEntry(x._1, x._2, x._3, x._4, "entry", entry))
+    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => Applications.makeLightweightAppEntry(x._1, x._2, user, x._3, "entry")(entry))
 
     bind("upgradableApplications", upgradable,
-         "entry" -> makeEntry _)
-  }
-
-  def recommended(recommended: NodeSeq): NodeSeq = {
-    val userId = User.currentUserId getOrElse 0l
-    val lang = Some(S.locale).filter(_.toString != "en_US").map(_.toString)
-    val apps = Seq.empty[(Application, Package, AppMeta, Option[AppMeta])] //TODO
-    def makeEntry(entry: NodeSeq): NodeSeq = apps.toSeq flatMap (x => Applications.makeAppEntry(x._1, x._2, x._3, x._4, "entry", entry))
-
-    bind("recommendedApplications", recommended,
          "entry" -> makeEntry _)
   }
 }

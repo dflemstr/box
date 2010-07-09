@@ -181,10 +181,16 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
       )
     )
   }
+  val emailRegex = """[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=""" +
+  """?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+(?:[a-zA-Z]{2}|com|org|net|edu""" +
+  """|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)"""
+  val urlRegex = """(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?"""
 
   def addApplicationToPackage(pkg: Package, application: pnd.Application)(implicit pn: ProcessNotifier, user: User, filename: String) =
     try {
-      val an = application.author.flatMap(_.name.map(_ take 512))
+      val name = application.author.flatMap(_.name.map(_ take 512))
+      val url = application.author.flatMap(_.website.map(_ take 512)).filter(_ matches urlRegex) //TODO: Warn if no match
+      val email = application.author.flatMap(_.email.map(_ take 512)).filter(_ matches emailRegex) //TODO: Warn if no match
       val app = Database.applications.insert(
         Application(
           `package` = pkg,
@@ -193,7 +199,9 @@ private[packages] class PackageManagerImpl(fs: Filesystem = Filesystem.default,
           versionMinor = application.version.minor,
           versionRelease = application.version.release,
           versionBuild = application.version.build,
-          authorName = an
+          authorName = name,
+          authorURL = url,
+          authorEmail = email
         )
       )
 

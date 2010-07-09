@@ -18,7 +18,8 @@ object ApplicationSearchRunner {
 }
 
 trait ApplicationSearchRunner {
-  def runSearch(params: ApplicationSearchRunner.SearchParam*): Query[(Application, Package, AppMeta, Option[AppMeta])]
+  type ResultQueryType = (Application, Package, User, AppMeta)
+  def runSearch(params: ApplicationSearchRunner.SearchParam*): Query[ResultQueryType]
 }
 
 private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
@@ -57,7 +58,7 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
         expressions
       case parser.NoSuccess(err, _) =>
         S.warning(<p>{S.?("search.invalid")}</p> ++ <code>{err}</code>)
-    Seq.empty
+        Seq.empty
     }
     @inline def warnVersion(field: String) = S.warning(<p>{S.?("search.version.conflict").replace("%versionfield%", field)}</p>)
     expressions.foldLeft(search) { (previous, expr) =>
@@ -89,28 +90,28 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
             warnVersion("release")
           if(previous.versionRestr.build.isDefined)
             warnVersion("build")
-          previous.copy(versionRestr = VersionRestriction(Some(major), Some(minor), Some(release), Some(build)))
+          previous.copy(versionRestr = VersionRestriction(Some(major), Some(minor), Some(release), Some(build)), showOldVersions = true)
         case SearchVersionMajor(major)     =>
           if(previous.versionRestr.major.isDefined)
             warnVersion("major")
-          previous.copy(versionRestr = previous.versionRestr.copy(major = Some(major)))
+          previous.copy(versionRestr = previous.versionRestr.copy(major = Some(major)), showOldVersions = true)
         case SearchVersionMinor(minor)     =>
           if(previous.versionRestr.minor.isDefined)
             warnVersion("minor")
-          previous.copy(versionRestr = previous.versionRestr.copy(minor = Some(minor)))
+          previous.copy(versionRestr = previous.versionRestr.copy(minor = Some(minor)), showOldVersions = true)
         case SearchVersionRelease(release) =>
           if(previous.versionRestr.release.isDefined)
             warnVersion("release")
-          previous.copy(versionRestr = previous.versionRestr.copy(release = Some(release)))
+          previous.copy(versionRestr = previous.versionRestr.copy(release = Some(release)), showOldVersions = true)
         case SearchVersionBuild(build)     =>
           if(previous.versionRestr.build.isDefined)
             warnVersion("build")
-          previous.copy(versionRestr = previous.versionRestr.copy(build = Some(build)))
+          previous.copy(versionRestr = previous.versionRestr.copy(build = Some(build)), showOldVersions = true)
       }
     }
   }
 
-  def runSearch(params: SearchParam*): Query[(Application, Package, AppMeta, Option[AppMeta])] = {
+  def runSearch(params: SearchParam*): Query[ResultQueryType] = {
 
     //Generate a Search construct out of the params
     val search = params.foldLeft(Search()) {
@@ -124,8 +125,6 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
   }
 
   def runAssembledSearch(search: Search) = {
-    val lang = search.locale.filter(_.toString != "en_US").map(_.toString)
-
     val categoryAlternatives = if(search.categoryRestr.isEmpty)
       Nil
     else
@@ -137,55 +136,40 @@ private[util] class ApplicationSearchRunnerImpl extends ApplicationSearchRunner
     @inline def maybeLikeness(what: => Option[String])(to: String) = what like "%" + to + "%"
     @inline def maybeOmit[A](condition: Boolean, value: A) = if(condition) Seq() else Seq(value)
 
-    val inhibitUsers      = search.uploaderRestr.isEmpty
     val inhibitCategories = categoryAlternatives.isEmpty
 
     //This is the most epic query ever constructed
     val query = from(Database.applications,
                      Database.appMetas,
-                     Database.appMetas,
                      Database.packages,
-                     Database.users     .inhibitWhen(inhibitUsers),
+                     Database.users,
                      Database.categories.inhibitWhen(inhibitCategories)) {
-      (app, metaEng, metaLoc, pkg, user, category) =>
+      (app, meta, pkg, user, category) =>
       where (
         {
-          (search.titleRestr map {restr =>
-              likeness(metaEng.title)(restr) or
-              likeness(metaLoc.title)(restr)
-            }) ++
-          (search.descriptionRestr map {restr =>
-              likeness(metaEng.description)(restr) or
-              likeness(metaLoc.title)(restr)
-            }) ++
+          (search.titleRestr map likeness(meta.title)) ++
+          (search.descriptionRestr map likeness(meta.description)) ++
           (search.keywordRestr map {restr =>
-              likeness(metaEng.title)(restr) or
-              likeness(metaLoc.title)(restr) or
-              likeness(metaEng.description)(restr) or
-              likeness(metaLoc.description)(restr)
+              likeness(meta.title)(restr) or
+              likeness(meta.description)(restr)
             }) ++
-          (search.uploaderRestr map likeness(user.get.username)) ++
+          (search.uploaderRestr map likeness(user.username)) ++
           (search.authorRestr map maybeLikeness(app.authorName)) ++
           (search.versionRestr.major map (app.versionMajor === _)) ++
           (search.versionRestr.minor map (app.versionMinor === _)) ++
           (search.versionRestr.release map (app.versionRelease === _)) ++
           (search.versionRestr.build map (app.versionBuild === _)) ++
           maybeOmit(inhibitCategories, app.id === category.get.applicationId) ++
-          maybeOmit(inhibitUsers, user.get.id === pkg.userId) ++
           (maybeOmit(search.showOldVersions, app.newest === true)) ++
           Seq(app.packageId === pkg.id,
+              user.id === pkg.userId,
               category.get.value in categoryAlternatives,
-              metaEng.applicationId === app.id,
-              metaEng.languageName === "en_US")
+              meta.applicationId === app.id,
+              meta.languageName === "en_US")
         }.reduceLeft[LogicalBoolean](_ and _)
-      ).select(app,
-               pkg,
-               metaEng,
-               leftOuterJoin(metaLoc,
-                             metaLoc.applicationId === app.id and
-                             metaLoc.languageName === lang.orNull)).orderBy {
+      ).select(app, pkg, user, meta).orderBy {
         val o: TypedExpressionNode[_] = (search.orderCol match {
-            case OrderingColumn.Title  => metaEng.title
+            case OrderingColumn.Title  => meta.title
             case OrderingColumn.Rating => app.ratingAverage
             case OrderingColumn.Time   => pkg.uploadTime
             case OrderingColumn.PxmlId => app.pxmlId
