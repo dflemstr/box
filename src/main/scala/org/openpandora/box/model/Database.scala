@@ -31,20 +31,20 @@ object Database extends Schema
   val usersToPackages            = oneToManyRelation(users,        packages)        .via((u, p)  => u.id === p .userId)
   val usersToRatings             = oneToManyRelation(users,        ratings)         .via((u, r)  => u.id === r .userId)
 
-  applicationsToAppMetas        .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  applicationsToCategories      .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  applicationsToAppMetas        .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  applicationsToCategories      .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  applicationsToComments        .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  applicationsToRatings         .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToAppMetas    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToCategories  .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToAppMetas    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToCategories  .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToComments    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  applicationsToRatings     .foreingKeyDeclaration.constrainReference(onDelete cascade)
 
-  packagesToApplications        .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  packagesToPackageDownloads    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  packagesToApplications    .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  packagesToPackageDownloads.foreingKeyDeclaration.constrainReference(onDelete cascade)
 
-  usersToComments               .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  usersToPackageDownloads       .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  usersToPackages               .foreingKeyDeclaration.constrainReference(onDelete cascade)
-  usersToRatings                .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToComments           .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToPackageDownloads   .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToPackages           .foreingKeyDeclaration.constrainReference(onDelete cascade)
+  usersToRatings            .foreingKeyDeclaration.constrainReference(onDelete cascade)
 
   def buildLoanWrapper(): LoanWrapper = new LoanWrapper {
     def apply[A](f: => A): A = transaction{
