@@ -1,11 +1,7 @@
 package org.openpandora.box.util.pnd
 
 import java.util.Locale
-import java.util.ResourceBundle
 import net.liftweb.common.Logger
-import net.liftweb.http.LiftRules
-import net.liftweb.util.Helpers
-import net.liftweb.util.NamedPF
 import org.openpandora.box.util.Localization
 import org.openpandora.box.util.Languages
 import scala.xml.NodeSeq

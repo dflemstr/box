@@ -1,9 +1,9 @@
 package org.openpandora.box.model
 
 import java.util.Date
+import org.squeryl.dsl.CompositeKey3
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.KeyedEntity
-import org.squeryl.dsl.CompositeKey3
 import org.squeryl.PrimitiveTypeMode._
 
 case class PackageDownload(packageId: Long,        //id

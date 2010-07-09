@@ -1,13 +1,12 @@
 package org.openpandora.box.model
 
-import org.squeryl.dsl.ManyToOne
 import java.util.Locale
 import org.openpandora.box.util.Languages
-import org.squeryl.KeyedEntity
-import org.squeryl.dsl.CompositeKey2
-import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.annotations.Column
-import scala.annotation.target.field
+import org.squeryl.dsl.CompositeKey2
+import org.squeryl.dsl.ManyToOne
+import org.squeryl.KeyedEntity
+import org.squeryl.PrimitiveTypeMode._
 
 
 case class AppMeta(applicationId:    Long,   //id

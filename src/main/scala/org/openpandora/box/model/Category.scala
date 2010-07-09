@@ -1,10 +1,10 @@
 package org.openpandora.box.model
 
 import org.openpandora.box.util.DotDesktopCategories
-import org.squeryl.KeyedEntity
 import org.squeryl.dsl.CompositeKey2
-import org.squeryl.PrimitiveTypeMode._
 import org.squeryl.dsl.ManyToOne
+import org.squeryl.KeyedEntity
+import org.squeryl.PrimitiveTypeMode._
 
 
 case class Category(applicationId: Long, //id

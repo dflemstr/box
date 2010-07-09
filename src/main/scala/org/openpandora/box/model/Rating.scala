@@ -1,8 +1,8 @@
 package org.openpandora.box.model
 
+import org.squeryl.dsl.CompositeKey2
 import org.squeryl.dsl.ManyToOne
 import org.squeryl.KeyedEntity
-import org.squeryl.dsl.CompositeKey2
 import org.squeryl.PrimitiveTypeMode._
 
 case class Rating(applicationId: Long, //id

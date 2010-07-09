@@ -6,10 +6,8 @@ import net.liftweb.http.S
 import org.squeryl.PrimitiveTypeMode._
 import org.openpandora.box.model._
 import org.squeryl.Query
-import org.squeryl.Queryable
 import org.squeryl.dsl.ast.LogicalBoolean
 import org.squeryl.dsl.ast.TypedExpressionNode
-import org.squeryl.dsl.OneToMany
 
 object ApplicationSearchRunner {
   val default: ApplicationSearchRunner = new ApplicationSearchRunnerImpl

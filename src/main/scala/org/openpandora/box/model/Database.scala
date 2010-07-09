@@ -1,11 +1,10 @@
 package org.openpandora.box.model
 
 import org.squeryl.Schema
-import org.squeryl.Session
 import net.liftweb.common.Logger
-import net.liftweb.util.DynoVar
 import net.liftweb.util.LoanWrapper
 import org.squeryl.PrimitiveTypeMode._
+import org.squeryl.Session
 
 object Database extends Schema
                    with Logger {

@@ -1,12 +1,11 @@
 package org.openpandora.box.model
 
 import java.util.Date
-import org.squeryl.dsl.ManyToOne
 import org.squeryl.annotations.Column
-import org.squeryl.KeyedEntity
 import org.squeryl.dsl.CompositeKey3
+import org.squeryl.dsl.ManyToOne
+import org.squeryl.KeyedEntity
 import org.squeryl.PrimitiveTypeMode._
-import scala.annotation.target.field
 
 case class Comment(userId:        Long, //id
                    applicationId: Long, //id

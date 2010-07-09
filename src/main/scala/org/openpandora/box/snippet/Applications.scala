@@ -3,7 +3,7 @@ package org.openpandora.box.snippet
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
-import net.liftweb.common.Full
+import java.util.TimeZone
 import net.liftweb.common.Logger
 import net.liftweb.http.DispatchSnippet
 import net.liftweb.http.FileParamHolder
@@ -26,14 +26,15 @@ import org.openpandora.box.model.User
 import org.openpandora.box.util.ApplicationSearchRunner
 import org.openpandora.box.util.ApplicationQueryParser
 import org.openpandora.box.util.DotDesktopCategories
-import org.openpandora.box.util.Languages
 import org.openpandora.box.util.packages.PackageManager
 import org.openpandora.box.util.filesystem.Filesystem
 import org.openpandora.box.util.filesystem.PNDFile
 import org.squeryl.PrimitiveTypeMode._
-import org.squeryl.dsl.OneToMany
 import scala.math._
-import scala.xml.{Comment => _, _}
+import scala.xml.Group
+import scala.xml.NodeSeq
+import scala.xml.Text
+import scala.xml.UnprefixedAttribute
 
 object Applications {
   private object createCommentFunction extends RequestVar[Option[() => NodeSeq]](None)
